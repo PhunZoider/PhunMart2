@@ -38,16 +38,195 @@ module PhunMart
         DisplayCategory = Currency, 
     }
 
-    item PhunMartShop
+    item Good Phoods
     {
 		DisplayCategory   = Furniture,
 		Type              = Moveable,
-		Icon              = SteelLadder,
-		Weight            = 20,
-		DisplayName       = Shop,
-		WorldObjectSprite = phunmart_02_1,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Good Phoods Vending Machine,
+		WorldObjectSprite = phunmart_01_8,
 
     }
 
+    item Phat Phoods
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Phat Phoods Vending Machine,
+		WorldObjectSprite = phunmart_01_16,
+    }
+
+    item Pitty The Tool
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Pitty The Tool Vending Machine,
+		WorldObjectSprite = phunmart_01_24,
+    }
+
+    item Final Ammendment
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Final Ammendmend Vending Machine,
+		WorldObjectSprite = phunmart_01_32,
+    }
+
+    item WrentAWreck
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Wrent A Wreck Vending Machine,
+		WorldObjectSprite = phunmart_01_40,
+    }
+
+    item Michelle Crafts
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Michelle Crafts Vending Machine,
+		WorldObjectSprite = phunmart_01_48,
+    }
+
+    item Car A Part
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Car-A-Part Vending Machine,
+		WorldObjectSprite = phunmart_01_56,
+    }
  
+    item Traiter Joes
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Traiter Joes Vending Machine,
+		WorldObjectSprite = phunmart_02_1,
+    }
+
+    item CSV Pharmacy
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = CSV Pharmacy Vending Machine,
+		WorldObjectSprite = phunmart_02_8,
+    }
+
+    item Radio Hacks
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Radio Hacks Vending Machine,
+		WorldObjectSprite = phunmart_02_16,
+    }
+
+    item Phish4U
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Phish4U Vending Machine,
+		WorldObjectSprite = phunmart_02_24,
+    }
+
+    item HoesNMoes
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = HoesNMoes Vending Machine,
+		WorldObjectSprite = phunmart_02_32,
+    }
+
+    item Budget XPerience
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = BudgetXp Vending Machine,
+		WorldObjectSprite = phunmart_02_40,
+    }
+
+    item Gifted XPerience
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = GiftedXp Vending Machine,
+		WorldObjectSprite = phunmart_02_48,
+    }
+
+    item Luxury XPerience
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = LuxuryXp Vending Machine,
+		WorldObjectSprite = phunmart_02_56,
+    }
+
+    item HardWear
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       =HardWear Vending Machine,
+		WorldObjectSprite = phunmart_03_1,
+    }
+
+    item Collectors
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Collectors Vending Machine,
+		WorldObjectSprite = phunmart_03_8,
+    }
+
+    item Travel
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Travel Vending Machine,
+		WorldObjectSprite = phunmart_03_16,
+    }
+
+    item Sheds and Commoners
+    {
+		DisplayCategory   = Furniture,
+		Type              = Moveable,
+		Icon              = VendingMachine,
+		Weight            = 250,
+		DisplayName       = Books Vending Machine,
+		WorldObjectSprite = phunmart_03_24,
+    }
+
 }
