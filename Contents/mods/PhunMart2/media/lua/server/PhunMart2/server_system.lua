@@ -9,6 +9,19 @@ local ServerSystem = Core.ServerSystem
 
 function ServerSystem:new()
     local o = SGlobalObjectSystem.new(self, "phunmart")
+
+    local shops = {"NONE", "GoodPhoods", "PhatPhoods", "PittyTheTool", "FinalAmmendment", "WrentAWreck",
+                   "MichellesCrafts", "CarAParts", "TraiterJoes", "CSVPharmacy", "RadioHacks", "Phish4U", "HoesNMoes",
+                   "BudgetXPerience", "GiftedXPerience", "LuxuryXPerience", "HardWear", "Collectors", "Travelers",
+                   "ShedsAndCommoners"}
+
+    self.spritesToShop = {}
+    for i = 1, 3 do
+        for i = 1, 63 do
+
+        end
+    end
+
     return o
 end
 
@@ -38,11 +51,20 @@ function ServerSystem:initSystem()
     self.system:setObjectModDataKeys({'ids', 'chunks'})
 end
 
+function ServerSystem:isValidIsoObject(isoObject)
+
+    local name = isoObject:getName()
+    local texture = isoObject:getTextureName()
+    print("*** isValidIsoObject " .. tostring(name) .. " " .. tostring(texture))
+    return name == "PhunMartVendingMachine"
+end
+
 function ServerSystem:newLuaObjectAt(x, y, z)
     local globalObject = self.system:newObject(x, y, z)
     return self:newLuaObject(globalObject)
 end
 function ServerSystem:newLuaObject(globalObject)
+    print("*** newLuaObjectAt")
     return Core.ServerObject:new(self, globalObject)
 end
 
@@ -118,6 +140,54 @@ function ServerSystem:requestShop(playerObj, location, forceRestock)
     --     id = shop.id,
     --     location = shop.location
     -- })
+end
+
+function ServerSystem:loadGridsquare(square)
+
+    local objects = square:getObjects()
+    for i = 0, objects:size() - 1 do
+        local obj = objects:get(i)
+        -- is this sprite a shop
+        local customName = obj:getSprite():getProperties():Val("CustomName")
+
+        if customName and Core.shops[customName] then
+            -- ensure this shop is registered
+            local key = square:getX() .. "_" .. square:getY() .. "_" .. square:getZ()
+            local facing = obj:getSprite():getProperties():Val("Facing")
+            if facing == "S" then
+                Core.opensquares[square:getX() .. "_" .. (square:getY() - 1) .. "_" .. square:getZ()] = square:getX() ..
+                                                                                                            "_" ..
+                                                                                                            square:getY() ..
+                                                                                                            "_" ..
+                                                                                                            square:getZ();
+            elseif facing == "N" then
+                Core.opensquares[square:getX() .. "_" .. (square:getY() + 1) .. "_" .. square:getZ()] = square:getX() ..
+                                                                                                            "_" ..
+                                                                                                            square:getY() ..
+                                                                                                            "_" ..
+                                                                                                            square:getZ();
+            elseif facing == "E" then
+                Core.opensquares[(square:getX() + 1) .. "_" .. square:getY() .. "_" .. square:getZ()] = square:getX() ..
+                                                                                                            "_" ..
+                                                                                                            square:getY() ..
+                                                                                                            "_" ..
+                                                                                                            square.getZ();
+            elseif facing == "W" then
+                Core.opensquares[(square:getX() - 1) .. "_" .. square:getY() .. "_" .. square:getZ()] = square:getX() ..
+                                                                                                            "_" ..
+                                                                                                            square:getY() ..
+                                                                                                            "_" ..
+                                                                                                            square.getZ();
+            end
+            print("Found shop: " .. customName .. " at " .. key .. " facing " .. tostring(facing))
+        elseif customName == "Machine" then
+            -- this could be a vendinng machine we want to convert?
+            local type = obj:getSprite():getProperties():Val("container")
+            if type == "vendingpop" or type == "vendingsnack" then
+                print("Shop candidate: " .. tostring(type))
+            end
+        end
+    end
 end
 
 function ServerSystem:OnClientCommand(command, playerObj, args)

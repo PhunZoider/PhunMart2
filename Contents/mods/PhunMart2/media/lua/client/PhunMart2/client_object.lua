@@ -32,17 +32,3 @@ function ClientObject:reroll(target)
     ClientSystem.instance:reroll(self, target)
 end
 
-function ClientObject:open(playerObj)
-    ClientSystem.instance:requestLock(self, playerObj)
-    PhunMart_OpenAction:openShop(playerObj, self)
-end
-
-function ClientObject:insufficientPower()
-    if self.requiresPower then
-        if not self:getSquare():haveElectricity() then
-            return SandboxVars.ElecShutModifier > -1 and GameTime:getInstance():getNightsSurvived() >
-                       SandboxVars.ElecShutModifier
-        end
-    end
-    return false
-end

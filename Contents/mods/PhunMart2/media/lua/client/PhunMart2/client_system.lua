@@ -13,7 +13,7 @@ function ClientSystem:new()
 end
 
 function ClientSystem:isValidIsoObject(isoObject)
-    return instanceof(isoObject, "IsoThumpable") and isoObject:getName() == "PhunMartShop"
+    return instanceof(isoObject, "IsoThumpable") and isoObject:getName() == "PhunMartVendingMachine"
 end
 
 function ClientSystem:newLuaObject(globalObject)

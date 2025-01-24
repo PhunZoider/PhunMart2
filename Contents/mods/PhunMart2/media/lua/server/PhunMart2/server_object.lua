@@ -8,119 +8,41 @@ local Core = PhunMart
 local ServerSystem = Core.ServerSystem
 Core.ServerObject = SGlobalObject:derive("SPhunMartObject")
 local ServerObject = Core.ServerObject
+local GameTime = GameTime
+local SandboxVars = SandboxVars
 
 -- all valid property and default values
 local fields = {
-    type = {
+    key = {
         -- a unique key to identify this shop type (eg shop-good-phoods)
         type = "string",
         default = "default"
-    },
-    label = {
-        -- textual name of shop
-        type = "string",
-        default = "PhunMart Shop"
-    },
-    id = {
-        -- a unique key to identify this instance (eg 0_0_0)
-        type = "string",
-        default = "default"
-    },
-    group = {
-        -- a name to group this type of shop. eg. FOODS or TOOLS which is used by distance property
-        type = "string",
-        default = "default"
-    },
-    distance = {
-        -- minimum distance from another shop of the same group
-        type = "number",
-        default = 100
-    },
-
-    probability = {
-        -- probability of this shop spawning
-        type = "number",
-        default = 15
-    },
-    filters = {
-        -- array of filters to apply to qualifying this shop
-        type = "array",
-        default = {}
-    },
-    reroll = {
-        -- number of ingame days between rerolling type of shop
-        type = "number",
-        default = 0
-    },
-    created = {
-        -- ingame date and time of instantiation
-        type = "number",
-        default = 0
-    },
-    fills = {
-        -- number of items to stock
-        type = "range",
-        default = {
-            min = 5,
-            max = 10
-        }
-    },
-
-    powered = {
-        -- does this shop require power
-        type = "bool",
-        default = false
-    },
-    restock = {
-        -- number of ingame days between regenerating inventory
-        type = "number",
-        default = 48
-    },
-    lastRestocked = {
-        -- the last time this shop was stocked (ingame days)
-        type = "number",
-        default = 0
     },
     items = {
         -- array of items currently in inventory
         type = "array",
         default = {}
     },
-    pools = {
-        -- array of pools to generate inventory from
-        type = "array",
-        default = {}
+    lockedBy = {
+        -- player that has locked this shop
+        type = "bool",
+        default = false
     },
-
-    currency = {
-        -- default type of currency if none is specified
-        type = "string",
-        default = "Base.Money"
-    },
-    basePrice = {
-        -- default price for items
+    created = {
+        -- what hour this shop was created
         type = "number",
-        default = 1
+        default = 0
     },
-    image = {
-        -- background image for the shop
+    facing = {
+        -- which way the shop is facing
         type = "string",
-        default = "machine-none.png"
-    },
-    sprites = {"phunmart_01_0", -- east
-    "phunmart_01_1", -- south
-    "phunmart_01_2", -- west
-    "phunmart_01_3", -- north
-    "phunmart_01_4", -- unpowered east
-    "phunmart_01_5", -- unpowered south
-    "phunmart_01_6", -- unpowered west
-    "phunmart_01_7" -- unpowered north
+        default = "E"
     }
 
 }
 
 function ServerObject:new(luaSystem, globalObject)
-    local o = ServerObject.new(self, luaSystem, globalObject)
+    local o = SGlobalObject.new(self, luaSystem, globalObject)
     return o
 end
 
@@ -128,15 +50,7 @@ function ServerObject:initNew()
     for k, v in pairs(fields) do
         self[k] = v.default
     end
-end
-
--- init modData with default values
-function ServerObject.initModData(modData)
-    for k, v in pairs(fields) do
-        if modData[k] == nil and self[k] == nil then
-            modData[k] = v.default
-        end
-    end
+    self.created = GameTime:getInstance():getWorldAgeHours()
 end
 
 function ServerObject:fromModData(modData)
@@ -148,10 +62,21 @@ function ServerObject:fromModData(modData)
 end
 
 function ServerObject:stateFromIsoObject(isoObject)
+
     self:initNew() -- initialize with default values
-    self:fromModData(isoObject:getModData()) -- populate with objects modData
-    self:updateSprite() -- update sprite if needed
-    isoObject:transmitModData() -- send to clients
+    local data = isoObject:getModData()
+    -- specify props derived from sprite
+    data.key = isoObject:getSprite():getProperties():Val("CustomName")
+    data.facing = isoObject:getSprite():getProperties():Val("Facing")
+    data.created = data.created or GameTime:getInstance():getWorldAgeHours()
+    data.lockedBy = data.lockedBy or false
+    self:fromModData(data) -- populate with this objects modData
+
+    -- update sprite if needed
+    self:updateSprite()
+
+    -- send data to clients 
+    isoObject:transmitModData()
 end
 
 function ServerObject:unlock()
@@ -165,16 +90,16 @@ function ServerObject:lock(player)
     self:saveData()
 end
 
-function ServerObject:requiresPower()
-    local isOk = true
-    if self.powered then
-        isOk = self:getSquare():haveElectricity()
-        if not isOk then
-            return SandboxVars.ElecShutModifier > -1 and GameTime:getInstance():getNightsSurvived() <
-                       SandboxVars.ElecShutModifier
-        end
+function ServerObject:getSpriteIndex()
+    if self.facing == "E" then
+        return 1
+    elseif self.facing == "S" then
+        return 2
+    elseif self.facing == "W" then
+        return 3
+    else
+        return 4
     end
-    return isOk
 end
 
 function ServerObject:updateSprite(force)
@@ -184,40 +109,26 @@ function ServerObject:updateSprite(force)
         return
     end
 
-    local def = PM.defs.shops[self.key]
-    local hasPower = true
-    local spriteKey = "working"
+    local def = Core.shops[self.key]
+    local sprite = isoObject:getSprite():getName()
 
-    if self.powered then
-        hasPower = self:getSquare():haveElectricity()
-        if not hasPower then
-            hasPower = SandboxVars.ElecShutModifier > -1 and GameTime:getInstance():getNightsSurvived() <
-                           SandboxVars.ElecShutModifier
-            if not hasPower then
-                spriteKey = "nopower"
-            end
+    if def.powered == true then
+        local hasPower = self:getSquare():haveElectricity() or SandboxVars.ElecShutModifier > -1 and
+                             GameTime:getInstance():getNightsSurvived() < SandboxVars.ElecShutModifier
+        if hasPower and def.unpoweredSprites[sprite] then
+            -- sprite is powered and sprite is unpowered so changeSprite
+            isoObject:setSprite(def.sprites[self:getSpriteIndex()])
+            isoObject:transmitUpdatedSpriteToClients()
+        elseif not hasPower and def.sprites[sprite] then
+            -- sprite is unpowered and sprite is powered so changeSprite
+            isoObject:setSprite(def.unpoweredSprites[self:getSpriteIndex()])
+            isoObject:transmitUpdatedSpriteToClients()
         end
-    end
-
-    local current = isoObject:getSprite()
-    -- default to north
-    local now = self.sprites[spriteKey].north
-    if self.direction == 0 then
-        -- east
-        now = self.sprites[spriteKey].east
-    elseif self.direction == 1 then
-        -- south
-        now = self.sprites[spriteKey].south
-    elseif self.direction == 2 then
-        -- west
-        now = self.sprites[spriteKey].west
-    end
-
-    if current ~= now then
-        isoObject:setSprite(now)
+    elseif def.unpoweredSprites[sprite] then
+        -- sprite is unpowered but def does not require power so changeSprite
+        isoObject:setSprite(def.unpoweredSprites[self:getSpriteIndex()])
         isoObject:transmitUpdatedSpriteToClients()
     end
-
 end
 
 function ServerObject:setType(type)

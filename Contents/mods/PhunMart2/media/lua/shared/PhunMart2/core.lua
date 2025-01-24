@@ -1,3 +1,5 @@
+local allShops = require "PhunMart2/data/shops"
+
 PhunMart = {
     name = "PhunMart",
     inied = false,
@@ -19,6 +21,9 @@ PhunMart = {
         OnReady = "OnPhunMartOnReady"
     },
     settings = {},
+    shops = allShops,
+    spriteToShop = {},
+    opensquares = {},
     targetSprites = {
         ["location_shop_accessories_01_29"] = "north",
         ["location_shop_accessories_01_31"] = "north",
@@ -56,6 +61,15 @@ Core.settings = SandboxVars["PhunMart"]
 for _, event in pairs(PhunMart.events) do
     if not Events[event] then
         LuaEventManager.AddEvent(event)
+    end
+end
+
+for k, v in pairs(Core.shops) do
+    for _, sprite in ipairs(v.sprites) do
+        Core.spriteToShop[sprite] = k
+    end
+    for _, sprite in ipairs(v.unpoweredSprites) do
+        Core.spriteToShop[sprite] = k
     end
 end
 
