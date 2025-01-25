@@ -25,6 +25,34 @@ function ServerSystem:new()
     return o
 end
 
+function ServerSystem:removeLuaObject(luaObject)
+    Core:removeInstance(luaObject:getModData())
+    SGlobalObjectSystem.removeLuaObject(self, luaObject)
+end
+
+function ServerSystem:removeInvalidInstanceData()
+
+    local checked = {}
+    local instanceCount = 0
+    for k, v in Core.instances do
+        checked[k] = true
+        instanceCount = instanceCount + 1
+    end
+    local objectCount = 0
+    for i = 1, self:getLuaObjectCount() do
+        local obj = self:getLuaObjectByIndex(i)
+        checked[obj.x .. "_" .. obj.y .. "_" .. obj.z] = nil
+        objectCount = objectCount + 1
+    end
+    local removed = 0
+    for k, v in pairs(checked) do
+        Core.instances[k] = nil
+        removed = removed + 1
+    end
+    print("Removed " .. tostring(removed) .. " invalid instances")
+
+end
+
 function ServerSystem.addToWorld(square, shop, direction)
     local index = 4
     if direction == "E" then
@@ -37,13 +65,17 @@ function ServerSystem.addToWorld(square, shop, direction)
     local sprite = Core.shops[shop].sprites[index]
     local isoObject = IsoThumpable.new(square:getCell(), square, sprite, false, {})
     isoObject:setName("PhunMartVendingMachine")
-    isoObject:setModData({
+    local data = {
         key = shop,
         facing = direction,
-        was = direction,
         lockedBy = false,
-        created = GameTime:getInstance():getWorldAgeHours()
-    })
+        created = GameTime:getInstance():getWorldAgeHours(),
+        x = square:getX(),
+        y = square:getY(),
+        z = square:getZ()
+    }
+    isoObject:setModData(data)
+    Core:addInstance(data)
     square:AddSpecialObject(isoObject, -1)
     triggerEvent("OnObjectAdded", isoObject)
     isoObject:transmitCompleteItemToClients()
@@ -192,7 +224,7 @@ end
 
 function ServerSystem:getRandomShop(x, y)
 
-    local options = self:closestShopKeysTo(x, y)
+    local options = Core:getInstanceDistancesFrom(x, y)
     local candidates = {}
 
     local min = Core.settings.DefaultDistanceBetweenGroups or 100

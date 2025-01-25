@@ -70,7 +70,12 @@ function ServerObject:stateFromIsoObject(isoObject)
     data.facing = isoObject:getSprite():getProperties():Val("Facing")
     data.created = data.created or GameTime:getInstance():getWorldAgeHours()
     data.lockedBy = data.lockedBy or false
+    data.x = isoObject:getX()
+    data.y = isoObject:getY()
+    data.z = isoObject:getZ()
     self:fromModData(data) -- populate with this objects modData
+
+    Core:addInstance(data)
 
     -- update sprite if needed
     self:updateSprite()
