@@ -108,8 +108,8 @@ function ServerObject:updateSprite(force)
     if not isoObject then
         return
     end
-
-    local def = Core.shops[self.key]
+    local shops = Core.shops
+    local def = shops[self.key]
     local sprite = isoObject:getSprite():getName()
 
     if def.powered == true then

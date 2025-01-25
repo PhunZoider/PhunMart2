@@ -28,36 +28,36 @@ return {
         unpoweredSprites = {"phunmart_01_60", "phunmart_01_61", "phunmart_01_62", "phunmart_01_63"}
     },
     TraiterJoes = {
-        sprites = {"phunmart_02_1", "phunmart_02_2", "phunmart_02_3", "phunmart_02_4"},
-        unpoweredSprites = {"phunmart_02_5", "phunmart_02_6", "phunmart_02_7", "phunmart_02_8"}
+        sprites = {"phunmart_02_0", "phunmart_02_1", "phunmart_02_2", "phunmart_02_3"},
+        unpoweredSprites = {"phunmart_02_4", "phunmart_02_5", "phunmart_02_6", "phunmart_02_7"}
     },
     CSVPharmacy = {
-        sprites = {"phunmart_02_9", "phunmart_02_10", "phunmart_02_11", "phunmart_02_12"},
-        unpoweredSprites = {"phunmart_02_13", "phunmart_02_14", "phunmart_02_15", "phunmart_02_16"}
+        sprites = {"phunmart_02_8", "phunmart_02_9", "phunmart_02_10", "phunmart_02_11"},
+        unpoweredSprites = {"phunmart_02_12", "phunmart_02_13", "phunmart_02_14", "phunmart_02_15"}
     },
     RadioHacks = {
-        sprites = {"phunmart_02_17", "phunmart_02_18", "phunmart_02_19", "phunmart_02_20"},
-        unpoweredSprites = {"phunmart_02_21", "phunmart_02_22", "phunmart_02_23", "phunmart_02_24"}
+        sprites = {"phunmart_02_16", "phunmart_02_17", "phunmart_02_18", "phunmart_02_19"},
+        unpoweredSprites = {"phunmart_02_20", "phunmart_02_21", "phunmart_02_22", "phunmart_02_23"}
     },
     Phish4U = {
-        sprites = {"phunmart_02_25", "phunmart_02_26", "phunmart_02_27", "phunmart_02_28"},
-        unpoweredSprites = {"phunmart_02_29", "phunmart_02_30", "phunmart_02_31", "phunmart_02_32"}
+        sprites = {"phunmart_02_24", "phunmart_02_25", "phunmart_02_26", "phunmart_02_27"},
+        unpoweredSprites = {"phunmart_02_28", "phunmart_02_29", "phunmart_02_30", "phunmart_02_31"}
     },
     HoesNMoes = {
-        sprites = {"phunmart_02_33", "phunmart_02_34", "phunmart_02_35", "phunmart_02_36"},
-        unpoweredSprites = {"phunmart_02_37", "phunmart_02_38", "phunmart_02_39", "phunmart_02_40"}
+        sprites = {"phunmart_02_32", "phunmart_02_33", "phunmart_02_34", "phunmart_02_35"},
+        unpoweredSprites = {"phunmart_02_36", "phunmart_02_37", "phunmart_02_38", "phunmart_02_39"}
     },
     BudgetXPerience = {
-        sprites = {"phunmart_02_41", "phunmart_02_42", "phunmart_02_43", "phunmart_02_44"},
-        unpoweredSprites = {"phunmart_02_45", "phunmart_02_46", "phunmart_02_47", "phunmart_02_48"}
+        sprites = {"phunmart_02_40", "phunmart_02_41", "phunmart_02_42", "phunmart_02_43"},
+        unpoweredSprites = {"phunmart_02_44", "phunmart_02_45", "phunmart_02_46", "phunmart_02_47"}
     },
     GiftedXPerience = {
-        sprites = {"phunmart_02_49", "phunmart_02_50", "phunmart_02_51", "phunmart_02_52"},
-        unpoweredSprites = {"phunmart_02_53", "phunmart_02_54", "phunmart_02_55", "phunmart_02_56"}
+        sprites = {"phunmart_02_48", "phunmart_02_49", "phunmart_02_50", "phunmart_02_51"},
+        unpoweredSprites = {"phunmart_02_52", "phunmart_02_53", "phunmart_02_54", "phunmart_02_55"}
     },
     LuxuryXPerience = {
-        sprites = {"phunmart_02_57", "phunmart_02_58", "phunmart_02_59", "phunmart_02_60"},
-        unpoweredSprites = {"phunmart_02_61", "phunmart_02_62", "phunmart_02_63", "phunmart_02_64"}
+        sprites = {"phunmart_02_56", "phunmart_02_57", "phunmart_02_58", "phunmart_02_59"},
+        unpoweredSprites = {"phunmart_02_60", "phunmart_02_61", "phunmart_02_62", "phunmart_02_63"}
     },
     HardWear = {
         sprites = {"phunmart_03_0", "phunmart_03_1", "phunmart_03_2", "phunmart_03_3"},
@@ -68,6 +68,7 @@ return {
         unpoweredSprites = {"phunmart_03_12", "phunmart_03_13", "phunmart_03_14", "phunmart_03_15"}
     },
     Travellers = {
+        enabled = false,
         sprites = {"phunmart_03_16", "phunmart_03_17", "phunmart_03_18", "phunmart_03_19"},
         unpoweredSprites = {"phunmart_03_20", "phunmart_03_21", "phunmart_03_22", "phunmart_03_23"}
     },

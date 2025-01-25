@@ -1,5 +1,25 @@
 VERSION = 1,
 
+option PhunMart.ChanceToConvertVanillaMachines
+{
+    type = integer,
+    default = 80,
+    min=0,
+    max=100,
+    page = PhunMart,
+    translation=PhunMart_ChanceToConvertVanillaMachines,
+}
+
+option PhunMart.DefaultDistanceBetweenGroups
+{
+    type = integer,
+    default = 200,
+    min=0,
+    max=10000,
+    page = PhunMart, 
+    translation=PhunMart_DefaultDistanceBetweenGroups,
+}
+
 option PhunMart.PoweredMachinesEnabled
 { 
     type = boolean,

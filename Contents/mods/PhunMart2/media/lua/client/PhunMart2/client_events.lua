@@ -7,10 +7,6 @@ Events.OnIsoThumpableLoad.Add(function()
     print("PhunMart2: OnIsoThumpableLoad")
 end)
 
-Events.OnIsoThumpableLoad.Add(function()
-    print("PhunMart2: OnIsoThumpableLoad")
-end)
-
 Events.OnDoTileBuilding.Add(function()
     print("PhunMart2: OnDoTileBuilding")
 end)
@@ -27,8 +23,8 @@ Events.OnDestroyIsoThumpable.Add(function()
     print("PhunMart2: OnDestroyIsoThumpable")
 end)
 
-Events.LoadGridsquare.Add(function()
-    print("PhunMart2: LoadGridsquare")
+Events.LoadGridsquare.Add(function(square)
+
 end)
 
 Events.ReuseGridsquare.Add(function()

@@ -33,7 +33,7 @@ Events.OnDestroyIsoThumpable.Add(function()
 end)
 
 Events.LoadGridsquare.Add(function(square)
-    Core.ServerSystem:loadGridsquare(square)
+    Core.ServerSystem.instance:loadGridsquare(square)
 end)
 
 Events.ReuseGridsquare.Add(function()

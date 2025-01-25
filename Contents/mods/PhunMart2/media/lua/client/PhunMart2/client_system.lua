@@ -9,6 +9,7 @@ local ClientSystem = Core.ClientSystem
 
 function ClientSystem:new()
     local o = CGlobalObjectSystem.new(self, "phunmart")
+    o.loadedShops = {}
     return o
 end
 
@@ -117,4 +118,14 @@ function ClientSystem:OnServerCommand(command, args)
     end
 end
 
+function ClientSystem:checkLocals()
+    for i = 1, self:getLuaObjectCount() do
+        -- print("ClientSystem:OnTick() " .. tostring(self:getLuaObjectByIndex(i).key))
+    end
+end
+
 CGlobalObjectSystem.RegisterSystemClass(Core.ClientSystem)
+
+Events.EveryOneMinute.Add(function()
+    Core.ClientSystem.instance:checkLocals()
+end)

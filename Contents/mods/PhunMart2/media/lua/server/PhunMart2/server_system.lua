@@ -26,14 +26,24 @@ function ServerSystem:new()
 end
 
 function ServerSystem.addToWorld(square, shop, direction)
-
-    direction = direction or "south"
-    shop.id = square:getX() .. "_" .. square:getY() .. "_" .. square:getZ()
-    local isoObject = IsoThumpable.new(square:getCell(), square, "phunmart_01_1", false, {})
-
-    shop.direction = direction
-    isoObject:setModData(shop)
-    isoObject:setName("PhunMartShop")
+    local index = 4
+    if direction == "E" then
+        index = 1
+    elseif direction == "S" then
+        index = 2
+    elseif direction == "W" then
+        index = 3
+    end
+    local sprite = Core.shops[shop].sprites[index]
+    local isoObject = IsoThumpable.new(square:getCell(), square, sprite, false, {})
+    isoObject:setName("PhunMartVendingMachine")
+    isoObject:setModData({
+        key = shop,
+        facing = direction,
+        was = direction,
+        lockedBy = false,
+        created = GameTime:getInstance():getWorldAgeHours()
+    })
     square:AddSpecialObject(isoObject, -1)
     triggerEvent("OnObjectAdded", isoObject)
     isoObject:transmitCompleteItemToClients()
@@ -142,6 +152,66 @@ function ServerSystem:requestShop(playerObj, location, forceRestock)
     -- })
 end
 
+function ServerSystem:getLoadedObjects()
+    local result = {}
+    for i = 1, self:getLuaObjectCount() do
+        local obj = self:getLuaObjectByIndex(i)
+        if obj and obj.key then
+            table.insert(result, obj)
+        end
+    end
+    return result
+end
+
+function ServerSystem:closestShopKeysTo(x, y)
+
+    local shops = {}
+    for k, v in pairs(Core.shops) do
+        if v.enabled ~= false then
+            -- set default distance to max per group
+            shops[k] = 9999999
+        end
+    end
+
+    for i = 1, self.system:getObjectCount() do
+        local obj = self.system:getObjectByIndex(i)
+        if obj then
+            local data = obj:getModData()
+            local dx = x - obj.x
+            local dy = y - obj.y
+            local distance = math.sqrt(dx * dx + dy * dy)
+            local shop = Core.shops[data.key]
+            if distance < shops[data.key] then
+                shops[data.key] = distance
+            end
+        end
+    end
+    return shops
+
+end
+
+function ServerSystem:getRandomShop(x, y)
+
+    local options = self:closestShopKeysTo(x, y)
+    local candidates = {}
+
+    local min = Core.settings.DefaultDistanceBetweenGroups or 100
+    local shops = Core.shops
+    -- remove options that are too close to each other
+    for k, v in pairs(options) do
+        if v > (shops[k].distance or min) and shops[k].enabled ~= false then
+            table.insert(candidates, k)
+        end
+    end
+
+    if #candidates == 0 then
+        return nil
+    end
+
+    return candidates[ZombRand(#candidates) + 1]
+
+end
+
 function ServerSystem:loadGridsquare(square)
 
     local objects = square:getObjects()
@@ -151,40 +221,34 @@ function ServerSystem:loadGridsquare(square)
         local customName = obj:getSprite():getProperties():Val("CustomName")
 
         if customName and Core.shops[customName] then
-            -- ensure this shop is registered
-            local key = square:getX() .. "_" .. square:getY() .. "_" .. square:getZ()
-            local facing = obj:getSprite():getProperties():Val("Facing")
-            if facing == "S" then
-                Core.opensquares[square:getX() .. "_" .. (square:getY() - 1) .. "_" .. square:getZ()] = square:getX() ..
-                                                                                                            "_" ..
-                                                                                                            square:getY() ..
-                                                                                                            "_" ..
-                                                                                                            square:getZ();
-            elseif facing == "N" then
-                Core.opensquares[square:getX() .. "_" .. (square:getY() + 1) .. "_" .. square:getZ()] = square:getX() ..
-                                                                                                            "_" ..
-                                                                                                            square:getY() ..
-                                                                                                            "_" ..
-                                                                                                            square:getZ();
-            elseif facing == "E" then
-                Core.opensquares[(square:getX() + 1) .. "_" .. square:getY() .. "_" .. square:getZ()] = square:getX() ..
-                                                                                                            "_" ..
-                                                                                                            square:getY() ..
-                                                                                                            "_" ..
-                                                                                                            square.getZ();
-            elseif facing == "W" then
-                Core.opensquares[(square:getX() - 1) .. "_" .. square:getY() .. "_" .. square:getZ()] = square:getX() ..
-                                                                                                            "_" ..
-                                                                                                            square:getY() ..
-                                                                                                            "_" ..
-                                                                                                            square.getZ();
+            -- registered already, but check if it is valid?
+            if not self:isValidIsoObject(obj) then
+                -- not valid, remove it
+                local facing = obj:getSprite():getProperties():Val("Facing")
+                square:transmitRemoveItemFromSquare(obj)
+                self.addToWorld(square, customName, facing)
+
             end
-            print("Found shop: " .. customName .. " at " .. key .. " facing " .. tostring(facing))
         elseif customName == "Machine" then
             -- this could be a vendinng machine we want to convert?
             local type = obj:getSprite():getProperties():Val("container")
             if type == "vendingpop" or type == "vendingsnack" then
-                print("Shop candidate: " .. tostring(type))
+                -- has it already been tested?
+                local modData = obj:getModData()
+                if not modData.PhunMart then
+                    modData.PhunMart = {}
+                    if Core.settings.ChanceToConvertVanillaMachines > 0 then
+                        local chance = ZombRand(100)
+                        if chance <= Core.settings.ChanceToConvertVanillaMachines then
+                            local shopname = self:getRandomShop(square:getX(), square:getY())
+                            if shopname then
+                                local facing = obj:getSprite():getProperties():Val("Facing")
+                                square:transmitRemoveItemFromSquare(obj)
+                                self.addToWorld(square, shopname, facing)
+                            end
+                        end
+                    end
+                end
             end
         end
     end
