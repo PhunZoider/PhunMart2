@@ -1,9 +1,0 @@
-Sandbox_EN = {
-    Sandbox_PhunMart = "PhunMart"
-    Sandbox_PhunMart_ChanceToConvertVanillaMachines="Chance to convert vanilla"
-    Sandbox_PhunMart_ChanceToConvertVanillaMachines_tooltip="The chance that a vanilla vending machine will get converted to a random PhunMart machine. Set to 0 to disable"
-
-    Sandbox_PhunMart_DefaultDistanceBetweenGroups="Distance between groups"
-    Sandbox_PhunMart_DefaultDistanceBetweenGroups_tooltip="The minimum distance between similarly grouped machines"
-
-}

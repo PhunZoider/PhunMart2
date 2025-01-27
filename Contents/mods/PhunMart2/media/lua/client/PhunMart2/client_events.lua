@@ -42,3 +42,7 @@ end)
 Events.OnRainStop.Add(function()
     print("PhunMart2: OnRainStop")
 end)
+
+Events.OnPreFillWorldObjectContextMenu.Add(function(playerObj, context, worldobjects, test)
+    Core.contexts.open(playerObj, context, worldobjects, test)
+end)

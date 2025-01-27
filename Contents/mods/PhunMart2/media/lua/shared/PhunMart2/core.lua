@@ -56,8 +56,9 @@ PhunMart = {
 
 local Core = PhunMart
 Core.isLocal = not isClient() and not isServer() and not isCoopHost()
-Core.settings = SandboxVars["PhunMart"]
-
+local sb = SandboxVars
+Core.settings = sb["PhunMart"]
+Core.settings.ReplacementKey = "PhunMart6"
 for _, event in pairs(PhunMart.events) do
     if not Events[event] then
         LuaEventManager.AddEvent(event)
@@ -97,4 +98,12 @@ function Core:getPlayerData(playerObj)
         end
         return self.players[key]
     end
+end
+
+function Core.hasPower(square)
+    if square and SandboxVars.ElecShutModifier > -1 then
+        return square:haveElectricity() or GameTime:getInstance():getNightsSurvived() >
+                   getSandboxOptions():getOptionByName("ElecShutModifier"):getValue()
+    end
+    return false
 end

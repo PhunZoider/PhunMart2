@@ -34,7 +34,7 @@ function ServerSystem:removeInvalidInstanceData()
 
     local checked = {}
     local instanceCount = 0
-    for k, v in Core.instances do
+    for k, v in pairs(Core.instances) do
         checked[k] = true
         instanceCount = instanceCount + 1
     end
@@ -199,7 +199,7 @@ function ServerSystem:closestShopKeysTo(x, y)
 
     local shops = {}
     for k, v in pairs(Core.shops) do
-        if v.enabled ~= false then
+        if Core.settings["ShopProbability" .. k] > 0 then
             -- set default distance to max per group
             shops[k] = 9999999
         end
@@ -222,17 +222,30 @@ function ServerSystem:closestShopKeysTo(x, y)
 
 end
 
+-- returns a random shop key based on x,y location based on its probability
+-- it will omit shops that are disabled and whose group/type would be too close to one another
 function ServerSystem:getRandomShop(x, y)
 
     local options = Core:getInstanceDistancesFrom(x, y)
     local candidates = {}
 
-    local min = Core.settings.DefaultDistanceBetweenGroups or 100
     local shops = Core.shops
+    local totalProbability = 0
     -- remove options that are too close to each other
     for k, v in pairs(options) do
-        if v > (shops[k].distance or min) and shops[k].enabled ~= false then
-            table.insert(candidates, k)
+        if shops[k].enabled ~= false and Core.settings["ShopProbability" .. k] > 0 then
+            local key = "MinDistance" .. k
+            local sets = Core.settings
+            print("Checking " .. k .. " " .. tostring(v) .. " " .. tostring(sets[key]) .. " " ..
+                      tostring(sets[key] <= v))
+            if Core.settings["MinDistance" .. k] <= v then
+                table.insert(candidates, {
+                    shop = k,
+                    p = Core.settings["ShopProbability" .. k]
+                })
+                totalProbability = totalProbability + Core.settings["ShopProbability" .. k]
+            end
+
         end
     end
 
@@ -240,7 +253,14 @@ function ServerSystem:getRandomShop(x, y)
         return nil
     end
 
-    return candidates[ZombRand(#candidates) + 1]
+    local r = ZombRand(totalProbability) + 1
+    local sum = 0
+    for _, v in ipairs(candidates) do
+        sum = sum + v.p
+        if sum >= r then
+            return v.shop
+        end
+    end
 
 end
 
@@ -269,6 +289,9 @@ function ServerSystem:loadGridsquare(square)
                 local modData = obj:getModData()
                 if not modData.PhunMart then
                     modData.PhunMart = {}
+                end
+                if modData.PhunMart.replacementKey ~= Core.settings.ReplacementKey then
+                    modData.PhunMart.replacementKey = Core.settings.ReplacementKey
                     if Core.settings.ChanceToConvertVanillaMachines > 0 then
                         local chance = ZombRand(100)
                         if chance <= Core.settings.ChanceToConvertVanillaMachines then

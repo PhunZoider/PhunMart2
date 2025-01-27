@@ -26,7 +26,6 @@ function Core:getInstanceDistancesFrom(x, y)
     local results = {}
     for k, v in pairs(self.shops) do
         if v.enabled ~= false then
-            -- set default distance to max per group
             results[k] = 9999999
         end
     end
@@ -46,6 +45,6 @@ end
 function Core:ini()
     self.inied = true
     self.instances = ModData.getOrCreate(self.name)
-    Core.ServerSystem:removeInvalidInstanceData()
+    Core.ServerSystem.instance:removeInvalidInstanceData()
     triggerEvent(self.events.OnReady, self)
 end

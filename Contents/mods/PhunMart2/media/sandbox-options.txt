@@ -16,84 +16,585 @@ option PhunMart.DefaultDistanceBetweenGroups
     default = 200,
     min=0,
     max=10000,
-    page = PhunMart, 
+    page = PhunMartSettings, 
     translation=PhunMart_DefaultDistanceBetweenGroups,
 }
 
-option PhunMart.PoweredMachinesEnabled
-{ 
-    type = boolean,
-    default = true,
-    page = PhunMart,
-    translation = PhunMartPoweredMachinesEnabled 
-}
-
-option PhunMart.PoweredMachinesEnableTabs
-{ 
-    type = boolean, 
-    default = true, 
-    page = PhunMart, 
-    translation = PhunMartPoweredMachinesEnableTabs 
-}
-
-option PhunMart.PoweredMachinesAlpha
-{ 
-    type = integer, 
-    default = 80, 
-    min = 0,
-    max = 100,
-    page = PhunMart, 
-    translation = PhunMartPoweredMachinesAlpha
-}
-
-option PhunMart.DefaultItemProbability
-{ 
-    type = integer, 
-    default = 10, 
-    min = 1,
-    max = 100,
-    page = PhunMart, 
-    translation = PhunMartDefaultItemProbability
-}
-
-option PhunMart.CumulativeItemGeneration
-{ 
-    type = boolean, 
-    default = false,
-    page = PhunMart, 
-    translation = PhunMartCumulativeItemGeneration
-}
-
-option PhunMart.ValidateDefsOnStartup
-{ 
-    type = boolean, 
-    default = true, 
-    page = PhunMart, 
-    translation = PhunMartValidateDefsOnStartup
-}
-
-option PhunMart.PhunMartShowNextRestockDate
-{ 
-    type = boolean, 
-    default = true, 
-    page = PhunMart, 
-    translation = PhunMartShowNextRestockDate
-}
-
-option PhunMart.PhunMartVanillaTestKey
-{ 
+option PhunMart.ReplacementKey
+{
     type = string,
-    default = PhunMartTest, 
-    page = PhunMart, 
-    translation = PhunMartVanillaTestKey
+    default = default,
+    page = PhunMart,
+    translation=PhunMart_ReplacementKey,
 }
 
-option PhunMart.PhunMartVanillaChance
-{ 
-    type = integer, 
-    default = 80, 
-    min = 1,
-    max = 100,
-    page = PhunMart, 
-    translation = PhunMartVanillaChance
+option PhunMart.ShopProbabilityGoodPhoods
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityGoodPhoods,
+}
+
+option PhunMart.MinDistanceGoodPhoods
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceGoodPhoods,
+}
+
+option PhunMart.GroupGoodPhoods
+{
+    type = integer,
+    default = FOOD,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupGoodPhoods,
+}
+
+
+option PhunMart.ShopProbabilityPhatPhoods
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityPhatPhoods,
+}
+
+option PhunMart.MinDistancePhatPhoods
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistancePhatPhoods,
+}
+
+option PhunMart.GroupPhatPhoods
+{
+    type = integer,
+    default = FOOD,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupPhatPhoods,
+}
+
+option PhunMart.ShopProbabilityPittyTheTool
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityPittyTheTool,
+}
+
+option PhunMart.MinDistancePittyTheTool
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistancePittyTheTool,
+}
+
+option PhunMart.GroupPittyTheTool
+{
+    type = integer,
+    default = TOOLS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupPittyTheTool,
+}
+
+option PhunMart.ShopProbabilityFinalAmmendment
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityFinalAmmendment,
+}
+
+option PhunMart.MinDistanceFinalAmmendment
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceFinalAmmendment,
+}
+
+option PhunMart.GroupFinalAmmendment
+{
+    type = integer,
+    default = GUNS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupFinalAmmendment,
+}
+
+option PhunMart.ShopProbabilityWrentAWreck
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityWrentAWreck,
+}
+
+option PhunMart.MinDistanceWrentAWreck
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceWrentAWreck,
+}
+
+option PhunMart.GroupWrentAWreck
+{
+    type = integer,
+    default = VEHICLES,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupWrentAWreck,
+}
+
+option PhunMart.ShopProbabilityMichellesCrafts
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityMichellesCrafts,
+}
+
+option PhunMart.MinDistanceMichellesCrafts
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceMichellesCrafts,
+}
+
+option PhunMart.GroupMichellesCrafts
+{
+    type = integer,
+    default = CRAFT,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupMichellesCrafts,
+}
+
+option PhunMart.ShopProbabilityCarAParts
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityCarAParts,
+}
+
+option PhunMart.MinDistanceCarAParts
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceCarAParts,
+}
+
+option PhunMart.GroupCarAParts
+{
+    type = integer,
+    default = CARS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupCarAParts,
+}
+
+option PhunMart.ShopProbabilityTraiterJoes
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityTraiterJoes,
+}
+
+option PhunMart.MinDistanceTraiterJoes
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceTraiterJoes,
+}
+
+option PhunMart.GroupTraiterJoes
+{
+    type = integer,
+    default = TRAITS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupTraiterJoes,
+}
+
+option PhunMart.ShopProbabilityCSVPharmacy
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityCSVPharmacy,
+}
+
+option PhunMart.MinDistanceCSVPharmacy
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceCSVPharmacy,
+}
+
+option PhunMart.GroupCSVPharmacy
+{
+    type = integer,
+    default = DRUGS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupCSVPharmacy,
+}
+
+option PhunMart.ShopProbabilityRadioHacks
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityRadioHacks,
+}
+
+option PhunMart.MinDistanceRadioHacks
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceRadioHacks,
+}
+
+option PhunMart.GroupRadioHacks
+{
+    type = integer,
+    default = ELECTRICS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupRadioHacks,
+}
+
+option PhunMart.ShopProbabilityPhish4U
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityPhish4U,
+}
+
+option PhunMart.MinDistancePhish4U
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistancePhish4U,
+}
+
+option PhunMart.GroupPhish4U
+{
+    type = integer,
+    default = FOOD,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupPhish4U,
+}
+
+option PhunMart.ShopProbabilityHoesNMoes
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityHoesNMoes,
+}
+
+option PhunMart.MinDistanceHoesNMoes
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceHoesNMoes,
+}
+
+option PhunMart.GroupHoesNMoes
+{
+    type = integer,
+    default = GARDEN,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupHoesNMoes,
+}
+
+option PhunMart.ShopProbabilityBudgetXPerience
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityBudgetXPerience,
+}
+
+option PhunMart.MinDistanceBudgetXPerience
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceBudgetXPerience,
+}
+
+option PhunMart.GroupBudgetXPerience
+{
+    type = integer,
+    default = XP,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupBudgetXPerience,
+}
+
+option PhunMart.ShopProbabilityGiftedXPerience
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityGiftedXPerience,
+}
+
+option PhunMart.MinDistanceGiftedXPerience
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceGiftedXPerience,
+}
+
+option PhunMart.GroupGiftedXPerience
+{
+    type = integer,
+    default = XP,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupGiftedXPerience,
+}
+
+option PhunMart.ShopProbabilityLuxuryXPerience
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityLuxuryXPerience,
+}
+
+option PhunMart.MinDistanceLuxuryXPerience
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceLuxuryXPerience,
+}
+
+option PhunMart.GroupLuxuryXPerience
+{
+    type = integer,
+    default = XP,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupLuxuryXPerience,
+}
+
+option PhunMart.ShopProbabilityHardWear
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityHardWear,
+}
+
+option PhunMart.MinDistanceHardWear
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceHardWear,
+}
+
+option PhunMart.GroupHardWear
+{
+    type = integer,
+    default = CLOTHES,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupHardWear,
+}
+
+option PhunMart.ShopProbabilityCollectors
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityCollectors,
+}
+
+option PhunMart.MinDistanceCollectors
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceCollectors,
+}
+
+option PhunMart.GroupCollectors
+{
+    type = integer,
+    default = COLLECT,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupCollectors,
+}
+
+option PhunMart.ShopProbabilityTravellers
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_ShopProbabilityTravellers,
+}
+
+option PhunMart.MinDistanceTravellers
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_MinDistanceTravellers,
+}
+
+option PhunMart.GroupTravellers
+{
+    type = integer,
+    default = TRAVEL,
+    min=0,
+    max=1000000,
+    page = PhunMartShopSpecial, 
+    translation=PhunMart_GroupTravellers,
+}
+
+option PhunMart.ShopProbabilityShedsAndCommoners
+{
+    type = integer,
+    default = 15,
+    min=0,
+    max=100,
+    page = PhunMartShopItems, 
+    translation=PhunMart_ShopProbabilityShedsAndCommoners,
+}
+
+option PhunMart.MinDistanceShedsAndCommoners
+{
+    type = integer,
+    default = 100,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_MinDistanceShedsAndCommoners,
+}
+
+option PhunMart.GroupShedsAndCommoners
+{
+    type = integer,
+    default = BOOKS,
+    min=0,
+    max=1000000,
+    page = PhunMartShopItems, 
+    translation=PhunMart_GroupShedsAndCommoners,
 }

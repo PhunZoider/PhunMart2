@@ -46,7 +46,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Good Phoods Vending Machine,
 		WorldObjectSprite = phunmart_01_8,
-		name			  = PhunMartVendingMachine,
+		
 
     }
 
@@ -58,7 +58,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Phat Phoods Vending Machine,
 		WorldObjectSprite = phunmart_01_16,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item PittyTheTool
@@ -69,7 +69,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Pitty The Tool Vending Machine,
 		WorldObjectSprite = phunmart_01_24,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item FinalAmmendment
@@ -80,7 +80,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Final Ammendmend Vending Machine,
 		WorldObjectSprite = phunmart_01_32,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item WrentAWreck
@@ -91,7 +91,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Wrent A Wreck Vending Machine,
 		WorldObjectSprite = phunmart_01_40,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item MichellesCrafts
@@ -102,7 +102,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Michelle Crafts Vending Machine,
 		WorldObjectSprite = phunmart_01_48,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item CarAPart
@@ -113,7 +113,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Car-A-Part Vending Machine,
 		WorldObjectSprite = phunmart_01_56,
-		name			  = PhunMartVendingMachine,
+		
     }
  
     item TraiterJoes
@@ -124,7 +124,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Traiter Joes Vending Machine,
 		WorldObjectSprite = phunmart_02_1,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item CSVPharmacy
@@ -135,7 +135,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = CSV Pharmacy Vending Machine,
 		WorldObjectSprite = phunmart_02_8,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item RadioHacks
@@ -146,7 +146,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Radio Hacks Vending Machine,
 		WorldObjectSprite = phunmart_02_16,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item Phish4U
@@ -157,7 +157,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Phish4U Vending Machine,
 		WorldObjectSprite = phunmart_02_24,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item HoesNMoes
@@ -168,7 +168,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = HoesNMoes Vending Machine,
 		WorldObjectSprite = phunmart_02_32,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item BudgetXPerience
@@ -179,7 +179,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = BudgetXp Vending Machine,
 		WorldObjectSprite = phunmart_02_40,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item GiftedXPerience
@@ -190,7 +190,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = GiftedXp Vending Machine,
 		WorldObjectSprite = phunmart_02_48,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item LuxuryXPerience
@@ -201,7 +201,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = LuxuryXp Vending Machine,
 		WorldObjectSprite = phunmart_02_56,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item HardWear
@@ -212,7 +212,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       =HardWear Vending Machine,
 		WorldObjectSprite = phunmart_03_1,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item Collectors
@@ -223,7 +223,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Collectors Vending Machine,
 		WorldObjectSprite = phunmart_03_8,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item Travel
@@ -234,7 +234,7 @@ module PhunMart
 		Weight            = 250,
 		DisplayName       = Travel Vending Machine,
 		WorldObjectSprite = phunmart_03_16,
-		name			  = PhunMartVendingMachine,
+		
     }
 
     item ShedsAndCommoners
@@ -244,7 +244,7 @@ module PhunMart
 		Icon              = VendingMachine,
 		Weight            = 250,
 		DisplayName       = Books Vending Machine,
-		name			  = PhunMartVendingMachine,
+		
 		WorldObjectSprite = phunmart_03_24,
     }
 
