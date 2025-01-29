@@ -9,6 +9,7 @@ return {
     clothing_jewelry = {
         categories = {
             ["Accessory"] = true,
+            ["Clothing"] = true,
             ["ClothJew"] = true,
             ["ClothAcc"] = true
         },

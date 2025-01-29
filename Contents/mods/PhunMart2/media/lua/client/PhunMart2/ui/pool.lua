@@ -1,0 +1,304 @@
+if isServer() then
+    return
+end
+
+require "ISUI/ISCollapsableWindowJoypad"
+local Core = PhunMart
+
+local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
+local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
+local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
+
+local FONT_SCALE = FONT_HGT_SMALL / 14
+local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
+
+local profileName = "PhunMartUIPool"
+PhunMartUIPool = ISCollapsableWindowJoypad:derive(profileName);
+local UI = PhunMartUIPool
+local instances = {}
+Core.ui.admin.pool = UI
+
+function UI.OnOpenPanel(playerObj)
+
+    local playerIndex = playerObj:getPlayerNum()
+    local instance = instances[playerIndex]
+
+    if not instance then
+        local core = getCore()
+        local width = 300 * FONT_SCALE
+        local height = 590 * FONT_SCALE
+
+        local x = (core:getScreenWidth() - width) / 2
+        local y = (core:getScreenHeight() - height) / 2
+
+        instances[playerIndex] = UI:new(x, y, width, height, playerObj, playerIndex);
+        instance = instances[playerIndex]
+        instance:initialise();
+
+        ISLayoutManager.RegisterWindow(profileName, PhunMartUIPool, instance)
+    end
+
+    instance:addToUIManager();
+    instance:setVisible(true);
+    instance:ensureVisible()
+
+    return instance;
+
+end
+
+function UI:new(x, y, width, height, player, playerIndex)
+    local o = {};
+    o = ISCollapsableWindowJoypad:new(x, y, width, height, player);
+    setmetatable(o, self);
+    self.__index = self;
+
+    o.variableColor = {
+        r = 0.9,
+        g = 0.55,
+        b = 0.1,
+        a = 1
+    };
+    o.backgroundColor = {
+        r = 0,
+        g = 0,
+        b = 0,
+        a = 0.8
+    };
+    o.buttonBorderColor = {
+        r = 0.7,
+        g = 0.7,
+        b = 0.7,
+        a = 1
+    };
+    o.data = {}
+    o.moveWithMouse = false;
+    o.anchorRight = true
+    o.anchorBottom = true
+    o.player = player
+    o.playerIndex = playerIndex
+    o.zOffsetLargeFont = 25;
+    o.zOffsetMediumFont = 20;
+    o.zOffsetSmallFont = 6;
+    o:setWantKeyEvents(true)
+    o:setTitle("Pool")
+    return o;
+end
+
+function UI:RestoreLayout(name, layout)
+
+    ISLayoutManager.DefaultRestoreWindow(self, layout)
+    -- if name == profileName then
+    --     ISLayoutManager.DefaultRestoreWindow(self, layout)
+    --     self.userPosition = layout.userPosition == 'true'
+    -- end
+    self:recalcSize();
+end
+
+function UI:SaveLayout(name, layout)
+    ISLayoutManager.DefaultSaveWindow(self, layout)
+    if self.userPosition then
+        layout.userPosition = 'true'
+    else
+        layout.userPosition = 'false'
+    end
+end
+
+function UI:close()
+    if not self.locked then
+        ISCollapsableWindowJoypad.close(self);
+    end
+end
+
+function UI:refreshItems()
+    local cmb = self.types
+    local selected = cmb:getOptionData(cmb.selected)
+    local data = {}
+    if selected.type == "ITEMS" then
+
+    elseif selected.type == "PERKS" then
+        for i = 0, Perks.getMaxIndex() - 1 do
+            local perk = PerkFactory.getPerk(Perks.fromIndex(i))
+            if perk and perk:getParent() ~= Perks.None then
+                local name = perk:getName()
+                data[name] = {
+                    label = name,
+                    cost = perk:getCost(),
+                    parent = perk:getParent()
+                }
+            end
+        end
+    elseif selected.type == "TRAITS" then
+        local traits = TraitFactory.getTraits()
+        for i = 0, traits:size() - 1 do
+            local trait = traits:get(i)
+            local exclusive = trait:getMutuallyExclusiveTraits()
+            local exclusives = {}
+            for j = 0, exclusive:size() - 1 do
+                table.insert(exclusives, exclusive:get(j))
+            end
+            local cost = trait:getCost()
+            local isPositive = true
+            if trait:getCost() < 0 then
+                isPositive = false
+            end
+            data[trait:getLabel()] = {
+                label = trait:getLabel(),
+                cost = cost,
+                isPositive = isPositive,
+                exclusives = exclusives
+            }
+        end
+    elseif selected.type == "VEHICLES" then
+        local scripts = getScriptManager():getAllVehicleScripts()
+        for i = 0, scripts:size() - 1 do
+            local script = scripts:get(i)
+            local name = script:getName()
+            local fname = script:getFileName()
+            local fullName = script:getFullName()
+            local text = "IGUI_VehicleName" .. name
+            local label = getText(text)
+            data[name] = {
+                label = label,
+                name = name,
+                fname = fname,
+                fullName = fullName
+            }
+        end
+    end
+    PhunLib:debug(data)
+end
+
+function UI:refreshCategories()
+
+    local groups = require("PhunMart2/data/groups")
+    local group = groups.clothing_jewelry
+
+    local categories = {}
+    local exclusions = {}
+    local inclusions = {}
+    local traits = {}
+    local vehicles = {}
+    local perks = {}
+    local boosts = {}
+
+    local catMap = {}
+    local itemList = getScriptManager():getAllItems()
+    for i = 0, itemList:size() - 1 do
+        local item = itemList:get(i)
+        if not item:getObsolete() and not item:isHidden() then
+
+            local cat = Core.getCategory(item)
+            if cat ~= "" and catMap[cat] == nil then
+                catMap[cat] = true
+                table.insert(categories, {
+                    label = cat,
+                    selected = group.categories[cat] ~= nil
+                })
+            end
+
+            table.insert(exclusions, {
+                type = item:getFullName(),
+                label = item:getDisplayName(),
+                texture = item:getNormalTexture(),
+                selected = group.exclude[item:getFullName()] ~= nil,
+                category = cat
+            })
+            table.insert(inclusions, {
+                type = item:getFullName(),
+                label = item:getDisplayName(),
+                texture = item:getNormalTexture(),
+                selected = group.include[item:getFullName()] ~= nil,
+                category = cat
+            })
+
+        end
+    end
+
+    table.sort(categories, function(a, b)
+        return a.label < b.label
+    end)
+    table.sort(exclusions, function(a, b)
+        return a.label < b.label
+    end)
+    table.sort(inclusions, function(a, b)
+        return a.label < b.label
+    end)
+
+    self.categories:setData(categories)
+    self.exclusions:setData(exclusions)
+
+    self.inclusions:setData(inclusions)
+
+    -- self:refreshItems()
+end
+
+function UI:createChildren()
+
+    ISCollapsableWindowJoypad.createChildren(self);
+
+    local th = self:titleBarHeight()
+    local rh = self:resizeWidgetHeight()
+
+    local padding = 10
+    local x = padding
+    local y = th + padding
+    local w = self.width - x - padding
+    local h = self.height - y - rh - padding
+
+    self.tabPanel = ISTabPanel:new(x, y, w, h);
+    self.tabPanel:initialise()
+    self:addChild(self.tabPanel)
+
+    self.categories = PhunMartUIItemCats:new(0, 100, w, self.tabPanel.height - th, {
+        player = self.player
+    });
+
+    self.exclusions = PhunMartUIItemList:new(0, 100, w, self.tabPanel.height - th, {
+        player = self.player
+    });
+
+    self.inclusions = PhunMartUIItemList:new(0, 100, w, self.tabPanel.height - th, {
+        player = self.player
+    });
+
+    self.tabPanel:addView("Item Categories", self.categories)
+    self.tabPanel:addView("Item Inclusions", self.inclusions)
+    self.tabPanel:addView("Item Exclusions", self.exclusions)
+
+    self:refreshCategories()
+end
+
+function UI:prerender()
+
+    ISCollapsableWindowJoypad.prerender(self);
+
+    self.tabPanel:setWidth(self.width - 20)
+    self.tabPanel:setHeight(self.height - self:titleBarHeight() - self:resizeWidgetHeight() - 10)
+
+end
+
+function UI:refreshShops(shops)
+    self.page:clear()
+    local data = {}
+    for k, v in pairs(shops) do
+        if v.abstract ~= true then
+            table.insert(data, v)
+        end
+    end
+    table.sort(data, function(a, b)
+        return a.label < b.label
+    end)
+    self.page:addOption(" -- SHOP -- ")
+    for _, v in ipairs(data) do
+        if v.abstract ~= true then
+            self.page:addOptionWithData(v.label .. " (" .. v.key .. ")", v)
+        end
+    end
+end
+
+local zones = nil
+
+function UI:refreshLocations(instances)
+    self.locations:setData(instances)
+end
+

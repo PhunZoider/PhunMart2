@@ -24,6 +24,10 @@ PhunMart = {
     shops = allShops,
     spriteToShop = {},
     opensquares = {},
+    ui = {
+        client = {},
+        admin = {}
+    },
     targetSprites = {
         ["location_shop_accessories_01_29"] = "north",
         ["location_shop_accessories_01_31"] = "north",
@@ -106,4 +110,71 @@ function Core.hasPower(square)
                    getSandboxOptions():getOptionByName("ElecShutModifier"):getValue()
     end
     return false
+end
+
+local tid = nil
+function Core.getCategory(item)
+    -- from the awesome BetterSorting mod by Blindcoder,
+    -- but modified to return the category rather than just set it
+
+    if tid == nil then
+        if TweakItemData then
+            tid = TweakItemData
+        else
+            tid = false
+        end
+    end
+    if tid then
+        local test = TweakItemData[item:getFullName()]["DisplayCategory"] or
+                         TweakItemData[item:getFullName()]["displaycategory"]
+        if test then
+            return test
+        end
+    end
+
+    local category = tostring(item:getDisplayCategory());
+
+    if item:getCanStoreWater() then
+        if item:getTypeString() ~= "Drainable" then
+            category = "Container";
+        else
+            category = "FoodB";
+        end
+
+    elseif item:getDisplayCategory() == "Water" then
+        category = "FoodB";
+
+    elseif item:getTypeString() == "Food" then
+        if item:getDaysTotallyRotten() > 0 and item:getDaysTotallyRotten() < 1000000000 then
+            category = "FoodP";
+        else
+            category = "FoodN";
+        end
+
+    elseif item:getTypeString() == "Literature" then
+        if string.len(item:getSkillTrained()) > 0 then
+            category = "LitS";
+        elseif item:getTeachedRecipes() and not item:getTeachedRecipes():isEmpty() then
+            category = "LitR";
+        elseif item:getStressChange() ~= 0 or item:getBoredomChange() ~= 0 or item:getUnhappyChange() ~= 0 then
+            category = "LitE";
+        else
+            category = "LitW";
+        end
+
+    elseif item:getTypeString() == "Weapon" then
+        if item:getDisplayCategory() == "Explosives" or item:getDisplayCategory() == "Devices" then
+            category = "WepBomb";
+        end
+
+        -- Tsar's True Music Cassette and Vinyls
+    elseif string.find(item:getFullName(), "Tsarcraft.Cassette") or string.find(item:getFullName(), "Tsarcraft.Vinyl") then
+        category = "MediaA";
+
+        -- Tsar's True Actions Dance Cards
+    elseif item:getTypeString() == "Normal" and item:getModuleName() == "TAD" then
+        category = "Misc";
+    end
+
+    return category or "Unknown"
 end
