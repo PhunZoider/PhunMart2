@@ -178,3 +178,53 @@ function Core.getCategory(item)
 
     return category or "Unknown"
 end
+
+function Core.getAllItemCategories()
+
+    if Core.itemCategories == nil then
+        Core.getAllItems()
+    end
+
+    return Core.itemCategories
+
+end
+
+function Core.getAllItems(refresh)
+
+    if Core.itemsAll ~= nil and not refresh then
+        return Core.itemsAll
+    end
+    Core.itemsAll = {}
+    Core.itemCategories = {}
+    local catMap = {}
+
+    local itemList = getScriptManager():getAllItems()
+    for i = 0, itemList:size() - 1 do
+        local item = itemList:get(i)
+        if not item:getObsolete() and not item:isHidden() then
+
+            local cat = Core.getCategory(item)
+            if cat ~= "" and catMap[cat] == nil then
+                catMap[cat] = true
+                table.insert(Core.itemCategories, {
+                    label = cat
+                })
+            end
+            table.insert(Core.itemsAll, {
+                type = item:getFullName(),
+                label = item:getDisplayName(),
+                texture = item:getNormalTexture(),
+                category = cat
+            })
+        end
+    end
+
+    table.sort(Core.itemsAll, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+    table.sort(Core.itemCategories, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+
+    return Core.itemsAll
+end

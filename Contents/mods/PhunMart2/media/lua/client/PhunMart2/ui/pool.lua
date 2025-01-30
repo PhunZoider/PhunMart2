@@ -25,8 +25,8 @@ function UI.OnOpenPanel(playerObj)
 
     if not instance then
         local core = getCore()
-        local width = 300 * FONT_SCALE
-        local height = 590 * FONT_SCALE
+        local width = 400 * FONT_SCALE
+        local height = 300 * FONT_SCALE
 
         local x = (core:getScreenWidth() - width) / 2
         local y = (core:getScreenHeight() - height) / 2
@@ -86,7 +86,7 @@ end
 
 function UI:RestoreLayout(name, layout)
 
-    ISLayoutManager.DefaultRestoreWindow(self, layout)
+    -- ISLayoutManager.DefaultRestoreWindow(self, layout)
     -- if name == profileName then
     --     ISLayoutManager.DefaultRestoreWindow(self, layout)
     --     self.userPosition = layout.userPosition == 'true'
@@ -215,19 +215,54 @@ function UI:refreshCategories()
     end
 
     table.sort(categories, function(a, b)
-        return a.label < b.label
+        return a.label:lower() < b.label:lower()
     end)
     table.sort(exclusions, function(a, b)
-        return a.label < b.label
+        return a.label:lower() < b.label:lower()
     end)
     table.sort(inclusions, function(a, b)
-        return a.label < b.label
+        return a.label:lower() < b.label:lower()
     end)
 
     self.categories:setData(categories)
     self.exclusions:setData(exclusions)
 
     self.inclusions:setData(inclusions)
+
+    local scripts = getScriptManager():getAllVehicleScripts()
+    for i = 0, scripts:size() - 1 do
+        local script = scripts:get(i)
+        local name = script:getName()
+        local fname = script:getFileName()
+        local fullName = script:getFullName()
+        local text = "IGUI_VehicleName" .. name
+        local label = getText(text)
+        local cat = "Other"
+        if string.contains(name, "Van") then
+            cat = "Van"
+        elseif string.contains(name, "Truck") then
+            cat = "Truck"
+        elseif string.contains(name, "Burnt") then
+            cat = "Burnt"
+        elseif string.contains(name, "Smashed") then
+            cat = "Smashed"
+        elseif string.contains(name, "Trailer") then
+            cat = "Trailer"
+        elseif string.contains(name, "Car") then
+            cat = "Car"
+        end
+        table.insert(vehicles, {
+            label = fullName,
+            name = name,
+            fname = fname,
+            fullName = fullName,
+            category = cat
+        })
+    end
+    table.sort(vehicles, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+    self.vehicles:setData(vehicles)
 
     -- self:refreshItems()
 end
@@ -243,9 +278,10 @@ function UI:createChildren()
     local x = padding
     local y = th + padding
     local w = self.width - x - padding
-    local h = self.height - y - rh - padding
+    -- local h = self.height - y - rh - padding
+    local h = self.height - rh - padding - FONT_HGT_SMALL - 4
 
-    self.tabPanel = ISTabPanel:new(x, y, w, h);
+    self.tabPanel = ISTabPanel:new(x, y, w, h - y);
     self.tabPanel:initialise()
     self:addChild(self.tabPanel)
 
@@ -261,20 +297,71 @@ function UI:createChildren()
         player = self.player
     });
 
+    self.vehicles = PhunMartUIItemList:new(0, 100, w, self.tabPanel.height - th, {
+        player = self.player
+    });
+
     self.tabPanel:addView("Item Categories", self.categories)
     self.tabPanel:addView("Item Inclusions", self.inclusions)
     self.tabPanel:addView("Item Exclusions", self.exclusions)
+    self.tabPanel:addView("Vehicles", self.vehicles)
+
+    self.ok = ISButton:new(padding, self.height - rh - padding - FONT_HGT_SMALL, 100, FONT_HGT_SMALL + 4, "OK", self,
+        UI.onOK);
+    self.ok:initialise();
+    self.ok:instantiate();
+    self:addChild(self.ok);
 
     self:refreshCategories()
+end
+
+function UI:onOK()
+    print("OK")
+
+    local selected = {
+        categories = {},
+        include = {},
+        exclude = {},
+        vehicles = {}
+    }
+
+    for _, v in ipairs(self.categories.list.items) do
+        if v.item.selected then
+            selected.categories[v.item.label] = true
+        end
+    end
+    for _, v in ipairs(self.exclusions.data) do
+        if v.selected then
+            selected.exclude[v.type] = true
+        end
+    end
+    for _, v in ipairs(self.inclusions.data) do
+        if v.selected then
+            selected.include[v.type] = true
+        end
+    end
+    for _, v in ipairs(self.inclusions.data) do
+        if v.selected then
+            selected.include[v.type] = true
+        end
+    end
+    for _, v in ipairs(self.vehicles.data) do
+        if v.selected then
+            selected.vehicles[v.name] = true
+        end
+    end
+    PhunLib:debug(selected)
+
 end
 
 function UI:prerender()
 
     ISCollapsableWindowJoypad.prerender(self);
 
+    self.ok:setX(self.width - self.ok.width - 10)
+    self.ok:setY(self.height - self.ok.height - self:resizeWidgetHeight() - 10)
     self.tabPanel:setWidth(self.width - 20)
-    self.tabPanel:setHeight(self.height - self:titleBarHeight() - self:resizeWidgetHeight() - 10)
-
+    self.tabPanel:setHeight(self.ok.y - self.tabPanel.y - 50)
 end
 
 function UI:refreshShops(shops)

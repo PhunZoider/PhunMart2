@@ -41,7 +41,7 @@ Core.contexts.open = function(player, context, worldobjects, test)
         local adminSubMenu = ISContextMenu:getNew(context)
 
         adminSubMenu:addOption("Pool Editor", player, function()
-            Core.ui.admin.pool.OnOpenPanel(getSpecificPlayer(player))
+            Core.ui.poolEditor.OnOpenPanel(getSpecificPlayer(player))
         end)
 
         adminSubMenu:addOption("Locations", player, function()

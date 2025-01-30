@@ -21,9 +21,19 @@ function UI:new(x, y, width, height, options)
     setmetatable(o, self);
     o.player = opts.player or getPlayer()
     o.playerIndex = o.player:getPlayerNum()
-
+    o.lastSelected = nil
     self.instance = o;
     return o;
+end
+
+function UI:prerender()
+    ISPanelJoypad.prerender(self)
+    local padding = 10
+    local maxWidth = self.parent.width
+    local maxHeight = self.parent.height
+    self:setWidth(maxWidth)
+    self:setHeight(maxHeight)
+    self.list:setHeight(maxHeight - HEADER_HGT)
 end
 
 function UI:createChildren()
@@ -36,11 +46,30 @@ function UI:createChildren()
     self.list = ISScrollingListBox:new(x, y, self:getWidth(), self.height - HEADER_HGT);
     self.list:initialise();
     self.list:instantiate();
-    self.list.itemheight = FONT_HGT_SMALL + 4 * 2
+    self.list.itemheight = FONT_HGT_SMALL + 6 * 2
     self.list.selected = 0;
     self.list.joypadParent = self;
     self.list.font = UIFont.NewSmall;
     self.list.doDrawItem = self.drawDatas;
+
+    self.list.onMouseUp = function(list, x, y)
+        self.selectedProperty = nil
+        local row = list:rowAt(x, y)
+        if row == nil or row == -1 then
+            return
+        end
+        list:ensureVisible(row)
+        local item = list.items[row].item
+        item.selected = not item.selected
+        if isShiftKeyDown() and self.lastSelected then
+            local start = math.min(row, self.lastSelected)
+            local finish = math.max(row, self.lastSelected)
+            for i = start, finish do
+                list.items[i].item.selected = item.selected
+            end
+        end
+        self.lastSelected = row
+    end
 
     self.list.onRightMouseUp = function(target, x, y, a, b)
         local row = self.list:rowAt(x, y)
@@ -61,25 +90,6 @@ function UI:createChildren()
 
 end
 
-function UI:prerender()
-    ISPanelJoypad.prerender(self);
-    -- local maxWidth = self.parent.width
-    -- local maxHeight = self.parent.height
-
-    -- local minHeight = 250
-    -- local sw = maxWidth
-    -- local tabY = self.parent.tabHeight
-    -- self:setWidth(sw)
-    -- self.list:setX(10)
-    -- self.list:setWidth(self.parent.width - 20)
-    -- self.list:setY(tabY + 10)
-    -- local height = maxHeight - (tabY + 20) - self.list.itemheight
-    -- if height > maxHeight then
-    --     height = maxHeight
-    -- end
-    -- self.list:setHeight(height)
-end
-
 function UI:drawDatas(y, item, alt)
     if y + self:getYScroll() + self.itemheight < 0 or y + self:getYScroll() >= self.height then
         return y + self.itemheight
@@ -88,11 +98,11 @@ function UI:drawDatas(y, item, alt)
     local a = 0.9;
 
     if item.item.selected then
-        self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.3, 0.7, 0.35, 0.15);
+        self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.4, 0.7, 0.35, 0.15);
     end
 
     if alt then
-        self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.3, 0.6, 0.5, 0.5);
+        self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.2, 0.6, 0.5, 0.5);
     end
 
     self:drawRectBorder(0, (y), self:getWidth(), self.itemheight, a, self.borderColor.r, self.borderColor.g,
@@ -110,6 +120,7 @@ end
 
 function UI:setData(data)
     self.list:clear();
+    self.lastSelected = nil
     if not data then
         return
     end
