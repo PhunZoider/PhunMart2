@@ -98,6 +98,8 @@ function UI:createChildren()
         self.data.categories = Core.getAllItemCategories()
     elseif self.listType == "VEHICLES" then
         self.data.categories = Core.getAllVehicleCategories()
+    elseif self.listType == "TRAITS" then
+        self.data.categories = Core.getAllTraitCategories()
     end
 
 end

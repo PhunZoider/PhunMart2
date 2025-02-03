@@ -156,7 +156,8 @@ function UI:createChildren()
     });
 
     self.controls.traits = Core.ui.poolEditorItems:new(0, 100, w, self.controls.tabPanel.height - th, {
-        player = self.player
+        player = self.player,
+        type = "TRAITS"
     });
 
     self.controls.tabPanel:addView("Items", self.controls.items)

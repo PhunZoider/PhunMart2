@@ -298,3 +298,47 @@ function Core.getAllVehicles(refresh)
     return Core.vehiclesAll
 end
 
+function Core.getAllTraitCategories()
+
+    return Core.traitCategories
+
+end
+
+function Core.getAllTraits(refresh)
+
+    if Core.traitsAll ~= nil and not refresh then
+        return Core.traitsAll
+    end
+    Core.traitsAll = {}
+    Core.traitCategories = {}
+    local catMap = {}
+
+    local traits = TraitFactory.getTraits()
+    for i = 0, traits:size() - 1 do
+        local trait = traits:get(i)
+
+        local cat = trait:getCost() < 0 and "Negative" or "Positive"
+        if cat ~= "" and catMap[cat] == nil then
+            catMap[cat] = true
+            table.insert(Core.traitCategories, {
+                label = cat
+            })
+        end
+
+        table.insert(Core.traitsAll, {
+            type = trait:getType(),
+            label = trait:getLabel(),
+            cost = trait:getCost(),
+            description = trait:getDescription(),
+            texture = trait:getTexture(),
+            exclusives = trait:getMutuallyExclusiveTraits(),
+            category = trait:getCost() < 0 and "Negative" or "Positive"
+        })
+
+    end
+    table.sort(Core.traitsAll, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+
+    return Core.traitsAll
+end

@@ -117,6 +117,9 @@ function UI:createChildren()
     elseif self.listType == "VEHICLES" then
         self.data.categories = Core.getAllVehicleCategories()
         self.data.items = Core.getAllVehicles()
+    elseif self.listType == "TRAITS" then
+        self.data.categories = Core.getAllTraitCategories()
+        self.data.items = Core.getAllTraits()
     end
 
     local catMap = {}
