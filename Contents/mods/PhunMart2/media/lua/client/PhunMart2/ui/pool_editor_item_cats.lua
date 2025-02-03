@@ -21,6 +21,7 @@ function UI:new(x, y, width, height, options)
     setmetatable(o, self);
     o.player = opts.player or getPlayer()
     o.playerIndex = o.player:getPlayerNum()
+    o.listType = options.type or nil
     o.lastSelected = nil
     self.instance = o;
     return o;
@@ -29,8 +30,8 @@ end
 function UI:prerender()
     ISPanelJoypad.prerender(self)
     local padding = 10
-    local maxWidth = self.parent.width
-    local maxHeight = self.parent.height
+    local maxWidth = self.parent.activeView.view.width
+    local maxHeight = self.parent.height - HEADER_HGT -- BUTTON_HGT - padding * 2
     self:setWidth(maxWidth)
     self:setHeight(maxHeight)
     self.list:setHeight(maxHeight - HEADER_HGT)
@@ -60,12 +61,14 @@ function UI:createChildren()
         end
         list:ensureVisible(row)
         local item = list.items[row].item
-        item.selected = not item.selected
+        local data = list.parent.data.selected
+        data[item.type] = data[item.type] == nil and true or nil
+
         if isShiftKeyDown() and self.lastSelected then
             local start = math.min(row, self.lastSelected)
             local finish = math.max(row, self.lastSelected)
             for i = start, finish do
-                list.items[i].item.selected = item.selected
+                data[list.items[i].item.type] = data[item.type]
             end
         end
         self.lastSelected = row
@@ -88,6 +91,15 @@ function UI:createChildren()
     self.list:addColumn("Category", 0);
     self:addChild(self.list);
 
+    self.data = {
+        selected = {}
+    }
+    if not self.listType then
+        self.data.categories = Core.getAllItemCategories()
+    elseif self.listType == "VEHICLES" then
+        self.data.categories = Core.getAllVehicleCategories()
+    end
+
 end
 
 function UI:drawDatas(y, item, alt)
@@ -97,7 +109,7 @@ function UI:drawDatas(y, item, alt)
 
     local a = 0.9;
 
-    if item.item.selected then
+    if self.parent.data.selected[item.item.type] then
         self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.4, 0.7, 0.35, 0.15);
     end
 
@@ -119,12 +131,16 @@ function UI:drawDatas(y, item, alt)
 end
 
 function UI:setData(data)
+
     self.list:clear();
     self.lastSelected = nil
-    if not data then
-        return
+
+    self.data.selected = {}
+    for k, item in ipairs(data or {}) do
+        self.data.selected[k] = true
     end
-    for _, item in ipairs(data) do
+
+    for _, item in ipairs(self.data.categories or {}) do
         self.list:addItem(item.label, item);
     end
 end

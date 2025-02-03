@@ -228,3 +228,73 @@ function Core.getAllItems(refresh)
 
     return Core.itemsAll
 end
+
+function Core.getAllVehicleCategories()
+
+    if Core.vehicleCategories == nil then
+        Core.getAllVehicles()
+    end
+
+    return Core.vehicleCategories
+
+end
+
+function Core.getAllVehicles(refresh)
+
+    if Core.vehiclesAll ~= nil and not refresh then
+        return Core.vehiclesAll
+    end
+    Core.vehiclesAll = {}
+    Core.vehicleCategories = {}
+    local catMap = {}
+
+    local itemList = getScriptManager():getAllVehicleScripts()
+    for i = 0, itemList:size() - 1 do
+        local item = itemList:get(i)
+
+        local script = itemList:get(i)
+        local name = script:getName()
+        local fname = script:getFileName()
+        local fullName = script:getFullName()
+        local text = "IGUI_VehicleName" .. name
+        local label = getText(text)
+        local cat = "Other"
+        if string.contains(name, "Van") then
+            cat = "Van"
+        elseif string.contains(name, "Truck") then
+            cat = "Truck"
+        elseif string.contains(name, "Burnt") then
+            cat = "Burnt"
+        elseif string.contains(name, "Smashed") then
+            cat = "Smashed"
+        elseif string.contains(name, "Trailer") then
+            cat = "Trailer"
+        elseif string.contains(name, "Car") then
+            cat = "Car"
+        end
+
+        if cat ~= "" and catMap[cat] == nil then
+            catMap[cat] = true
+            table.insert(Core.vehicleCategories, {
+                label = cat
+            })
+        end
+        table.insert(Core.vehiclesAll, {
+            type = fullName,
+            label = label,
+            -- texture = item:getNormalTexture(),
+            category = cat
+        })
+
+    end
+
+    table.sort(Core.vehiclesAll, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+    table.sort(Core.vehicleCategories, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+
+    return Core.vehiclesAll
+end
+

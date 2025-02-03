@@ -68,7 +68,8 @@ function UI:new(x, y, width, height, data)
         b = 0.7,
         a = 1
     };
-    o.data = data.data or {}
+    o.data = {}
+    o.listType = data.type or nil
     o.moveWithMouse = false;
     o.anchorRight = true
     o.anchorBottom = true
@@ -89,22 +90,25 @@ function UI:createChildren()
     local y = 50
     local w = self.width - x - padding
 
-    local h = self.height - padding - y - FONT_HGT_SMALL - 4
+    local h = self.height - y
 
     self.tabPanel = ISTabPanel:new(x, y, w, h - y);
     self.tabPanel:initialise()
     self:addChild(self.tabPanel)
 
-    self.categories = PhunMartUIItemCats:new(0, 100, w, self.tabPanel.height, {
-        player = self.player
+    self.categories = PhunMartUIItemCats:new(0, y, w, self.tabPanel.height, {
+        player = self.player,
+        type = self.listType
     });
 
-    self.exclusions = PhunMartUIItemList:new(0, 100, w, self.tabPanel.height, {
-        player = self.player
+    self.exclusions = PhunMartUIItemList:new(0, y, w, self.tabPanel.height, {
+        player = self.player,
+        type = self.listType
     });
 
-    self.inclusions = PhunMartUIItemList:new(0, 100, w, self.tabPanel.height, {
-        player = self.player
+    self.inclusions = PhunMartUIItemList:new(0, y, w, self.tabPanel.height, {
+        player = self.player,
+        type = self.listType
     });
 
     self.tabPanel:addView("Categories", self.categories)
@@ -121,36 +125,40 @@ end
 
 function UI:refreshAll()
 
-    self.categories.list:clear()
-    self.inclusions.list:clear()
-    self.exclusions.list:clear()
+    -- self.categories.list:clear()
+    -- self.inclusions.list:clear()
+    -- self.exclusions.list:clear()
 
-    local categories = Core.getAllItemCategories()
-    local inclusions = Core.getAllItems()
-    local exclusions = Core.getAllItems()
+    -- local categories = Core.getAllItemCategories()
+    -- local inclusions = Core.getAllItems()
+    -- local exclusions = Core.getAllItems()
 
-    for i = 1, #categories do
-        local category = categories[i]
-        self.categories.list:addItem(category.label, {
-            data = category,
-            selected = self.data and self.data.categories and self.data.categories[category.label]
-        })
-    end
+    -- for i = 1, #categories do
+    --     local category = categories[i]
+    --     self.categories.list:addItem(category.label, {
+    --         data = category,
+    --         selected = self.data and self.data.categories and self.data.categories[category.label]
+    --     })
+    -- end
 
-    for i = 1, #inclusions do
-        local inclusion = inclusions[i]
-        self.inclusions.list:addItem(inclusion.label, {
-            data = inclusion,
-            selected = self.data and self.data.include and self.data.include[inclusion.type]
-        })
-    end
+    self.categories:setData(self.data.categories)
+    self.inclusions:setData(self.data.include)
+    self.exclusions:setData(self.data.exclude)
 
-    for i = 1, #exclusions do
-        local exclusion = exclusions[i]
-        self.exclusions.list:addItem(exclusion, {
-            data = exclusion,
-            selected = self.data and self.data.exclude and self.data.exclude[exclusion.type]
-        })
-    end
+    -- for i = 1, #inclusions do
+    --     local inclusion = inclusions[i]
+    --     self.inclusions.list:addItem(inclusion.label, {
+    --         data = inclusion,
+    --         selected = self.data and self.data.include and self.data.include[inclusion.type]
+    --     })
+    -- end
+
+    -- for i = 1, #exclusions do
+    --     local exclusion = exclusions[i]
+    --     self.exclusions.list:addItem(exclusion.label, {
+    --         data = exclusion,
+    --         selected = self.data and self.data.exclude and self.data.exclude[exclusion.type]
+    --     })
+    -- end
 
 end

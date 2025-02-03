@@ -151,7 +151,8 @@ function UI:createChildren()
     });
 
     self.controls.vehicles = Core.ui.poolEditorItems:new(0, 100, w, self.controls.tabPanel.height - th, {
-        player = self.player
+        player = self.player,
+        type = "VEHICLES"
     });
 
     self.controls.traits = Core.ui.poolEditorItems:new(0, 100, w, self.controls.tabPanel.height - th, {
@@ -186,6 +187,7 @@ function UI:refreshAll()
     end
 
     self.controls.items:refreshAll()
+    self.controls.vehicles:refreshAll()
 
 end
 
