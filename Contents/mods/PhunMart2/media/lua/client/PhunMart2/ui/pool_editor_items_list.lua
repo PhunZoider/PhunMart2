@@ -83,6 +83,9 @@ function UI:createChildren()
 
     end
     self.list.drawBorder = true;
+    self.list.onMouseMove = self.doOnMouseMove
+    self.list.onMouseMoveOutside = self.doOnMouseMoveOutside
+
     self.list:addColumn("Item", 0);
     self.list:addColumn("Category", 300);
     self:addChild(self.list);
@@ -107,6 +110,13 @@ function UI:createChildren()
     self.filterCategory:initialise();
     self.filterCategory:instantiate();
     self.filters:addChild(self.filterCategory);
+
+    self.tooltip = ISToolTip:new();
+    self.tooltip:initialise();
+    self.tooltip:setVisible(false);
+    self.tooltip:setAlwaysOnTop(true)
+    self.tooltip.description = "";
+    self.tooltip:setOwner(self.datas)
 
     self.data = {
         selected = {}
@@ -159,6 +169,7 @@ function UI:prerender()
     self.filterCategory:setWidth(self.width - self.filter.width - padding * 2)
 
     self.list:setHeight(self.filters:getY() - self.list.y)
+
 end
 
 function UI:drawDatas(y, item, alt)
@@ -208,6 +219,50 @@ function UI:drawDatas(y, item, alt)
     return self.itemsHeight;
 end
 
+function UI:doOnMouseMoveOutside(dx, dy)
+    local tooltip = self.parent.tooltip
+    tooltip:setVisible(false)
+    tooltip:removeFromUIManager()
+end
+
+function UI:doOnMouseMove(dx, dy)
+
+    local showInvTooltipForItem = nil
+    local item = nil
+    local tooltip = nil
+
+    if not self.dragging and self.rowAt then
+        if self:isMouseOver() then
+            local row = self:rowAt(self:getMouseX(), self:getMouseY())
+            if row ~= nil and row > 0 and self.items[row] and self.items[row].tooltip then
+                item = self.items[row].item
+                if item then
+                    tooltip = self.parent.tooltip
+                    local viewer = self.parent.viewer
+                    tooltip:setName(item.label)
+                    local desc = {}
+
+                    tooltip.description = item.tooltip.description
+                    if not tooltip:isVisible() then
+
+                        tooltip:addToUIManager();
+                        tooltip:setVisible(true)
+                    end
+                    tooltip:bringToTop()
+                elseif self.parent.tooltip:isVisible() then
+                    self.parent.tooltip:setVisible(false)
+                    self.parent.tooltip:removeFromUIManager()
+                end
+            end
+        end
+    end
+
+end
+
+function UI:doTooltip()
+
+end
+
 function UI:setData(data)
 
     self.data.selected = {}
@@ -216,6 +271,12 @@ function UI:setData(data)
     end
     self:refreshData()
 
+end
+
+function UI:doOnMouseMoveOutside(dx, dy)
+    local tooltip = self.parent.tooltip
+    tooltip:setVisible(false)
+    tooltip:removeFromUIManager()
 end
 
 function UI:refreshData()

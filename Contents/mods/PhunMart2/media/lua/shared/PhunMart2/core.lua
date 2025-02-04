@@ -329,7 +329,9 @@ function Core.getAllTraits(refresh)
             type = trait:getType(),
             label = trait:getLabel(),
             cost = trait:getCost(),
-            description = trait:getDescription(),
+            tooltip = {
+                description = trait:getDescription()
+            },
             texture = trait:getTexture(),
             exclusives = trait:getMutuallyExclusiveTraits(),
             category = trait:getCost() < 0 and "Negative" or "Positive"
