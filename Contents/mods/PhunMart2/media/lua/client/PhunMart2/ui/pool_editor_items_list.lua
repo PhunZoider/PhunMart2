@@ -111,26 +111,28 @@ function UI:createChildren()
     self.filterCategory:instantiate();
     self.filters:addChild(self.filterCategory);
 
-    self.tooltip = ISToolTip:new();
+    self.data = {
+        selected = {}
+    }
+    if self.listType == "VEHICLES" then
+        self.data.categories = Core.getAllVehicleCategories()
+        self.data.items = Core.getAllVehicles()
+        self.tooltip = ISToolTip:new();
+    elseif self.listType == "TRAITS" then
+        self.data.categories = Core.getAllTraitCategories()
+        self.data.items = Core.getAllTraits()
+        self.tooltip = ISToolTip:new();
+    else
+        self.data.categories = Core.getAllItemCategories()
+        self.data.items = Core.getAllItems()
+        self.tooltip = ISToolTipInv:new();
+    end
+
     self.tooltip:initialise();
     self.tooltip:setVisible(false);
     self.tooltip:setAlwaysOnTop(true)
     self.tooltip.description = "";
-    self.tooltip:setOwner(self.datas)
-
-    self.data = {
-        selected = {}
-    }
-    if not self.listType then
-        self.data.categories = Core.getAllItemCategories()
-        self.data.items = Core.getAllItems()
-    elseif self.listType == "VEHICLES" then
-        self.data.categories = Core.getAllVehicleCategories()
-        self.data.items = Core.getAllVehicles()
-    elseif self.listType == "TRAITS" then
-        self.data.categories = Core.getAllTraitCategories()
-        self.data.items = Core.getAllTraits()
-    end
+    self.tooltip:setOwner(self.list)
 
     local catMap = {}
     local categories = {}
@@ -234,15 +236,18 @@ function UI:doOnMouseMove(dx, dy)
     if not self.dragging and self.rowAt then
         if self:isMouseOver() then
             local row = self:rowAt(self:getMouseX(), self:getMouseY())
-            if row ~= nil and row > 0 and self.items[row] and self.items[row].tooltip then
+            if row ~= nil and row > 0 and self.items[row] then
                 item = self.items[row].item
                 if item then
                     tooltip = self.parent.tooltip
-                    local viewer = self.parent.viewer
-                    tooltip:setName(item.label)
-                    local desc = {}
+                    if self.parent.listType == "VEHICLES" or self.parent.listType == "TRAITS" then
+                        tooltip:setName(item.label)
+                        local desc = {}
+                        tooltip.description = item.tooltip and item.tooltip.description or ""
+                    else
+                        tooltip:setItem(instanceItem(item.type))
+                    end
 
-                    tooltip.description = item.tooltip.description
                     if not tooltip:isVisible() then
 
                         tooltip:addToUIManager();
