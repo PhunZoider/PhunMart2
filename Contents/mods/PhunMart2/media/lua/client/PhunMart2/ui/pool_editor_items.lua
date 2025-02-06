@@ -1,3 +1,7 @@
+if isServer() then
+    return
+end
+
 require "ISUI/ISCollapsableWindowJoypad"
 local Core = PhunMart
 
@@ -9,12 +13,12 @@ local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local profileName = "PhunMartUIPoolEditorItems"
-PhunMartUIPoolEditorItems = ISPanelJoypad:derive(profileName);
+PhunMartUIPoolEditorItems = ISCollapsableWindowJoypad:derive(profileName);
 local UI = PhunMartUIPoolEditorItems
 local instances = {}
-Core.ui.poolEditorItems = UI
+Core.ui.poolEditor = UI
 
-function UI.OnOpenPanel(playerObj, data)
+function UI.OnOpenPanel(playerObj, pool)
 
     local playerIndex = playerObj:getPlayerNum()
     local instance = instances[playerIndex]
@@ -31,22 +35,22 @@ function UI.OnOpenPanel(playerObj, data)
         instance = instances[playerIndex]
         instance:initialise();
 
+        ISLayoutManager.RegisterWindow(profileName, PhunMartUIPoolEditorItems, instance)
     end
 
-    instance.data = data or {}
-    instance:refreshAll()
+    instance.pool = pool or {}
 
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
-
+    instance:refreshAll()
     return instance;
 
 end
 
-function UI:new(x, y, width, height, data)
+function UI:new(x, y, width, height, player, playerIndex)
     local o = {};
-    o = ISPanelJoypad:new(x, y, width, height, data.player);
+    o = ISCollapsableWindowJoypad:new(x, y, width, height, player);
     setmetatable(o, self);
     self.__index = self;
 
@@ -68,97 +72,166 @@ function UI:new(x, y, width, height, data)
         b = 0.7,
         a = 1
     };
+    o.controls = {}
     o.data = {}
-    o.listType = data.type or nil
     o.moveWithMouse = false;
     o.anchorRight = true
     o.anchorBottom = true
-    o.player = data.player
-    o.playerIndex = o.player:getPlayerNum()
+    o.player = player
+    o.playerIndex = playerIndex
     o.zOffsetLargeFont = 25;
     o.zOffsetMediumFont = 20;
     o.zOffsetSmallFont = 6;
     o:setWantKeyEvents(true)
+    o:setTitle("Pool")
     return o;
 end
 
+function UI:RestoreLayout(name, layout)
+
+    -- ISLayoutManager.DefaultRestoreWindow(self, layout)
+    -- if name == profileName then
+    --     ISLayoutManager.DefaultRestoreWindow(self, layout)
+    --     self.userPosition = layout.userPosition == 'true'
+    -- end
+    self:recalcSize();
+end
+
+function UI:SaveLayout(name, layout)
+    ISLayoutManager.DefaultSaveWindow(self, layout)
+    if self.userPosition then
+        layout.userPosition = 'true'
+    else
+        layout.userPosition = 'false'
+    end
+end
+
+function UI:close()
+    if not self.locked then
+        ISCollapsableWindowJoypad.close(self);
+    end
+end
+
 function UI:createChildren()
-    ISPanelJoypad.createChildren(self);
+
+    ISCollapsableWindowJoypad.createChildren(self);
+    local th = self:titleBarHeight()
+    local rh = self:resizeWidgetHeight()
 
     local padding = 10
     local x = padding
-    local y = 50
+    local y = th + padding
     local w = self.width - x - padding
+    -- local h = self.height - y - rh - padding
+    local h = self.height - rh - padding - FONT_HGT_SMALL - 4
 
-    local h = self.height - y
+    self.controls.pools = ISComboBox:new(self.width - 210, y, 200, FONT_HGT_SMALL + 4, self, function()
+        self:setPool(self.controls.pools:getOptionText(self.controls.pools.selected))
+    end);
+    self.controls.pools:initialise();
+    self.controls.pools:instantiate();
+    self.controls.pools:setAnchorRight(true);
+    self:addChild(self.controls.pools);
 
-    self.tabPanel = ISTabPanel:new(x, y, w, h - y);
-    self.tabPanel:initialise()
-    self:addChild(self.tabPanel)
+    local txt = "Pool"
+    self.controls.poolsLabel = ISLabel:new(self.controls.pools.x - 10 - getTextManager():MeasureStringX(self.font, txt),
+        y, FONT_HGT_SMALL, txt, 1, 1, 1, 1, UIFont.Small, true);
+    self.controls.poolsLabel:initialise();
+    self.controls.poolsLabel:instantiate();
+    self:addChild(self.controls.poolsLabel);
 
-    self.categories = PhunMartUIItemCats:new(0, y, w, self.tabPanel.height, {
-        player = self.player,
-        type = self.listType
+    y = y + self.controls.pools.height + padding
+
+    self.controls.tabPanel = ISTabPanel:new(x, y, w, h - y);
+    self.controls.tabPanel:initialise()
+    self:addChild(self.controls.tabPanel)
+
+    self.controls.items = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+        player = self.player
     });
 
-    self.exclusions = PhunMartUIItemList:new(0, y, w, self.tabPanel.height, {
+    self.controls.vehicles = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        type = self.listType
+        type = "VEHICLES"
     });
 
-    self.inclusions = PhunMartUIItemList:new(0, y, w, self.tabPanel.height, {
+    self.controls.traits = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        type = self.listType
+        type = "TRAITS"
     });
 
-    self.tabPanel:addView("Categories", self.categories)
-    self.tabPanel:addView("Inclusions", self.inclusions)
-    self.tabPanel:addView("Exclusions", self.exclusions)
+    self.controls.tabPanel:addView("Items", self.controls.items)
+    self.controls.tabPanel:addView("Vehicles", self.controls.vehicles)
+    self.controls.tabPanel:addView("Traits", self.controls.traits)
 
-    self.ok =
-        ISButton:new(padding, self.height - padding - FONT_HGT_SMALL, 100, FONT_HGT_SMALL + 4, "OK", self, UI.onOK);
-    self.ok:initialise();
-    self.ok:instantiate();
-    self:addChild(self.ok);
+    self.controls.ok = ISButton:new(padding, self.height - rh - padding - FONT_HGT_SMALL, 100, FONT_HGT_SMALL + 4, "OK",
+        self, UI.onOK);
+    self.controls.ok:initialise();
+    self.controls.ok:instantiate();
+    self:addChild(self.controls.ok);
+
+    self:refreshAll()
+end
+
+function UI:setPool(pool)
+    local groups = require("PhunMart2/data/groups")
+    local group = groups[pool]
+    self:setTitle("Pool: " .. pool)
+
+    local items = group.items or {}
+    items.categories = items.categories or {}
+    items.include = items.include or {}
+    items.exclude = items.exclude or {}
+
+    local vehicles = group.vehicles or {}
+    vehicles.categories = vehicles.categories or {}
+    vehicles.include = vehicles.include or {}
+    vehicles.exclude = vehicles.exclude or {}
+
+    local traits = group.traits or {}
+    traits.categories = traits.categories or {}
+    traits.include = traits.include or {}
+    traits.exclude = traits.exclude or {}
+
+    self.controls.items:setData(items)
+    self.controls.vehicles:setData(vehicles)
+    self.controls.traits:setData(traits)
 
 end
 
 function UI:refreshAll()
 
-    -- self.categories.list:clear()
-    -- self.inclusions.list:clear()
-    -- self.exclusions.list:clear()
+    local groups = require("PhunMart2/data/groups")
+    self.controls.pools:clear()
+    for k, v in pairs(groups) do
+        self.controls.pools:addOption(k)
+    end
 
-    -- local categories = Core.getAllItemCategories()
-    -- local inclusions = Core.getAllItems()
-    -- local exclusions = Core.getAllItems()
+    self.controls.items:refreshAll()
+    self.controls.vehicles:refreshAll()
+    self.controls.traits:refreshAll()
 
-    -- for i = 1, #categories do
-    --     local category = categories[i]
-    --     self.categories.list:addItem(category.label, {
-    --         data = category,
-    --         selected = self.data and self.data.categories and self.data.categories[category.label]
-    --     })
-    -- end
+end
 
-    self.categories:setData(self.data.categories)
-    self.inclusions:setData(self.data.include)
-    self.exclusions:setData(self.data.exclude)
+function UI:prerender()
 
-    -- for i = 1, #inclusions do
-    --     local inclusion = inclusions[i]
-    --     self.inclusions.list:addItem(inclusion.label, {
-    --         data = inclusion,
-    --         selected = self.data and self.data.include and self.data.include[inclusion.type]
-    --     })
-    -- end
+    ISCollapsableWindowJoypad.prerender(self);
 
-    -- for i = 1, #exclusions do
-    --     local exclusion = exclusions[i]
-    --     self.exclusions.list:addItem(exclusion.label, {
-    --         data = exclusion,
-    --         selected = self.data and self.data.exclude and self.data.exclude[exclusion.type]
-    --     })
-    -- end
+    self.controls.ok:setX(self.width - self.controls.ok.width - 10)
+    self.controls.ok:setY(self.height - self.controls.ok.height - self:resizeWidgetHeight() - 10)
+    self.controls.tabPanel:setWidth(self.width - 20)
+    self.controls.tabPanel:setHeight(self.controls.ok.y - self.controls.tabPanel.y - 50)
+end
+
+function UI:onOK()
+    print("OK")
+
+    local selected = {
+        items = self.controls.items:getSelected(),
+        vehicles = self.controls.vehicles:getSelected(),
+        traits = self.controls.traits:getSelected()
+    }
+
+    PhunLib:debug(selected)
 
 end

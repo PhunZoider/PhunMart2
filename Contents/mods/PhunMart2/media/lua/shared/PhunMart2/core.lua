@@ -207,7 +207,8 @@ function Core.getAllItems(refresh)
             if cat ~= "" and catMap[cat] == nil then
                 catMap[cat] = true
                 table.insert(Core.itemCategories, {
-                    label = cat
+                    label = cat,
+                    type = ""
                 })
             end
             table.insert(Core.itemsAll, {
@@ -300,6 +301,9 @@ end
 
 function Core.getAllTraitCategories()
 
+    if Core.traitCategories == nil then
+        Core.getAllTraits()
+    end
     return Core.traitCategories
 
 end

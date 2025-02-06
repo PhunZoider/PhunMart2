@@ -173,13 +173,32 @@ function UI:refreshCategories()
     local groups = require("PhunMart2/data/groups")
     local group = groups.clothing_jewelry
 
-    local categories = {}
-    local exclusions = {}
-    local inclusions = {}
-    local traits = {}
-    local vehicles = {}
-    local perks = {}
-    local boosts = {}
+    local data = group or {}
+    data.items = data.items or {}
+    data.items.categories = data.items.categories or {}
+    data.items.include = data.items.include or {}
+    data.items.exclude = data.items.exclude or {}
+
+    data.vehicles = data.vehicles or {}
+    data.vehicles.categories = data.vehicles.categories or {}
+    data.vehicles.include = data.vehicles.include or {}
+    data.vehicles.exclude = data.vehicles.exclude or {}
+
+    data.traits = data.traits or {}
+    data.traits.categories = data.traits.categories or {}
+    data.traits.include = data.traits.include or {}
+
+    local itemCats = {}
+    local itemExcludes = {}
+    local itemIncludes = {}
+
+    local vehicleCats = {}
+    local vehicleExcludes = {}
+    local vehicleIncludes = {}
+
+    local traitCats = {}
+    local traitExcludes = {}
+    local traitIncludes = {}
 
     local catMap = {}
     local itemList = getScriptManager():getAllItems()
@@ -190,20 +209,20 @@ function UI:refreshCategories()
             local cat = Core.getCategory(item)
             if cat ~= "" and catMap[cat] == nil then
                 catMap[cat] = true
-                table.insert(categories, {
+                table.insert(itemCats, {
                     label = cat,
-                    selected = group.categories[cat] ~= nil
+                    selected = data.items.categories[cat] ~= nil
                 })
             end
 
-            table.insert(exclusions, {
+            table.insert(itemExcludes, {
                 type = item:getFullName(),
                 label = item:getDisplayName(),
                 texture = item:getNormalTexture(),
                 selected = group.exclude[item:getFullName()] ~= nil,
                 category = cat
             })
-            table.insert(inclusions, {
+            table.insert(itemIncludes, {
                 type = item:getFullName(),
                 label = item:getDisplayName(),
                 texture = item:getNormalTexture(),
@@ -214,21 +233,20 @@ function UI:refreshCategories()
         end
     end
 
-    table.sort(categories, function(a, b)
+    table.sort(itemCats, function(a, b)
         return a.label:lower() < b.label:lower()
     end)
-    table.sort(exclusions, function(a, b)
+    table.sort(itemExcludes, function(a, b)
         return a.label:lower() < b.label:lower()
     end)
-    table.sort(inclusions, function(a, b)
+    table.sort(itemIncludes, function(a, b)
         return a.label:lower() < b.label:lower()
     end)
 
-    self.categories:setData(categories)
-    self.exclusions:setData(exclusions)
-
-    self.inclusions:setData(inclusions)
-
+    self.categories:setData(itemCats)
+    self.exclusions:setData(itemExcludes)
+    self.inclusions:setData(itemIncludes)
+    catMap = {}
     local scripts = getScriptManager():getAllVehicleScripts()
     for i = 0, scripts:size() - 1 do
         local script = scripts:get(i)
@@ -251,7 +269,23 @@ function UI:refreshCategories()
         elseif string.contains(name, "Car") then
             cat = "Car"
         end
-        table.insert(vehicles, {
+        if not catMap[cat] then
+            catMap[cat] = true
+            table.insert(vehicleCats, {
+                label = cat,
+                selected = data.vehicles.categories[cat] ~= nil
+            })
+        end
+
+        table.insert(vehicleExcludes, {
+            label = fullName,
+            name = name,
+            fname = fname,
+            fullName = fullName,
+            category = cat
+        })
+
+        table.insert(vehicleIncludes, {
             label = fullName,
             name = name,
             fname = fname,
@@ -259,10 +293,20 @@ function UI:refreshCategories()
             category = cat
         })
     end
-    table.sort(vehicles, function(a, b)
+    table.sort(vehicleCats, function(a, b)
         return a.label:lower() < b.label:lower()
     end)
-    self.vehicles:setData(vehicles)
+    self.vehicles:setData(vehicleCats)
+
+    table.sort(vehicleExcludes, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+    self.vehicles:setData(vehicleExcludes)
+
+    table.sort(vehicleIncludes, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+    self.vehicles:setData(vehicleIncludes)
 
     -- self:refreshItems()
 end

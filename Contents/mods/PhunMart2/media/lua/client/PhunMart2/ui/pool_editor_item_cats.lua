@@ -2,8 +2,6 @@ if isServer() then
     return
 end
 
-local sandbox = SandboxVars.PhunMart
-
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
@@ -62,13 +60,13 @@ function UI:createChildren()
         list:ensureVisible(row)
         local item = list.items[row].item
         local data = list.parent.data.selected
-        data[item.type] = data[item.type] == nil and true or nil
+        data[item.label] = data[item.label] == nil and true or nil
 
         if isShiftKeyDown() and self.lastSelected then
             local start = math.min(row, self.lastSelected)
             local finish = math.max(row, self.lastSelected)
             for i = start, finish do
-                data[list.items[i].item.type] = data[item.type]
+                data[list.items[i].item.label] = data[item.label]
             end
         end
         self.lastSelected = row
@@ -94,12 +92,13 @@ function UI:createChildren()
     self.data = {
         selected = {}
     }
-    if not self.listType then
-        self.data.categories = Core.getAllItemCategories()
-    elseif self.listType == "VEHICLES" then
+
+    if self.listType == "VEHICLES" then
         self.data.categories = Core.getAllVehicleCategories()
     elseif self.listType == "TRAITS" then
         self.data.categories = Core.getAllTraitCategories()
+    else
+        self.data.categories = Core.getAllItemCategories()
     end
 
 end
@@ -111,7 +110,7 @@ function UI:drawDatas(y, item, alt)
 
     local a = 0.9;
 
-    if self.parent.data.selected[item.item.type] then
+    if self.parent.data.selected[item.item.label] then
         self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.4, 0.7, 0.35, 0.15);
     end
 

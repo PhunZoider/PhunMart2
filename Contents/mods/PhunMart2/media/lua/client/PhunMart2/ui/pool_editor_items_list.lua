@@ -118,6 +118,9 @@ function UI:createChildren()
         self.data.categories = Core.getAllVehicleCategories()
         self.data.items = Core.getAllVehicles()
         self.tooltip = ISToolTip:new();
+        self.previewPanel3d = ISUI3DScene:new(0, 0, self.width, self.height)
+        self.previewPanel3d:initialise()
+        self.tooltip:addChild(self.previewPanel3d)
     elseif self.listType == "TRAITS" then
         self.data.categories = Core.getAllTraitCategories()
         self.data.items = Core.getAllTraits()
@@ -240,10 +243,24 @@ function UI:doOnMouseMove(dx, dy)
                 item = self.items[row].item
                 if item then
                     tooltip = self.parent.tooltip
-                    if self.parent.listType == "VEHICLES" or self.parent.listType == "TRAITS" then
+                    if self.parent.listType == "TRAITS" then
                         tooltip:setName(item.label)
                         local desc = {}
                         tooltip.description = item.tooltip and item.tooltip.description or ""
+                    elseif self.parent.listType == "VEHICLES" then
+                        if self.parent.previewPanel3d.vehicleName ~= item.type then
+                            if self.parent.previewPanel3d.initialized ~= true then
+                                self.parent.previewPanel3d.initialized = true
+                                self.parent.previewPanel3d.javaObject:fromLua1("setDrawGrid", false)
+                                self.parent.previewPanel3d.javaObject:fromLua1("createVehicle", "vehicle")
+                            end
+                            self.parent.previewPanel3d.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
+                            self.parent.previewPanel3d.javaObject:fromLua1("setView", "UserDefined")
+                            self.parent.previewPanel3d.javaObject:fromLua1("setZoom", 3)
+                        end
+                        self.parent.previewPanel3d.vehicleName = item.type or "?"
+                        self.parent.previewPanel3d.javaObject:fromLua2("setVehicleScript", "vehicle",
+                            self.parent.previewPanel3d.vehicleName)
                     else
                         tooltip:setItem(instanceItem(item.type))
                     end
