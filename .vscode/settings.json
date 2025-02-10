@@ -40,12 +40,12 @@
             },
             {
                 "match": ".*",
-                "cmd": "rmdir /S /Q ${env.USERPROFILE}\\Zomboid41\\mods\\PhunMart2 2>nul"
+                "cmd": "rmdir /S /Q ${env.USERPROFILE}\\pz41\\mods\\PhunMart2 2>nul"
             },
             {
                 "match": ".*",
-                "cmd": "xcopy ${env.USERPROFILE}\\Zomboid\\mods\\PhunMart2 ${env.USERPROFILE}\\Zomboid41\\mods\\PhunMart2 /Y /I /E /F /EXCLUDE:xclude"
-            },            
+                "cmd": "xcopy ${env.USERPROFILE}\\Zomboid\\mods\\PhunMart2 ${env.USERPROFILE}\\pz41\\mods\\PhunMart2 /Y /I /E /F /EXCLUDE:xclude"
+            },
         ]
     },
     "editor.formatOnSave": true,
