@@ -70,6 +70,7 @@ function UI:new(x, y, width, height, data)
     };
     o.data = {}
     o.listType = data.type or nil
+    o.blacklist = data.blacklist == true
     o.moveWithMouse = false;
     o.anchorRight = true
     o.anchorBottom = true
@@ -106,13 +107,17 @@ function UI:createChildren()
         type = self.listType
     });
 
-    self.inclusions = PhunMartUIItemList:new(0, y, w, self.tabPanel.height, {
-        player = self.player,
-        type = self.listType
-    });
+    if self.blacklist ~= true then
+        self.inclusions = PhunMartUIItemList:new(0, y, w, self.tabPanel.height, {
+            player = self.player,
+            type = self.listType
+        });
+    end
 
     self.tabPanel:addView("Categories", self.categories)
-    self.tabPanel:addView("Inclusions", self.inclusions)
+    if self.blacklist ~= true then
+        self.tabPanel:addView("Inclusions", self.inclusions)
+    end
     self.tabPanel:addView("Exclusions", self.exclusions)
 end
 
@@ -121,7 +126,7 @@ function UI:getSelected()
     local data = self.data
     local selected = {
         categories = self.categories.data.selected,
-        include = self.inclusions.data.selected,
+        include = self.blacklist ~= true and self.inclusions.data.selected or nil,
         exclude = self.exclusions.data.selected
     }
 
@@ -137,7 +142,9 @@ end
 function UI:refreshAll()
 
     self.categories:setData(self.data.categories)
-    self.inclusions:setData(self.data.include)
+    if self.blacklist ~= true then
+        self.inclusions:setData(self.data.include)
+    end
     self.exclusions:setData(self.data.exclude)
 
 end

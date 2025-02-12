@@ -5,6 +5,18 @@ end
 local Core = PhunMart
 local Commands = {}
 
+Commands[Core.commands.getBlacklist] = function(playerObj, args)
+    local list = Core.getBlacklist()
+    sendServerCommand(Core.name, Core.commands.getBlackList, {
+        username = playerObj:getUsername(),
+        data = list
+    })
+end
+
+Commands[Core.commands.setBlacklist] = function(playerObj, args)
+    Core.setBlacklistData(args)
+end
+
 Commands[Core.commands.requestShop] = function(playerObj, args)
     Core.ServerSystem.instance:requestShop(playerObj, args.location)
 end

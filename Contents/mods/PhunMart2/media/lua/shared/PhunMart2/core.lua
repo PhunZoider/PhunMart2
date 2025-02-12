@@ -23,7 +23,11 @@ PhunMart = {
             boosts = "BOOSTS"
         }
     },
-    commands = {},
+    commands = {
+        getBlackList = "PhunMartGetBlacklist",
+        setBlacklist = "PhunMartSetBlacklist"
+
+    },
     events = {
         OnReady = "OnPhunMartOnReady"
     },

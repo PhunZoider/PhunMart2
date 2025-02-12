@@ -58,6 +58,15 @@ Core.contexts.open = function(player, context, worldobjects, test)
 
         end)
 
+        adminSubMenu:addOption("Global Blacklist", player, function()
+            if Core.isLocal then
+                Core.ui.poolBlacklist.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
+            else
+                sendClientCommand(Core.name, Core.commands.getBlackList, {})
+            end
+
+        end)
+
         context:addSubMenu(adminOption, adminSubMenu)
     end
 end

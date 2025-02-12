@@ -114,22 +114,22 @@ function UI:createChildren()
     self.data = {
         selected = {}
     }
-    if self.listType == "VEHICLES" then
+    if self.listType == Core.consts.itemType.vehicles then
         self.data.categories = Core.getAllVehicleCategories()
         self.data.items = Core.getAllVehicles()
         self.tooltip = ISToolTip:new();
         self.previewPanel3d = ISUI3DScene:new(0, 0, self.width, self.height)
         self.previewPanel3d:initialise()
         self.tooltip:addChild(self.previewPanel3d)
-    elseif self.listType == "TRAITS" then
+    elseif self.listType == Core.consts.itemType.traits then
         self.data.categories = Core.getAllTraitCategories()
         self.data.items = Core.getAllTraits()
         self.tooltip = ISToolTip:new();
-    elseif self.listType == "XP" then
+    elseif self.listType == Core.consts.itemType.xp then
         self.data.categories = Core.getAllXpCategories()
         self.data.items = Core.getAllXp()
         self.tooltip = ISToolTip:new();
-    elseif self.listType == "BOOSTS" then
+    elseif self.listType == Core.consts.itemType.boosts then
         self.data.categories = Core.getAllBoostCategories()
         self.data.items = Core.getAllBoosts()
         self.tooltip = ISToolTip:new();
@@ -297,7 +297,7 @@ end
 function UI:setData(data)
 
     self.data.selected = {}
-    for k, item in ipairs(data or {}) do
+    for k, item in pairs(data or {}) do
         self.data.selected[k] = true
     end
     self:refreshData()
