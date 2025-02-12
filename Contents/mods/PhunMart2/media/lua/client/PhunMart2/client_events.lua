@@ -27,10 +27,6 @@ Events.LoadGridsquare.Add(function(square)
 
 end)
 
-Events.ReuseGridsquare.Add(function()
-    print("PhunMart2: ReuseGridsquare")
-end)
-
 Events.OnTileRemoved.Add(function()
     print("PhunMart2: OnTileRemoved")
 end)

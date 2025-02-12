@@ -115,7 +115,7 @@ function UI:refreshItems()
     local data = {}
     if selected.type == "ITEMS" then
 
-    elseif selected.type == "PERKS" then
+    elseif selected.type == "XP" then
         for i = 0, Perks.getMaxIndex() - 1 do
             local perk = PerkFactory.getPerk(Perks.fromIndex(i))
             if perk and perk:getParent() ~= Perks.None then

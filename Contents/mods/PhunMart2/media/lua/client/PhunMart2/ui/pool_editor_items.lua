@@ -147,22 +147,35 @@ function UI:createChildren()
     self:addChild(self.controls.tabPanel)
 
     self.controls.items = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
-        player = self.player
+        player = self.player,
+        type = Core.consts.itemType.items
     });
 
     self.controls.vehicles = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        type = "VEHICLES"
+        type = Core.consts.itemType.vehicles
     });
 
     self.controls.traits = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        type = "TRAITS"
+        type = Core.consts.itemType.traits
     });
 
-    self.controls.tabPanel:addView("Items", self.controls.items)
-    self.controls.tabPanel:addView("Vehicles", self.controls.vehicles)
-    self.controls.tabPanel:addView("Traits", self.controls.traits)
+    self.controls.xp = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+        player = self.player,
+        type = Core.consts.itemType.xp
+    });
+
+    self.controls.boosts = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+        player = self.player,
+        type = Core.consts.itemType.boosts
+    });
+
+    self.controls.tabPanel:addView(Core.consts.itemType.items, self.controls.items)
+    self.controls.tabPanel:addView(Core.consts.itemType.vehicles, self.controls.vehicles)
+    self.controls.tabPanel:addView(Core.consts.itemType.traits, self.controls.traits)
+    self.controls.tabPanel:addView(Core.consts.itemType.xp, self.controls.xp)
+    self.controls.tabPanel:addView(Core.consts.itemType.boosts, self.controls.boosts)
 
     self.controls.ok = ISButton:new(padding, self.height - rh - padding - FONT_HGT_SMALL, 100, FONT_HGT_SMALL + 4, "OK",
         self, UI.onOK);
@@ -193,9 +206,21 @@ function UI:setPool(pool)
     traits.include = traits.include or {}
     traits.exclude = traits.exclude or {}
 
+    local xp = group.xp or {}
+    xp.categories = xp.categories or {}
+    xp.include = xp.include or {}
+    xp.exclude = xp.exclude or {}
+
+    local boosts = group.boosts or {}
+    boosts.categories = boosts.categories or {}
+    boosts.include = boosts.include or {}
+    boosts.exclude = boosts.exclude or {}
+
     self.controls.items:setData(items)
     self.controls.vehicles:setData(vehicles)
     self.controls.traits:setData(traits)
+    self.controls.xp:setData(xp)
+    self.controls.boosts:setData(boosts)
 
 end
 
@@ -210,7 +235,8 @@ function UI:refreshAll()
     self.controls.items:refreshAll()
     self.controls.vehicles:refreshAll()
     self.controls.traits:refreshAll()
-
+    self.controls.xp:refreshAll()
+    self.controls.boosts:refreshAll()
 end
 
 function UI:prerender()
@@ -229,7 +255,9 @@ function UI:onOK()
     local selected = {
         items = self.controls.items:getSelected(),
         vehicles = self.controls.vehicles:getSelected(),
-        traits = self.controls.traits:getSelected()
+        traits = self.controls.traits:getSelected(),
+        xp = self.controls.xp:getSelected(),
+        boosts = self.controls.boosts:getSelected()
     }
 
     PhunLib:debug(selected)

@@ -14,7 +14,14 @@ PhunMart = {
         unpoweredEast = 4,
         unpoweredSouth = 5,
         unpoweredWest = 6,
-        unpoweredNorth = 7
+        unpoweredNorth = 7,
+        itemType = {
+            items = "ITEMS",
+            vehicles = "VEHICLES",
+            traits = "TRAITS",
+            xp = "XP",
+            boosts = "BOOSTS"
+        }
     },
     commands = {},
     events = {
@@ -134,7 +141,20 @@ function Core.getCategory(item)
 
     local category = tostring(item:getDisplayCategory());
 
-    if item:getCanStoreWater() then
+    if item.fluidContainer then
+        local fluid = item.fluidContainer:getFluidContainer():getPrimaryFluid();
+        if fluid and item:getFluidContainer():getAmount() > 0 then
+            if fluid:isCategory(FluidCategory.Alcoholic) then
+                category = "FoodA";
+            elseif fluid:isCategory(FluidCategory.Beverage) then
+                category = "FoodB";
+            elseif fluid:isCategory(FluidCategory.Fuel) then
+                category = "Fuel"
+            end
+        else
+            category = "Container";
+        end
+    elseif item.getCanStoreWater and item:getCanStoreWater() then
         if item:getTypeString() ~= "Drainable" then
             category = "Container";
         else
@@ -347,4 +367,109 @@ function Core.getAllTraits(refresh)
     end)
 
     return Core.traitsAll
+end
+
+function Core.getAllXpCategories()
+
+    if Core.xpCategories == nil then
+        Core.xpCategories = {}
+        for i = 1, 10 do
+            table.insert(Core.xpCategories, {
+                label = "Level " .. tostring(i)
+            })
+        end
+    end
+    return Core.xpCategories
+
+end
+
+function Core.getAllXp(refresh)
+
+    if Core.xpAll ~= nil and not refresh then
+        return Core.xpAll
+    end
+    Core.xpAll = {}
+    local result = {}
+    for i = 0, Perks.getMaxIndex() - 1 do
+        local perk = PerkFactory.getPerk(Perks.fromIndex(i))
+        local name = perk:getName()
+        if name ~= "None" then
+
+            for i = 1, 10 do
+                table.insert(Core.xpAll, {
+                    type = i,
+                    label = name,
+                    level = i,
+                    xpForLevel = perk:getXpForLevel(i),
+                    tooltip = {
+                        description = ""
+                    },
+                    category = "Level " .. tostring(i)
+                })
+            end
+        end
+
+    end
+
+    table.sort(Core.xpAll, function(a, b)
+        if a.label:lower() ~= b.label:lower() then
+            return a.label:lower() < b.label:lower()
+        end
+        return a.level < b.level
+    end)
+
+    return Core.xpAll
+end
+
+function Core.getAllBoostCategories()
+
+    if Core.boostsCategories == nil then
+        Core.boostsCategories = {}
+        for i = 1, 3 do
+            table.insert(Core.boostsCategories, {
+                label = "Level " .. tostring(i)
+            })
+        end
+    end
+    return Core.boostsCategories
+
+end
+
+function Core.getAllBoosts(refresh)
+
+    if Core.boostsAll ~= nil and not refresh then
+        return Core.boostsAll
+    end
+    Core.boostsAll = {}
+    Core.boostsCategories = {}
+    local catMap = {}
+
+    local result = {}
+    for i = 0, Perks.getMaxIndex() - 1 do
+        local perk = PerkFactory.getPerk(Perks.fromIndex(i))
+        local name = perk:getName()
+        if name ~= "None" then
+            for i = 1, 3 do
+                table.insert(Core.boostsAll, {
+                    type = i,
+                    label = name,
+                    level = i,
+                    tooltip = {
+                        description = ""
+                    },
+                    category = "Level " .. tostring(i)
+                })
+            end
+        end
+
+    end
+
+    table.sort(Core.boostsAll, function(a, b)
+        if a.label:lower() ~= b.label:lower() then
+            return a.label:lower() < b.label:lower()
+        end
+        return a.level < b.level
+    end)
+
+    return Core.boostsAll
 end

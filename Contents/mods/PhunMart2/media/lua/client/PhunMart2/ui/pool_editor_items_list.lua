@@ -125,6 +125,14 @@ function UI:createChildren()
         self.data.categories = Core.getAllTraitCategories()
         self.data.items = Core.getAllTraits()
         self.tooltip = ISToolTip:new();
+    elseif self.listType == "XP" then
+        self.data.categories = Core.getAllXpCategories()
+        self.data.items = Core.getAllXp()
+        self.tooltip = ISToolTip:new();
+    elseif self.listType == "BOOSTS" then
+        self.data.categories = Core.getAllBoostCategories()
+        self.data.items = Core.getAllBoosts()
+        self.tooltip = ISToolTip:new();
     else
         self.data.categories = Core.getAllItemCategories()
         self.data.items = Core.getAllItems()
@@ -243,7 +251,8 @@ function UI:doOnMouseMove(dx, dy)
                 item = self.items[row].item
                 if item then
                     tooltip = self.parent.tooltip
-                    if self.parent.listType == "TRAITS" then
+                    if self.parent.listType == "TRAITS" or self.parent.listType == "XP" or self.parent.listType ==
+                        "BOOSTS" then
                         tooltip:setName(item.label)
                         local desc = {}
                         tooltip.description = item.tooltip and item.tooltip.description or ""

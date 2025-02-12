@@ -93,11 +93,16 @@ function UI:createChildren()
         selected = {}
     }
 
-    if self.listType == "VEHICLES" then
+    if self.listType == Core.consts.itemType.vehicles then
         self.data.categories = Core.getAllVehicleCategories()
-    elseif self.listType == "TRAITS" then
+    elseif self.listType == Core.consts.itemType.traits then
         self.data.categories = Core.getAllTraitCategories()
+    elseif self.listType == Core.consts.itemType.xp then
+        self.data.categories = Core.getAllXpCategories()
+    elseif self.listType == Core.consts.itemType.boosts then
+        self.data.categories = Core.getAllBoostCategories()
     else
+        -- assert Core.consts.itemType.items
         self.data.categories = Core.getAllItemCategories()
     end
 

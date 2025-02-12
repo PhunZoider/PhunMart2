@@ -136,40 +136,8 @@ end
 
 function UI:refreshAll()
 
-    -- self.categories.list:clear()
-    -- self.inclusions.list:clear()
-    -- self.exclusions.list:clear()
-
-    -- local categories = Core.getAllItemCategories()
-    -- local inclusions = Core.getAllItems()
-    -- local exclusions = Core.getAllItems()
-
-    -- for i = 1, #categories do
-    --     local category = categories[i]
-    --     self.categories.list:addItem(category.label, {
-    --         data = category,
-    --         selected = self.data and self.data.categories and self.data.categories[category.label]
-    --     })
-    -- end
-
     self.categories:setData(self.data.categories)
     self.inclusions:setData(self.data.include)
     self.exclusions:setData(self.data.exclude)
-
-    -- for i = 1, #inclusions do
-    --     local inclusion = inclusions[i]
-    --     self.inclusions.list:addItem(inclusion.label, {
-    --         data = inclusion,
-    --         selected = self.data and self.data.include and self.data.include[inclusion.type]
-    --     })
-    -- end
-
-    -- for i = 1, #exclusions do
-    --     local exclusion = exclusions[i]
-    --     self.exclusions.list:addItem(exclusion.label, {
-    --         data = exclusion,
-    --         selected = self.data and self.data.exclude and self.data.exclude[exclusion.type]
-    --     })
-    -- end
 
 end

@@ -9,49 +9,45 @@ Events.OnServerStarted.Add(function()
 end)
 
 Events.OnIsoThumpableLoad.Add(function()
-    print("PhunMart2: OnIsoThumpableLoad")
+    print("PhunMart2 (server): OnIsoThumpableLoad")
 end)
 
 Events.OnIsoThumpableLoad.Add(function()
-    print("PhunMart2: OnIsoThumpableLoad")
+    print("PhunMart2 (server): OnIsoThumpableLoad")
 end)
 
 Events.OnDoTileBuilding.Add(function()
-    print("PhunMart2: OnDoTileBuilding")
+    print("PhunMart2 (server): OnDoTileBuilding")
 end)
 
 Events.OnDoTileBuilding2.Add(function()
-    print("PhunMart2: OnDoTileBuilding2")
+    print("PhunMart2 (server): OnDoTileBuilding2")
 end)
 
 Events.OnDoTileBuilding3.Add(function()
-    print("PhunMart2: OnDoTileBuilding3")
+    print("PhunMart2 (server): OnDoTileBuilding3")
 end)
 
 Events.OnDestroyIsoThumpable.Add(function()
-    print("PhunMart2: OnDestroyIsoThumpable")
+    print("PhunMart2 (server): OnDestroyIsoThumpable")
 end)
 
 Events.LoadGridsquare.Add(function(square)
     Core.ServerSystem.instance:loadGridsquare(square)
 end)
 
-Events.ReuseGridsquare.Add(function()
-    print("PhunMart2: ReuseGridsquare")
-end)
-
 Events.OnTileRemoved.Add(function()
-    print("PhunMart2: OnTileRemoved")
+    print("PhunMart2 (server): OnTileRemoved")
 end)
 
 Events.OnRainStart.Add(function()
-    print("PhunMart2: OnRainStart")
+    print("PhunMart2 (server): OnRainStart")
 end)
 
 Events.OnRainStop.Add(function()
-    print("PhunMart2: OnRainStop")
+    print("PhunMart2 (server): OnRainStop")
 end)
 
 Events.OnPlayerMove.Add(function()
-    print("PhunMart2: OnPlayerMove")
+    print("PhunMart2 (server): OnPlayerMove")
 end)
