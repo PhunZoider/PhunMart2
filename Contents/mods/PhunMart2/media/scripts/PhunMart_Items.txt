@@ -11,6 +11,25 @@ module PhunMart
         Weight          =   1,
         Icon            =   CarKey
     }
+
+	item DroppedWallet
+    {
+        type = Normal,
+        DisplayName = Wallet
+        Weight = 1,
+        Icon = PhunWallet,
+		Hidden=true
+    }
+
+    item QuarterCoin
+    {
+        Weight = 0.01,
+        Type = Normal,
+	    DisplayName = Quarter,
+	    Icon = QuarterCoin,
+        DisplayCategory = Currency, 
+    }
+
     item SilverDollar
     {
         Weight = 0.01,
@@ -19,15 +38,6 @@ module PhunMart
 	    Icon = SilverDollar,
         DisplayCategory = Currency, 
     } 
-
-    item CheeseToken
-    {
-        Weight = 0.01,
-        Type = Normal,
-	    DisplayName = Chuck D. Cheese Token,
-	    Icon = CheeseToken,
-        DisplayCategory = Currency, 
-    }
 
     item TraiterToken
     {

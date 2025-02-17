@@ -47,4 +47,11 @@ IGUI_EN = {
 
     IGUI_PhunMart_Admin_ExportItemsFilename = "Name for file to export to"
 
+    IGUI_PhunMart_Wallet_Current = "Balance"
+    IGUI_PhunMart_Wallet_CurrentDesc = ""
+    IGUI_PhunMart_Wallet_Savings = "Savings"
+    IGUI_PhunMart_Wallet_SavingsDesc = "Each time you spawn a new character, any savings will replenish your balance"
+    IGUI_PhunMart_Wallet_Empty = "This is rather Empty"
+    IGUI_PhunMart_Wallet_BalanceReplenishedOnDeath = "If you die, your next character will start with %1"
+    IGUI_PhunMart_Wallet_CharsWallet = "%1's wallet"
 }
