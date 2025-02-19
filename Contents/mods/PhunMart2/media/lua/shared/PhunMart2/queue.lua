@@ -1,39 +1,47 @@
-require "PhunMart2/core"
-local Core = PhunMart
+local Core = nil
 
 local queue = {
     isPaused = false,
-    counter = 0,
+    updated = 0,
+    modified = 0,
     items = {}
 }
 
 local processing = {}
 
+local function sendQueue()
+    queue:send()
+end
+
 function queue:add(player, item, qty)
+
+    Events.EveryOneMinute.Remove(sendQueue)
     local name = type(player) == "string" and player or player:getUsername()
+
     if not self.items[name] then
         self.items[name] = {}
     end
-    if self.items[name][item] then
-        self.items[name][item] = self.items[name][item] + qty
-    else
-        self.items[name][item] = qty
-    end
-    self.counter = self.counter + 1
+
+    self.items[name][item] = (self.items[name][item] or 0) + qty
+
+    Events.EveryOneMinute.Add(sendQueue)
+end
+
+function queue:resetWallet(player)
+
 end
 
 function queue:send()
-    local toSend = {}
-    for k, v in pairs(queue.items) do
-        table.insert(toSend, {k, v})
+    Events.EveryOneMinute.Remove(sendQueue)
+    print("Sending Queue")
+    if Core == nil then
+        Core = PhunMart
     end
-    table.insert(processing, toSend)
-    sendClientCommand(Core.name, Core.commands.addToWallet, {
-        processing = processing[#processing],
-        index = #processing
+    local c = Core
+    sendClientCommand(c.name, c.commands.addToWallet, {
+        wallet = self.items
     })
     queue.items = {}
-    queue.counter = 0
 end
 
 function queue:complete(index)
@@ -48,10 +56,6 @@ function queue:complete(index)
     end
     table.remove(processing, index)
 
-end
-
-function queue:bulkSetValues(player, values)
-    -- set all the values at once (Eg wallet pickup)
 end
 
 return queue

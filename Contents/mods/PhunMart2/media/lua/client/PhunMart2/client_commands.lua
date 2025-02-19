@@ -110,4 +110,11 @@ Commands[Core.commands.requestLocations] = function(args)
     triggerEvent(Core.events.OnShopLocationsReceived, args.locations)
 end
 
+Commands[Core.commands.updateWallet] = function(args)
+    local player = PL.getPlayerByUsername(args.username)
+    for k, v in pairs(args.wallet) do
+        Core.wallet:adjust(player, k, v, true)
+    end
+end
+
 return Commands

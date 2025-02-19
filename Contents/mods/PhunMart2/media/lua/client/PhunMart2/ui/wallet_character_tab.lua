@@ -149,7 +149,7 @@ function UI:drawDatas(y, item, alt)
     self:setStencilRect(clipX, clipY, clipX2 - clipX, clipY2 - clipY)
 
     local wallet = Core.wallet:get(self.parent.player)
-    local value = tostring(wallet.current[item.item.type] or 0)
+    local value = tostring(wallet.current[item.text] or 0)
 
     if item.item.texture then
         local boa = " *"
@@ -203,7 +203,7 @@ function UI:doOnMouseMove(dx, dy)
             local row = self:rowAt(self:getMouseX(), self:getMouseY())
             if row ~= nil and row > 0 then
                 item = self.items[row] and self.items[row].item
-                if item and item.boa then
+                if item and item.bound then
                     tooltip = self.parent.tooltip
                     local viewer = self.parent.playerObj
                     tooltip:setName(item.label)

@@ -1,6 +1,7 @@
 
 Sandbox_EN = {
     Sandbox_PhunMart = "PhunMart"
+    Sandbox_PhunWallet = "PhunMart Wallet"
 
     Sandbox_PhunMart_Wallet_DropWallet = "Drop on death"
     Sandbox_PhunMart_Wallet_DropWallet_tooltip = "Drops wallet on death"

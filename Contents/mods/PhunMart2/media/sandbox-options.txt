@@ -1,5 +1,31 @@
 VERSION = 1,
 
+option PhunMart.WalletDropOnDeath
+{
+    type = boolean,
+    default = true,
+    page = PhunWallet,
+    translation = PhunMart_WalletDropOnDeath,
+}
+
+option PhunMart.WalletOnlyPickupOwn
+{ 
+    type = boolean,
+    default = true,
+    page = PhunWallet,
+    translation = PhunMart_WalletOnlyPickupOwn,
+}
+
+option PhunMart.WalletReturnRate
+{ 
+    type = integer, 
+    default = 100, 
+    min = 1,
+    max = 100,
+    page = PhunWallet,
+    translation = PhunMart_WalletReturnRate,
+}
+
 option PhunMart.ChanceToConvertVanillaMachines
 {
     type = integer,

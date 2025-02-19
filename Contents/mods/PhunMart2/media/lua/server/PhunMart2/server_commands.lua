@@ -119,4 +119,12 @@ Commands[Core.commands.requestLocations] = function(playerObj, args)
     })
 end
 
+Commands[Core.commands.addToWallet] = function(_, args)
+    for k, v in pairs(args.wallet) do
+        for kk, vv in pairs(v) do
+            Core.wallet:adjust(k, kk, vv)
+        end
+    end
+end
+
 return Commands

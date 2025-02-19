@@ -2,6 +2,8 @@ if isClient() then
     return
 end
 require "PhunMart2/core"
+local Commands = require "PhunMart2/server_commands"
+
 local Core = PhunMart
 
 Events.OnServerStarted.Add(function()
@@ -50,4 +52,12 @@ end)
 
 Events.OnPlayerMove.Add(function()
     print("PhunMart2 (server): OnPlayerMove")
+end)
+
+Events.OnClientCommand.Add(function(module, command, playerObj, arguments)
+    if module == Core.name then
+        if Commands[command] then
+            Commands[command](playerObj, arguments)
+        end
+    end
 end)

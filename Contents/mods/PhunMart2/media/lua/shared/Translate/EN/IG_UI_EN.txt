@@ -54,4 +54,5 @@ IGUI_EN = {
     IGUI_PhunMart_Wallet_Empty = "This is rather Empty"
     IGUI_PhunMart_Wallet_BalanceReplenishedOnDeath = "If you die, your next character will start with %1"
     IGUI_PhunMart_Wallet_CharsWallet = "%1's wallet"
+    IGUI_ItemCat_Currency = "Currency"
 }

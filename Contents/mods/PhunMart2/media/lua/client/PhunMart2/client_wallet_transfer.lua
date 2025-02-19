@@ -3,7 +3,6 @@ if isServer() then
 end
 
 require "TimedActions/ISInventoryTransferAction"
-local queue = require "PhunMart2/queue"
 local Core = PhunMart
 
 -- Hook the original New Inventory Transfer Method
@@ -18,8 +17,8 @@ function ISInventoryTransferAction:new(player, item, srcContainer, destContainer
             -- picking up a players wallet
             wallet = item:getModData().PhunWallet
             if wallet then
-                if wallet.wallet and (not PW.settings.OnlyPickupOwnWallet or player:getUsername() == wallet.owner) then
-                elseif wallet.wallet and PW.settings.OnlyPickupOwnWallet and player:getUsername() ~= wallet.owner then
+                if wallet.wallet and (not Core.settings.OnlyPickupOwnWallet or player:getUsername() == wallet.owner) then
+                elseif wallet.wallet and Core.settings.OnlyPickupOwnWallet and player:getUsername() ~= wallet.owner then
                     return {
                         ignoreAction = true
                     }
@@ -34,16 +33,15 @@ function ISInventoryTransferAction:new(player, item, srcContainer, destContainer
         action:setOnComplete(function()
             -- add the items in the dropped wallet to the player
             for k, v in pairs(wallet.wallet.current or {}) do
-                queue:add(player, k, v, true)
-                queue:process()
+                Core.wallet:adjust(player, k, v, true)
             end
         end)
     elseif Core.wallet:isCurrency(itemType) then
         action:setOnComplete(function()
             local destType = destContainer:getType()
-
             if destType ~= "floor" then
-                queue:add(player, itemType, 1)
+                Core.wallet:adjust(player, itemType, 1)
+                destContainer:DoRemoveItem(item)
             end
         end)
     end

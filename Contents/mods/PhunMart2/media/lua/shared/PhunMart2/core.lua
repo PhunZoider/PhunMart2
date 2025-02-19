@@ -27,7 +27,9 @@ PhunMart = {
         getBlackList = "PhunMartGetBlacklist",
         setBlacklist = "PhunMartSetBlacklist",
         addToWallet = "PhunMartAddToWallet",
-        getWallet = "PhunMartGetWallet"
+        getWallet = "PhunMartGetWallet",
+        resetWallet = "PhunMartResetWallet",
+        updateWallet = "PhunMartUpdateWallet"
 
     },
     events = {
