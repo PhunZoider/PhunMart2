@@ -26,10 +26,7 @@ PhunMart = {
     commands = {
         getBlackList = "PhunMartGetBlacklist",
         setBlacklist = "PhunMartSetBlacklist",
-        addToWallet = "PhunMartAddToWallet",
-        getWallet = "PhunMartGetWallet",
-        resetWallet = "PhunMartResetWallet",
-        updateWallet = "PhunMartUpdateWallet"
+        playerSetup = "PhunMartPlayerSetup"
 
     },
     events = {
@@ -43,7 +40,6 @@ PhunMart = {
         client = {},
         admin = {}
     },
-    wallet = require "PhunMart2/wallet",
     targetSprites = {
         ["location_shop_accessories_01_29"] = "north",
         ["location_shop_accessories_01_31"] = "north",

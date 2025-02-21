@@ -1,9 +1,8 @@
 local Core = nil
 
 local queue = {
-    isPaused = false,
-    updated = 0,
-    modified = 0,
+    module = "PhunWallet",
+    sendCommand = "addToWallet",
     items = {}
 }
 
@@ -27,18 +26,9 @@ function queue:add(player, item, qty)
     Events.EveryOneMinute.Add(sendQueue)
 end
 
-function queue:resetWallet(player)
-
-end
-
 function queue:send()
     Events.EveryOneMinute.Remove(sendQueue)
-    print("Sending Queue")
-    if Core == nil then
-        Core = PhunMart
-    end
-    local c = Core
-    sendClientCommand(c.name, c.commands.addToWallet, {
+    sendClientCommand(self.module, self.sendCommand, {
         wallet = self.items
     })
     queue.items = {}

@@ -1,6 +1,6 @@
 module Base
 {
-	sound PhunMart_WalletPickup
+	sound PhunWallet_Pickup
 	{
         category = Player,
 		loop = false, 

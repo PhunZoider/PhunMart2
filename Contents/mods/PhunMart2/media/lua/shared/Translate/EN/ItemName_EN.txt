@@ -1,4 +1,3 @@
 ItemName_EN = {
-    ItemName_PhunMart_Wallet_DroppedWallet = "Dropped Wallet",
-    ItemName_PhunMart_Wallet_CharsWallet = "%1's Wallet",
+
 }

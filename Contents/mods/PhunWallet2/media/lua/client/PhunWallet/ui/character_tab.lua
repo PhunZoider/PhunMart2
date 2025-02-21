@@ -2,7 +2,7 @@ if isServer() then
     return
 end
 require "ISUI/ISPanel"
-local Core = PhunMart
+local Core = PhunWallet
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
@@ -68,7 +68,7 @@ end
 function UI:refreshData()
     self.datas:clear();
     local currentCatagories = {}
-    for k, v in pairs(Core.wallet.currencies or {}) do
+    for k, v in pairs(Core.currencies or {}) do
         local item = getScriptManager():getItem(k)
         if item then
             v.label = item:getDisplayName() or k
@@ -168,23 +168,6 @@ function UI:drawDatas(y, item, alt)
     self:drawText(value, w - valueWidth - xoffset - 4, y + 4, 1, 1, 1, a, self.font);
     self.itemsHeight = y + self.itemheight;
     return self.itemsHeight;
-end
-
-function UI:doTooltip()
-    local rectWidth = 10;
-
-    local title = "Hello";
-    local description = "Tooltop desc"
-    local heightPadding = 2
-    local rectHeight = 100 + 100 + (heightPadding * 3);
-
-    local x = self:getMouseX() + 20;
-    local y = self:getMouseY() + 20;
-
-    self:drawRect(x, y, rectWidth + 100, rectHeight, 1.0, 0.0, 0.0, 0.0);
-    self:drawRectBorder(x, y, rectWidth + 100, rectHeight, 0.7, 0.4, 0.4, 0.4);
-    self:drawText(title or "???", x + 2, y + 2, 1, 1, 1, 1);
-    self:drawText(description or "???", x + 2, y + 100 + (heightPadding * 2), 1, 1, 1, 0.7);
 end
 
 function UI:doOnMouseMoveOutside(dx, dy)

@@ -55,6 +55,7 @@ Events.OnPlayerMove.Add(function()
 end)
 
 Events.OnClientCommand.Add(function(module, command, playerObj, arguments)
+    print("PhunMart2 (server): OnClientCommand " .. module .. " " .. command)
     if module == Core.name then
         if Commands[command] then
             Commands[command](playerObj, arguments)
