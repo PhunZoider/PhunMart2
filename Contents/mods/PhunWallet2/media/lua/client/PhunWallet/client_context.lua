@@ -10,7 +10,8 @@ Core.contexts.open = function(player, context, worldobjects, test)
         local adminSubMenu = ISContextMenu:getNew(context)
 
         adminSubMenu:addOption("Admin", player, function()
-            Core.ui.admin.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
+            local c = Core
+            c.ui.admin.OnOpenPanel(getSpecificPlayer(player))
 
         end)
 

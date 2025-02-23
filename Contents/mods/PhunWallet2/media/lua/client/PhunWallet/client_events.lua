@@ -27,3 +27,7 @@ Events.OnServerCommand.Add(function(module, command, arguments)
         end
     end
 end)
+
+Events.OnPreFillWorldObjectContextMenu.Add(function(playerObj, context, worldobjects)
+    Core.contexts.open(playerObj, context, worldobjects)
+end);

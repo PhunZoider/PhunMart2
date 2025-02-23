@@ -17,8 +17,12 @@ function ISInventoryTransferAction:new(player, item, srcContainer, destContainer
         -- picking up a players wallet
         wallet = item:getModData().PhunWallet
         if wallet then
-            if wallet.wallet and (not Core.settings.OnlyPickupOwn or player:getUsername() == wallet.owner) then
-            elseif wallet.wallet and Core.settings.OnlyPickupOwn and player:getUsername() ~= wallet.owner then
+            local name = player:getUsername()
+            if Core.isLocal then
+                name = player:getPlayerNum()
+            end
+            if wallet.wallet and (not Core.settings.OnlyPickupOwn or name == wallet.owner) then
+            elseif wallet.wallet and Core.settings.OnlyPickupOwn and name ~= wallet.owner then
                 return {
                     ignoreAction = true
                 }

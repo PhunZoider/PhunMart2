@@ -15,6 +15,13 @@ local windowName = "PhunWalletUI"
 PhunWalletUI = ISPanel:derive(windowName);
 local UI = PhunWalletUI
 
+local function setup()
+    if Core.inied then
+        Events.EveryOneMinute.Remove(setup)
+        PhunWalletUI.instance:refreshData()
+    end
+end
+
 local function formatWholeNumber(number)
     number = number or 0
     -- Round the number to remove the decimal part
@@ -58,10 +65,10 @@ function UI:new(x, y, width, height, player)
     o.itemsHeight = 200
     o.player = getSpecificPlayer(player)
     o.playerName = o.player:getUsername()
-    o.data = Core:getPlayerData(o.player)
-    o.currencies = Core.wallet.currencies
+    o.data = Core:get(o.player)
+    o.currencies = Core.currencies
     UI.instance = o;
-
+    Events.EveryOneMinute.Add(setup)
     return o;
 end
 
@@ -148,7 +155,7 @@ function UI:drawDatas(y, item, alt)
 
     self:setStencilRect(clipX, clipY, clipX2 - clipX, clipY2 - clipY)
 
-    local wallet = Core.wallet:get(self.parent.player)
+    local wallet = Core:get(self.parent.player)
     local value = tostring(wallet.current[item.text] or 0)
 
     if item.item.texture then
@@ -262,10 +269,3 @@ end
 
 addCharacterPageTab("PhunWallet", PhunWalletUI, "Wallet")
 
-local function setup()
-    if Core.inied then
-        Events.EveryOneMinute.Remove(setup)
-        PhunWalletUI.instance:refreshData()
-    end
-end
-Events.EveryOneMinute.Add(setup)

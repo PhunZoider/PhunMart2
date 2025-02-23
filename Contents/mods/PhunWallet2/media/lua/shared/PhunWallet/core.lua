@@ -1,7 +1,6 @@
-local allShops = require "PhunMart2/data/shops"
 local PL = PhunLib
-PhunMart = {
-    name = "PhunMart",
+PhunWallet = {
+    name = "PhunWallet",
     inied = false,
     consts = {
         log = "wallet.log"
@@ -26,13 +25,13 @@ PhunMart = {
         admin = {}
     },
     currencies = {
-        ["PhunMart.QuarterCoin"] = {
+        ["PhunWallet.QuarterCoin"] = {
             bound = false
         },
-        ["PhunMart.SilverDollar"] = {
+        ["PhunWallet.SilverDollar"] = {
             bound = false
         },
-        ["PhunMart.TraiterToken"] = {
+        ["PhunWallet.TraiterToken"] = {
             bound = true
         }
     }
@@ -67,12 +66,14 @@ function Core:get(player)
     if self.data == nil then
         self.data = ModData.getOrCreate(self.name)
     end
-    if type(player) == "string" then
+    if self.isLocal then
+        key = 0
+    elseif type(player) == "string" then
         key = player
     else
         key = player:getUsername()
     end
-    if key and string.len(key) > 0 then
+    if key then
         if not self.data[key] then
             self.data[key] = {
                 current = {},
@@ -109,7 +110,7 @@ function Core:reset(player)
         if (w.current[k] or 0) > 0 then
             -- deduct current amount
             if PL then
-                PL.file.logTo(self.const.log, name, k, 0 - w.current[k])
+                PL.file.logTo(self.consts.log, name, k, 0 - w.current[k])
                 w.current[k] = 0
             end
         end
@@ -119,7 +120,7 @@ function Core:reset(player)
             if (w.bound[k] or 0) > 0 then
                 w.current[k] = w.bound[k]
                 if PL then
-                    PL.file.logTo(self.const.log, name, k, w.current[k])
+                    PL.file.logTo(self.consts.log, name, k, w.current[k])
                 end
             end
         end
@@ -147,7 +148,8 @@ function Core:adjust(player, item, amount)
             self.queue:add(player, item, amount or 1)
         end
         if PL then
-            PL.file.logTo(self.const.log, name, item, amount or 1)
+            local pl = PL
+            PL.file.logTo(self.consts.log, name, item, amount or 1)
         end
     end
 end

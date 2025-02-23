@@ -1,4 +1,4 @@
-module PhunMart
+module PhunWallet
 {
     imports
     {
@@ -28,6 +28,7 @@ module PhunMart
         Type = Normal,
 	    DisplayName = Silver Dollar,
 	    Icon = SilverDollar,
+        scale = 0.4,
         DisplayCategory = Currency, 
     } 
 

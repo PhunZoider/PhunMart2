@@ -6,7 +6,7 @@ require "ISUI/ISPanel"
 require "PhunLib/core"
 local PL = PhunLib
 local tableTools = PL.table
-local PW = PhunWallet
+local Core = PhunWallet
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
@@ -15,20 +15,20 @@ local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local windowName = "PhunWalletAdminUI"
 
-PW.ui.admin = ISPanel:derive(windowName);
-PW.ui.admin.instances = {}
-local UI = PW.ui.admin
+Core.ui.admin = ISPanel:derive(windowName);
+Core.ui.admin.instances = {}
+local UI = Core.ui.admin
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 
 local function refreshPlayers()
-    sendClientCommand(PW.name, PW.commands.getPlayerList, {})
+    sendClientCommand(Core.name, Core.commands.getPlayerList, {})
 end
 
 local function refreshPlayerWallet(playername)
-    sendClientCommand(PW.name, PW.commands.getPlayersWallet, {
+    sendClientCommand(Core.name, Core.commands.getPlayersWallet, {
         playername = playername
     })
 end
@@ -82,7 +82,7 @@ end
 function UI:setWallet(wallet)
     self.datas:clear();
     local bound = {}
-    for k, v in pairs(PW.currencies or {}) do
+    for k, v in pairs(Core.currencies or {}) do
         local item = getScriptManager():getItem(v.type)
         if item then
             v.label = item:getDisplayName() or k
@@ -106,7 +106,7 @@ function UI:promptForValue(playerName, walletType, currencyType, value)
     local modal = ISTextBox:new(0, 0, 280, 180, currencyType .. "(" .. walletType .. ") for " .. playerName,
         tostring(value), nil, function(target, button, obj)
             if button.internal == "OK" then
-                sendClientCommand(PW.name, PW.commands.adjustPlayerWallet, {
+                sendClientCommand(Core.name, Core.commands.adjustPlayerWallet, {
                     player = playerName,
                     walletType = walletType,
                     currencyType = currencyType,
@@ -179,7 +179,7 @@ function UI:createChildren()
     self:addChild(self.datas);
 
     self.datas:clear();
-    for k, v in pairs(PW.currencies or {}) do
+    for k, v in pairs(Core.currencies or {}) do
         local item = getScriptManager():getItem(v.type)
         if item then
             v.label = item:getDisplayName()
@@ -286,7 +286,7 @@ end
 
 local Commands = {}
 
-Commands[PW.commands.getPlayerList] = function(args)
+Commands[Core.commands.getPlayerList] = function(args)
     if UI.instances then
         for _, instance in pairs(UI.instances) do
             instance:setPlayers(args.players)
@@ -294,7 +294,7 @@ Commands[PW.commands.getPlayerList] = function(args)
     end
 end
 
-Commands[PW.commands.getPlayersWallet] = function(args)
+Commands[Core.commands.getPlayersWallet] = function(args)
     if UI.instances then
         for _, instance in pairs(UI.instances) do
             instance:setWallet(args.wallet)
@@ -304,7 +304,7 @@ end
 
 -- Listen for commands from the server
 Events.OnServerCommand.Add(function(module, command, arguments)
-    if module == PW.name and Commands[command] then
+    if module == Core.name and Commands[command] then
         Commands[command](arguments)
     end
 end)
