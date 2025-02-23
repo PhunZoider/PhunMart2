@@ -83,14 +83,15 @@ function UI:setWallet(wallet)
     self.datas:clear();
     local bound = {}
     for k, v in pairs(Core.currencies or {}) do
-        local item = getScriptManager():getItem(v.type)
+        local item = getScriptManager():getItem(k)
         if item then
-            v.label = item:getDisplayName() or k
+            v.label = v.label or k
             v.texture = item:getNormalTexture()
+            v.type = k
             v.value = formatWholeNumber(wallet.current[k] or 0)
         end
         self.datas:addItem(k, v)
-        if v.boa then
+        if v.bound then
             bound[k] = tableTools.shallowCopy(v)
             bound[k].isBoa = true
         end
@@ -286,25 +287,58 @@ end
 
 local Commands = {}
 
-Commands[Core.commands.getPlayerList] = function(args)
-    if UI.instances then
-        for _, instance in pairs(UI.instances) do
-            instance:setPlayers(args.players)
+if Core.isLocal then
+
+    Commands[Core.commands.getPlayerList] = function(player, args)
+        local players = {}
+        for k, v in pairs(Core.data) do
+            table.insert(players, tostring(k))
+        end
+        if UI.instances then
+            for _, instance in pairs(UI.instances) do
+                instance:setPlayers(players)
+            end
         end
     end
-end
 
-Commands[Core.commands.getPlayersWallet] = function(args)
-    if UI.instances then
-        for _, instance in pairs(UI.instances) do
-            instance:setWallet(args.wallet)
+    Commands[Core.commands.getPlayersWallet] = function(player, args)
+        if UI.instances then
+            for _, instance in pairs(UI.instances) do
+                instance:setWallet(Core:get(args.playername))
+            end
         end
     end
+
+    Events.OnClientCommand.Add(function(module, command, playerObj, arguments)
+        if module == Core.name then
+            if Commands[command] then
+                Commands[command](playerObj, arguments)
+            end
+        end
+    end)
+else
+    Commands[Core.commands.getPlayerList] = function(args)
+        if UI.instances then
+            for _, instance in pairs(UI.instances) do
+                instance:setPlayers(args.players)
+            end
+        end
+
+    end
+
+    Commands[Core.commands.getPlayersWallet] = function(args)
+        if UI.instances then
+            for _, instance in pairs(UI.instances) do
+                instance:setWallet(args.wallet)
+            end
+        end
+    end
+
+    -- Listen for commands from the server
+    Events.OnServerCommand.Add(function(module, command, arguments)
+        if module == Core.name and Commands[command] then
+            Commands[command](arguments)
+        end
+    end)
 end
 
--- Listen for commands from the server
-Events.OnServerCommand.Add(function(module, command, arguments)
-    if module == Core.name and Commands[command] then
-        Commands[command](arguments)
-    end
-end)

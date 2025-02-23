@@ -11,6 +11,8 @@ module PhunWallet
         Weight = 1,
         Icon = DroppedWallet,
 		IsHidden = true,
+        WorldStaticModel 	= PhunWallet,
+        StaticModel 	= PhunWallet,
     }
 
     item QuarterCoin
@@ -19,7 +21,8 @@ module PhunWallet
         Type = Normal,
 	    DisplayName = Quarter,
 	    Icon = QuarterCoin,
-        DisplayCategory = Currency, 
+        DisplayCategory = Currency,
+
     }
 
     item SilverDollar
@@ -29,7 +32,7 @@ module PhunWallet
 	    DisplayName = Silver Dollar,
 	    Icon = SilverDollar,
         scale = 0.4,
-        DisplayCategory = Currency, 
+        DisplayCategory = Currency,
     } 
 
     item TraiterToken

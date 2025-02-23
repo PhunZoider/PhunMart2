@@ -25,20 +25,20 @@ Commands[Core.commands.playerSetup] = function(playerObj, args)
     })
 end
 
-Commands[Core.commands.getPlayerList] = function(args)
-    if Core.ui.admin.instances then
-        for _, instance in pairs(Core.ui.admin.instances) do
-            instance:setPlayers(args.players)
-        end
+Commands[Core.commands.getPlayerList] = function(player, args)
+    local players = {}
+    for k, v in pairs(Core.data) do
+        table.insert(players, tostring(k))
     end
+    sendServerCommand(player, Core.name, Core.commands.getPlayersList, {
+        players = players
+    })
 end
 
-Commands[Core.commands.getPlayersWallet] = function(args)
-    if Core.ui.admin.instances then
-        for _, instance in pairs(Core.ui.admin.instances) do
-            instance:setWallet(args.wallet)
-        end
-    end
+Commands[Core.commands.getPlayersWallet] = function(player, args)
+    sendServerCommand(player, Core.name, Core.commands.getPlayersWallet, {
+        wallet = Core:get(args.playername)
+    })
 end
 
 return Commands

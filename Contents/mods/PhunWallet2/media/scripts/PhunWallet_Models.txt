@@ -1,0 +1,24 @@
+module PhunWallet
+{
+
+	model PhunWallet
+	{
+		mesh = PhunWallet,
+		texture = WalletTexture,
+		scale = 0.015,
+	}
+
+	model PhunWallet_Quarter
+	{
+		mesh = PhunWalletQuarter,
+		texture = QuarterTexture,
+		scale = 0.001,
+	}
+
+    model PhunWallet_SilverDollar
+	{
+		mesh = PhunWalletSilverDollar,
+		texture = SilverDollarTexture,
+		scale = 0.001,
+	}
+}
