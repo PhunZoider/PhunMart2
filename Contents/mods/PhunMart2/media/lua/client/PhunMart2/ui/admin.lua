@@ -179,6 +179,8 @@ function UI:prerender()
 end
 
 function UI:refreshShops()
+
+    local shops = Core:getShops()
     self.page:clear()
     local data = {}
     local groups = {}

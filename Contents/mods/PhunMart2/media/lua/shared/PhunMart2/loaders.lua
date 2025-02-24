@@ -55,18 +55,47 @@ local function formatPool(data)
 
 end
 
-local function getPools(shopKey)
+local function getShopPool(entry)
+
+    -- pools = {{
+    -- currency = Base.money,
+    -- price = {min, max},
+    -- totalItems = {min, max},
+    -- zones = { difficulty = {3,4}},
+    -- enabled = false
+    -- probability = 10
+    -- when = {months = {}}} 
+    -- keys = { "clothing_all_hats" }
+
+    -- }},
+
+    local result = {
+        currency = entry.currency or nil,
+        price = entry.price and getRangeResult(entry, "price", Core.settings.DefaultPrice or 1) or nil,
+        totalItems = entry.totalItems and
+            getRangeResult(entry, "totalItems", Core.settings.DefaultNumOfItemsWhenRestocking or 1) or nil,
+        zones = entry.zones or {},
+        enabled = entry.enabled == true or nil,
+        probability = entry.probability or nil,
+        when = entry.when or nil,
+        keys = entry.keys or {}
+    }
+
+    return result
+
+end
+
+local function getShopPools(data)
 
     local results = {}
-    local data = poolsData[shopKey] or {}
-    local pools = data.pools or {}
 
-    for _, entry in ipairs(pools) do
+    for i, entry in ipairs(data.pools or {}) do
         local status, err = pcall(function()
-            table.push(results, formatPool(entry))
+            table.insert(results, getShopPool(entry or {}))
         end)
         if not status then
-            print("Error caught in " .. key .. ": " .. tostring(err))
+            print("Error caught formatting pool " .. tostring(i) .. " of " .. tostring(data.key) .. ": " ..
+                      tostring(err))
         end
     end
     return results
@@ -75,15 +104,8 @@ end
 
 local function formatShop(data)
 
-    local pools = {}
-
-    for _, v in ipairs(data.pools or {}) do
-        pools[v] = poolsData[v]
-    end
-
     local result = {
-        type = data.type,
-        label = data.label,
+        label = data.label or data.key,
         group = data.group,
         distance = data.distance or Core.settings.DefaultDistanceBetweenGroups or 0,
         probability = data.probability or 15,
@@ -91,17 +113,7 @@ local function formatShop(data)
         reroll = data.reroll or 0,
         powered = data.powered == true,
         restock = data.restock or 48,
-        pools = {{
-            -- currency = Base.money,
-            -- price = {min, max},
-            -- totalItems = {min, max},
-            -- zones = { difficulty = {3,4}},
-            -- enabled = false
-            -- probability = 10
-            -- when = {months = {}}} 
-            -- keys = { "clothing_all_hats" }
-
-        }},
+        pools = getShopPools(data),
         currency = data.currency or Core.settings.DefaultCurrencyItemType or "base.money",
         price = getRangeResult(data, "price", Core.settings.DefaultPrice or 1),
         totalItems = getRangeResult(data, "totalItems", Core.settings.DefaultNumOfItemsWhenRestocking or 1),
@@ -110,6 +122,11 @@ local function formatShop(data)
         "phunmart_01_1", -- south
         "phunmart_01_2", -- west
         "phunmart_01_3" -- north
+        },
+        unpoweredSprites = {"phunmart_01_4", -- east
+        "phunmart_01_5", -- south
+        "phunmart_01_6", -- west
+        "phunmart_01_7" -- north
         }
     }
 
@@ -130,7 +147,7 @@ local function getCoreShops()
 
     local results = {}
     local order = 0
-    local all = tableTools.merge(shopsData, self.extended or {})
+    local all = PL.table.merge(shopsData, Core.extended or {})
     for key, entry in pairs(all) do
         local status, err = pcall(function()
             results[key] = formatShop(entry)
@@ -149,19 +166,19 @@ local function getModifications()
     if not isClient() then
         -- this is a server or local game
         -- load the modified data from ./lua/PhunZones.lua
-        local data = fileTools.loadTable(Core.const.shops .. ".lua")
+        local data = PL.file.loadTable(Core.consts.shopsLuaFile)
         if not data then
-            print("PhunMart: missing ./lua/" .. self.const.modifiedLuaFile ..
-                      ".lua, this is normal if you haven't modified any shops")
+            print("PhunMart: missing ./lua/" .. Core.consts.shopsLuaFile ..
+                      ", this is normal if you haven't modified any shops")
         else
-            ModData.add(self.const.shops, data)
-            print("PhunMart: loaded customisations from ./lua/" .. self.const.shops .. ".lua")
+            ModData.add(Core.consts.shops, data)
+            print("PhunMart: loaded customisations from ./lua/" .. Core.consts.shopsLuaFile)
         end
     end
-    data = ModData.get(self.const.shops)
+    data = ModData.get(Core.consts.shops)
     if data == nil then
         data = {}
-        ModData.add(self.const.shops, data)
+        ModData.add(Core.consts.shops, data)
     end
     local results = {}
     for key, entry in pairs(data) do
@@ -175,8 +192,7 @@ local function getModifications()
     return results
 end
 
-local function getShops()
-
+function Core:getShops()
     local core = getCoreShops()
     local modified = getModifications() or {}
     local results = tableTools.merge(modified or {}, core or {})

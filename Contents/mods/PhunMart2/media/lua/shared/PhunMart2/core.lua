@@ -5,6 +5,7 @@ PhunMart = {
     inied = false,
     consts = {
         shops = "PhunMart_Shops",
+        shopsLuaFile = "PhunMart_Shops.lua",
         players = "PhunMart_Players",
         history = "PhunMart_History",
         east = 0,
@@ -95,6 +96,9 @@ end
 
 function Core:ini()
     self.inied = true
+    if isServer() then
+        self.shops = self:getShops()
+    end
     triggerEvent(self.events.OnReady, self)
 end
 
