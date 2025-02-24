@@ -10,8 +10,8 @@ local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local Core = PhunMart
 local profileName = "PhunMartUIAdminPools"
-PhunMartUIAdminShops = ISPanelJoypad:derive(profileName);
-local UI = PhunMartUIAdminShops
+PhunMartUIAdminPools = ISPanelJoypad:derive(profileName);
+local UI = PhunMartUIAdminPools
 
 function UI:new(x, y, width, height, options)
     local opts = options or {}

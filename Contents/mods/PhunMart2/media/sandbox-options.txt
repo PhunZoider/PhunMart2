@@ -6,7 +6,7 @@ option PhunMart.ChanceToConvertVanillaMachines
     default = 80,
     min=0,
     max=100,
-    page = PhunMart,
+    page = PhunMartSettings,
     translation=PhunMart_ChanceToConvertVanillaMachines,
 }
 
@@ -24,9 +24,56 @@ option PhunMart.ReplacementKey
 {
     type = string,
     default = default,
-    page = PhunMart,
+    page = PhunMartSettings,
     translation=PhunMart_ReplacementKey,
 }
+
+option PhunMart.DefaultCurrencyItemType
+{
+    type = string,
+    default = PhunMart.QuarterCoin,
+    page = PhunMartSettings,
+    translation=PhunMart_DefaultCurrencyItemType,
+}
+
+option PhunMart.DefaultPrice
+{
+    type = string,
+    default = 5,
+    page = PhunMartSettings,
+    translation=PhunMart_DefaultPrice,
+}
+
+option PhunMart.DefaultHoursToRestock
+{
+    type = integer,
+    min = 0,
+    max = 9999999,
+    default = 72,
+    page = PhunMartSettings,
+    translation=PhunMart_DefaultHoursToRestock,
+}
+
+option PhunMart.DefaultNumOfHoursToReRoll
+{
+    type = integer,
+    min = 0,
+    max = 9999999,
+    default = 0,
+    page = PhunMartSettings,
+    translation=PhunMart_DefaultNumOfHoursToReRoll,
+}
+
+option PhunMart.DefaultNumOfItemsWhenRestocking
+{
+    type = integer,
+    min = 0,
+    max = 9999999,
+    default = 0,
+    page = PhunMartSettings,
+    translation=PhunMart_DefaultNumOfItemsWhenRestocking,
+}
+
 
 option PhunMart.ShopProbabilityGoodPhoods
 {

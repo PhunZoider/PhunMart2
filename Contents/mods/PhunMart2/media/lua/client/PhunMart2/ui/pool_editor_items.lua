@@ -16,7 +16,7 @@ local profileName = "PhunMartUIPoolEditorItems"
 PhunMartUIPoolEditorItems = ISCollapsableWindowJoypad:derive(profileName);
 local UI = PhunMartUIPoolEditorItems
 local instances = {}
-Core.ui.poolEditor = UI
+Core.ui.admin.poolEditor = UI
 
 function UI.OnOpenPanel(playerObj, pool)
 

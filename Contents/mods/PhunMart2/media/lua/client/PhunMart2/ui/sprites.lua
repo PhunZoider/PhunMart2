@@ -64,7 +64,7 @@ function UI:setSelection(selection)
     local opts = self.selection.options[self.selection.selected]
     local data = opts.data
     if data then
-        local texture = getTexture(data.k)
+        local texture = getTexture(data.v)
         self.texture = texture
     else
         self.texture = nil
@@ -80,23 +80,44 @@ function UI:setData(data)
         return
     end
 
-    local i = 0
-    for k, v in pairs(data.spriteMap) do
-        i = i + 1
-        local title = k
-        if i < 5 then
-            title = k .. " - " .. v
-        else
-            title = k .. " - " .. v .. " (disabled)"
-        end
-        self.selection:addOptionWithData(title, {
-            k = k,
-            v = v
+    local choices = {}
+    local dir = {"East", "South", "West", "North"}
+    local i = 1
+    for _, v in ipairs(dir) do
+        local file = data.sprites[i] or "missing"
+        self.selection:addOptionWithData(v .. " " .. file, {
+            k = v,
+            v = file
         })
+        i = i + 1
+    end
+    i = 1
+    for _, v in ipairs(dir) do
+        local file = data.unpoweredSprites[i] or "missing"
+        self.selection:addOptionWithData("Unpowered " .. v .. " " .. file, {
+            k = v,
+            v = file
+        })
+        i = i + 1
     end
 
-    if i > 0 then
-        self:setSelection(2)
-    end
+    -- local i = 0
+    -- for k, v in pairs(data.spriteMap) do
+    --     i = i + 1
+    --     local title = k
+    --     if i < 5 then
+    --         title = k .. " - " .. v
+    --     else
+    --         title = k .. " - " .. v .. " (disabled)"
+    --     end
+    --     self.selection:addOptionWithData(title, {
+    --         k = k,
+    --         v = v
+    --     })
+    -- end
+
+    -- if i > 0 then
+    --     self:setSelection(2)
+    -- end
 
 end

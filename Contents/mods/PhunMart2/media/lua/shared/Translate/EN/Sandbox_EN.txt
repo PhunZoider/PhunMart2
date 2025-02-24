@@ -1,7 +1,22 @@
 
 Sandbox_EN = {
     Sandbox_PhunMart = "PhunMart"
+    Sandbox_PhunMartSettings = "PhunMart Global Settings"
 
+    Sandbox_PhunMart_DefaultCurrencyItemType = "Default Currency Type"
+    Sandbox_PhunMart_DefaultCurrencyItemType_tooltip="The default item to use as currency (eg PhunWallet.QuarterCoin or Base.Money) when no other currency is specified"
+
+    Sandbox_PhunMart_DefaultCurrencyItemType = "Default Price"
+    Sandbox_PhunMart_DefaultCurrencyItemType_tooltip="The default price for items when no other is specified"
+
+    Sandbox_PhunMart_DefaultHoursToRestock = "Default hours between restocking"
+    Sandbox_PhunMart_DefaultHoursToRestock_tooltip="The default number of hours between restocking a shop. 0 would mean that (by default) the shops are only ever stocked once"
+
+    Sandbox_PhunMart_DefaultNumOfHoursToReRoll = "Default hours rerolling shop"
+    Sandbox_PhunMart_DefaultNumOfHoursToReRoll_tooltip="The default number of hours between changing the shop to a different one. 0 means shops will default to never changing"
+    
+    Sandbox_PhunMart_DefaultNumOfItemsWhenRestocking = "Default number of items to stock"
+    Sandbox_PhunMart_DefaultNumOfItemsWhenRestocking_tooltip="This the number of items a shop will stock by default"    
 
     Sandbox_PhunMartShopItems = "PhunMart Shops - Items"
     Sandbox_PhunMartShopSpecial = "PhunMart Shops - Special"

@@ -9,6 +9,7 @@ local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local Core = PhunMart
+local PL = PhunLib
 local profileName = "PhunMartUIShopProps"
 PhunMartUIShopProps = ISPanelJoypad:derive(profileName);
 local UI = PhunMartUIShopProps
@@ -113,49 +114,47 @@ function UI:setData(data)
     if not data then
         return
     end
+
+    local defaultSettings = Core.settings
+
     self.list:addItem("Key", {
         value = data.key
     })
-    self.list:addItem("Type", {
-        value = data.type
+    self.list:addItem("Group", {
+        value = data.group or "NONE"
     })
     self.list:addItem("Label", {
         value = data.label
     })
     self.list:addItem("Base Price", {
-        value = (data.basePrice and PhunTools:formatWholeNumber(data.basePrice)) or "none"
-    })
-    self.list:addItem("Inflation Base", {
-        value = (data.inflationBase and PhunTools:formatWholeNumber(data.inflationBase)) or "none"
+        value = (data.basePrice and PL.string.formatWholeNumber(data.basePrice)) or
+            PL.string.formatWholeNumber(defaultSettings.DefaultPrice or 0)
     })
     self.list:addItem("Default Currency", {
-        value = data.currency or "none"
+        value = data.currency or defaultSettings.DefaultCurrencyItemType or "none"
     })
     self.list:addItem("Enabled", {
-        value = data.enabled and "true" or "false"
+        value = data.enabled == false and "false" or "true"
     })
-    self.list:addItem("File", {
-        value = data.file or "none"
-    })
+    local minFill = data.fills and data.fills.min or defaultSettings.DefaultNumOfItemsWhenRestocking
+    local maxFill = data.fills and data.fills.max or defaultSettings.DefaultNumOfItemsWhenRestocking
     self.list:addItem("Fills", {
-        value = data.fills.min .. " - " .. data.fills.max
+        value = tostring(minFill ~= maxFill and minFill .. " - " .. maxFill or minFill or "none")
     })
-    self.list:addItem("Generate", {
-        value = data.generate and "true" or "false"
-    })
-    self.list:addItem("Max Restock", {
-        value = (data.maxRestock and PhunTools:formatWholeNumber(data.maxRestock)) or "none"
+    local hoursForRestock = data.hoursToRestock and data.hoursToRestock or defaultSettings.DefaultHoursToRestock
+    self.list:addItem("Restock Hours", {
+        value = PL.string.formatWholeNumber(data.hoursToRestock and data.hoursToRestock or
+                                                defaultSettings.DefaultHoursToRestock) or "none"
     })
     self.list:addItem("Min Distance", {
-        value = (data.minDistance and PhunTools:formatWholeNumber(data.minDistance)) or "none"
+        value = PL.string.formatWholeNumber(data.minDistance and PL.string.formatWholeNumber(data.minDistance) or
+                                                defaultSettings.DefaultDistanceBetweenGroups)
+
     })
     self.list:addItem("Probability", {
-        value = (data.probability and PhunTools:formatWholeNumber(data.probability)) or "none"
+        value = PL.string.formatWholeNumber(data.probability and PL.string.formatWholeNumber(data.probability)) or "1"
     })
     self.list:addItem("Requires Power", {
         value = data.requiresPower and "true" or "false"
-    })
-    self.list:addItem("Restock", {
-        value = (data.restock and PhunTools:formatWholeNumber(data.restock)) or "none"
     })
 end

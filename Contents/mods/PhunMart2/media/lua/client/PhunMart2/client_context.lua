@@ -40,8 +40,13 @@ Core.contexts.open = function(player, context, worldobjects, test)
         local adminOption = context:addOption("PhunMart", worldobjects, nil)
         local adminSubMenu = ISContextMenu:getNew(context)
 
+        adminSubMenu:addOption("Shops", player, function()
+            local c = Core.ui
+            c.admin.shops.OnOpenPanel(getSpecificPlayer(player))
+        end)
+
         adminSubMenu:addOption("Pool Editor", player, function()
-            Core.ui.poolEditor.OnOpenPanel(getSpecificPlayer(player))
+            Core.ui.admin.poolEditor.OnOpenPanel(getSpecificPlayer(player))
         end)
 
         adminSubMenu:addOption("Locations", player, function()
@@ -60,7 +65,7 @@ Core.contexts.open = function(player, context, worldobjects, test)
 
         adminSubMenu:addOption("Global Blacklist", player, function()
             if Core.isLocal then
-                Core.ui.poolBlacklist.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
+                Core.ui.admin.poolBlacklist.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
             else
                 sendClientCommand(Core.name, Core.commands.getBlackList, {})
             end

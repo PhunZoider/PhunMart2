@@ -12,7 +12,7 @@ local profileName = "PhunMartUIPoolEditorGroup"
 PhunMartUIPoolEditorGroup = ISPanelJoypad:derive(profileName);
 local UI = PhunMartUIPoolEditorGroup
 local instances = {}
-Core.ui.poolEditorGroup = UI
+Core.ui.admin.poolEditorGroup = UI
 
 function UI.OnOpenPanel(playerObj, data)
 

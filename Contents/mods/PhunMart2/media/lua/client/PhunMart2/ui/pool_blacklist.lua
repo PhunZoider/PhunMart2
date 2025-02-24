@@ -16,7 +16,7 @@ local profileName = "PhunMartUIPoolEditorBlacklist"
 PhunMartUIPoolEditorBlacklist = ISCollapsableWindowJoypad:derive(profileName);
 local UI = PhunMartUIPoolEditorBlacklist
 local instances = {}
-Core.ui.poolBlacklist = UI
+Core.ui.admin.poolBlacklist = UI
 
 function UI.OnOpenPanel(playerObj, blacklist)
 

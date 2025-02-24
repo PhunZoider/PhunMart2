@@ -4,6 +4,7 @@ end
 
 require "ISUI/ISCollapsableWindowJoypad"
 local Core = PhunMart
+local PL = PhunLib
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
@@ -16,11 +17,11 @@ local profileName = "PhunMartUIAdminShops"
 PhunMartUIAdminShops = ISCollapsableWindowJoypad:derive(profileName);
 local UI = PhunMartUIAdminShops
 local instances = {}
-Core.ui.admin.shops = instances
+Core.ui.admin.shops = UI
 
-function UI.OnOpenPanel(playerObj, playerIndex)
+function UI.OnOpenPanel(playerObj)
 
-    playerIndex = playerIndex or playerObj:getPlayerNum()
+    local playerIndex = playerObj:getPlayerNum()
     local instance = instances[playerIndex]
 
     if not instance then
@@ -42,7 +43,7 @@ function UI.OnOpenPanel(playerObj, playerIndex)
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
-
+    instance:refreshShops()
     return instance;
 
 end
@@ -127,7 +128,6 @@ function UI:createChildren()
         local data = self.page.options[self.page.selected].data
 
         self.properties:setData(data)
-        self.reservations:setData(data)
         self.sprites:setData(data)
         self.pools:setData(data)
         if data and data.key then
@@ -164,12 +164,6 @@ function UI:createChildren()
 
     self.tabPanel:addView("Locations", self.locations)
 
-    self.reservations = PhunMartUIShopReservations:new(0, 100, self.tabPanel.width,
-        self.tabPanel.height - self.tabPanel.tabHeight, {
-            player = self.player
-        });
-    self.tabPanel:addView("Reservations", self.reservations)
-
     self.sprites = PhunMartUIShopSprites:new(0, 100, self.tabPanel.width,
         self.tabPanel.height - self.tabPanel.tabHeight, {
             player = self.player
@@ -184,17 +178,19 @@ function UI:prerender()
 
 end
 
-function UI:refreshShops(shops)
+function UI:refreshShops()
     self.page:clear()
     local data = {}
-    for k, v in pairs(shops) do
+    local groups = {}
+    for k, v in pairs(Core.shops) do
         if v.abstract ~= true then
-            table.insert(data, v)
+            local entry = PL.table.shallowCopy(v)
+            entry.label = getTextOrNull("IGUI_PhunMart_Shop_" .. k) or k
+            entry.key = k
+            table.insert(data, entry)
         end
     end
-    table.sort(data, function(a, b)
-        return a.label < b.label
-    end)
+
     self.page:addOption(" -- SHOP -- ")
     for _, v in ipairs(data) do
         if v.abstract ~= true then
