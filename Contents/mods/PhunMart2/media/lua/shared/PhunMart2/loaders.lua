@@ -10,41 +10,101 @@ local poolsData = require "PhunMart2/data/pools"
 local blacklistData = require "PhunMart2/data/blacklist"
 local shopsData = require "PhunMart2/data/shops"
 
-local function formatShop(data)
-
-    local fills = {
-        min = 1,
-        max = 10
+local function getRangeResult(data, key, defaultValue)
+    local range = {
+        min = defaultValue or 1,
+        max = defaultValue or 10
     }
 
-    if data.fills then
-        if type(data.fills) == "number" then
-            fills.min = data.fills
-            fills.max = data.fills
+    if data[key] then
+        if type(data[key]) == "number" then
+            range.min = data[key]
+            range.max = data[key]
         else
-            if data.fills.min then
-                fills.min = data.fills.min
+            if data[key].min then
+                range.min = data[key].min
             end
-            if data.fills.max then
-                fills.max = data.fills.max
+            if data[key].max then
+                range.max = data[key].max
             end
         end
+    end
+
+    return {
+        min = math.min(range.min, range.max),
+        max = math.max(range.min, range.max)
+    }
+end
+
+local function formatPool(data)
+
+    local result = {}
+    for k, v in pairs(data) do
+        result[k] = {
+            currency = data.currency or nil,
+            price = data.price and getRangeResult(data, "price", Core.settings.DefaultPrice or 1) or nil,
+            totalItems = data.totalItems and
+                getRangeResult(data, "totalItems", Core.settings.DefaultNumOfItemsWhenRestocking or 1) or nil,
+            items = v.items or {},
+            categories = v.categories or {},
+            include = v.include or {},
+            exclude = v.exclude or {},
+            blacklist = v.blacklist or {}
+        }
+    end
+
+end
+
+local function getPools(shopKey)
+
+    local results = {}
+    local data = poolsData[shopKey] or {}
+    local pools = data.pools or {}
+
+    for _, entry in ipairs(pools) do
+        local status, err = pcall(function()
+            table.push(results, formatPool(entry))
+        end)
+        if not status then
+            print("Error caught in " .. key .. ": " .. tostring(err))
+        end
+    end
+    return results
+
+end
+
+local function formatShop(data)
+
+    local pools = {}
+
+    for _, v in ipairs(data.pools or {}) do
+        pools[v] = poolsData[v]
     end
 
     local result = {
         type = data.type,
         label = data.label,
-        group = data.group or "NONE",
-        distance = data.distance or 100,
+        group = data.group,
+        distance = data.distance or Core.settings.DefaultDistanceBetweenGroups or 0,
         probability = data.probability or 15,
         filters = data.filters or {},
         reroll = data.reroll or 0,
         powered = data.powered == true,
         restock = data.restock or 48,
-        currency = data.currency or "base.money",
-        basePrice = data.basePrice or 1,
-        fills = fills,
-        groups = data.groups or {},
+        pools = {{
+            -- currency = Base.money,
+            -- price = {min, max},
+            -- totalItems = {min, max},
+            -- zones = { difficulty = {3,4}},
+            -- enabled = false
+            -- probability = 10
+            -- when = {months = {}}} 
+            -- keys = { "clothing_all_hats" }
+
+        }},
+        currency = data.currency or Core.settings.DefaultCurrencyItemType or "base.money",
+        price = getRangeResult(data, "price", Core.settings.DefaultPrice or 1),
+        totalItems = getRangeResult(data, "totalItems", Core.settings.DefaultNumOfItemsWhenRestocking or 1),
         image = data.image or "machine-none.png",
         sprites = data.sprites or {"phunmart_01_0", -- east
         "phunmart_01_1", -- south
@@ -54,22 +114,6 @@ local function formatShop(data)
     }
 
     return result
-end
-
-local function formatPool(data)
-
-    local result = {}
-    for k, v in pairs(data) do
-        result[k] = {
-
-            items = v.items or {},
-            categories = v.categories or {},
-            include = v.include or {},
-            exclude = v.exclude or {},
-            blacklist = v.blacklist or {}
-        }
-    end
-
 end
 
 local function formatGroup(data)
@@ -82,12 +126,59 @@ local function formatGroup(data)
 
 end
 
+local function getCoreShops()
+
+    local results = {}
+    local order = 0
+    local all = tableTools.merge(shopsData, self.extended or {})
+    for key, entry in pairs(all) do
+        local status, err = pcall(function()
+            results[key] = formatShop(entry)
+        end)
+        if not status then
+            print("Error caught in " .. key .. ": " .. tostring(err))
+        end
+
+    end
+    return results
+end
+
+local function getModifications()
+
+    local data = {}
+    if not isClient() then
+        -- this is a server or local game
+        -- load the modified data from ./lua/PhunZones.lua
+        local data = fileTools.loadTable(Core.const.shops .. ".lua")
+        if not data then
+            print("PhunMart: missing ./lua/" .. self.const.modifiedLuaFile ..
+                      ".lua, this is normal if you haven't modified any shops")
+        else
+            ModData.add(self.const.shops, data)
+            print("PhunMart: loaded customisations from ./lua/" .. self.const.shops .. ".lua")
+        end
+    end
+    data = ModData.get(self.const.shops)
+    if data == nil then
+        data = {}
+        ModData.add(self.const.shops, data)
+    end
+    local results = {}
+    for key, entry in pairs(data) do
+        local status, err = pcall(function()
+            results[key] = formatShop(entry)
+        end)
+        if not status then
+            print("Error caught in " .. key .. ": " .. tostring(err))
+        end
+    end
+    return results
+end
+
 local function getShops()
 
-    local result = {}
-    for k, v in pairs(shopsData) do
-        result[k] = formatShop(v)
-    end
-
-    return result
+    local core = getCoreShops()
+    local modified = getModifications() or {}
+    local results = tableTools.merge(modified or {}, core or {})
+    return results
 end

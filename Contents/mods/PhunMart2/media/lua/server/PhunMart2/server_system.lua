@@ -3,6 +3,7 @@ if isClient() then
 end
 require "Map/SGlobalObjectSystem"
 local Core = PhunMart
+local PL = PhunLib
 local Commands = require "PhunMart2/server_commands"
 Core.ServerSystem = SGlobalObjectSystem:derive("SPhunMartSystem")
 local ServerSystem = Core.ServerSystem
@@ -260,6 +261,39 @@ function ServerSystem:getRandomShop(x, y)
         if sum >= r then
             return v.shop
         end
+    end
+
+end
+
+function ServerSystem:getShopList()
+    local shops = {}
+    for k, v in pairs(Core.shops) do
+        table.insert(shops, {
+            key = k,
+            label = getTextOrNull("IGUI_PhunMart_Shop_" .. k) or k,
+            group = v.group or "NONE",
+            enabled = v.enabled == false and "false" or "true"
+        })
+    end
+end
+
+function ServerSystem:getShopData(key)
+
+    local shop = Core.shops[key]
+    if not shop then
+        return nil
+    end
+    return PL.table.deepCopy(shop)
+end
+
+function ServerSystem:updateShopData(data)
+
+    local shop = Core.shops[data.key]
+    if not shop then
+        return
+    end
+    for k, v in pairs(data) do
+        shop[k] = v
     end
 
 end

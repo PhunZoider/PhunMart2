@@ -26,7 +26,10 @@ PhunMart = {
     commands = {
         getBlackList = "PhunMartGetBlacklist",
         setBlacklist = "PhunMartSetBlacklist",
-        playerSetup = "PhunMartPlayerSetup"
+        playerSetup = "PhunMartPlayerSetup",
+        getShopList = "PhunMartGetShopList",
+        getShopData = "PhunMartGetShopData",
+        updateShopData = "PhunMartUpdateShopData"
 
     },
     events = {

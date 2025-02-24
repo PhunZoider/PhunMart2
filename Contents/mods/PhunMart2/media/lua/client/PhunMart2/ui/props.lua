@@ -39,7 +39,7 @@ function UI:createChildren()
     local x = 0
     local y = HEADER_HGT - 1
 
-    self.list = ISScrollingListBox:new(x, y, self:getWidth(), self.height - HEADER_HGT);
+    self.list = ISScrollingListBox:new(x, y, self:getWidth(), self.height - HEADER_HGT - 40);
     self.list:initialise();
     self.list:instantiate();
     self.list.itemheight = FONT_HGT_SMALL + 4 * 2
@@ -65,6 +65,15 @@ function UI:createChildren()
     self.list:addColumn("Property", 0);
     self.list:addColumn("Value", 199);
     self:addChild(self.list);
+
+    self.editButton = ISButton:new(padding, self.height - 30 - padding, 100, 30, "Edit", self, function()
+        Core.ui.admin.propEditor.OnOpenPanel(self.player, self.data, function(newData)
+            self:saveData(newData)
+        end)
+    end);
+    self.editButton:initialise();
+    self.editButton:instantiate();
+    self:addChild(self.editButton);
 
 end
 
@@ -110,6 +119,7 @@ function UI:drawDatas(y, item, alt)
 end
 
 function UI:setData(data)
+    self.data = data
     self.list:clear();
     if not data then
         return

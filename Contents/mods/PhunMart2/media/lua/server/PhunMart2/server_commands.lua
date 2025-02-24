@@ -119,4 +119,23 @@ Commands[Core.commands.requestLocations] = function(playerObj, args)
     })
 end
 
+Commands[Core.commands.getShopList] = function(playerObj, args)
+    local list = SPhunMartSystem.instance:getShopList()
+    sendServerCommand(playerObj, Core.name, Core.commands.getShopList, list)
+end
+
+Commands[Core.commands.getShopData] = function(playerObj, args)
+    local data = SPhunMartSystem.instance:getShopData(args.location)
+    if data then
+        sendServerCommand(playerObj, Core.name, Core.commands.getShopData, data)
+    end
+end
+
+Commands[Core.commands.updateShopData] = function(playerObj, args)
+    local data = SPhunMartSystem.instance:getShopData(args.location)
+    if data then
+        sendServerCommand(playerObj, Core.name, Core.commands.getShopData, data)
+    end
+end
+
 return Commands
