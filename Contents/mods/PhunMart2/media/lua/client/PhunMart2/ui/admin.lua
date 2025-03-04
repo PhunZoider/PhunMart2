@@ -27,7 +27,7 @@ function UI.OnOpenPanel(playerObj)
     if not instance then
         local core = getCore()
         local FONT_SCALE = getTextManager():getFontHeight(UIFont.Small) / 14
-        local width = 300 * FONT_SCALE
+        local width = 450 * FONT_SCALE
         local height = 590 * FONT_SCALE
 
         local x = (core:getScreenWidth() - width) / 2
@@ -111,6 +111,10 @@ function UI:close()
     end
 end
 
+function UI:setSelected(item)
+    self.controls.list.selected = item
+end
+
 function UI:createChildren()
 
     ISCollapsableWindowJoypad.createChildren(self);
@@ -124,45 +128,81 @@ function UI:createChildren()
     local w = self.width - padding * 2
     local h = self.height - y - rh - padding
 
-    self.page = ISComboBox:new(x, y, self:getWidth() - (padding * 2), FONT_HGT_MEDIUM, self, function()
-        local data = self.page.options[self.page.selected].data
+    self.controls = {}
 
-        self.properties:setData(data)
-        self.sprites:setData(data)
-        self.pools:setData(data)
-        if data and data.key then
-            sendClientCommand(Core.name, Core.commands.requestLocations, {
-                playerIndex = self.playerIndex,
-                key = data.key
-            })
+    self.controls.list = ISScrollingListBox:new(x, y + HEADER_HGT, 200, self.height - HEADER_HGT - 100);
+    self.controls.list:initialise();
+    self.controls.list:instantiate();
+    self.controls.list.itemheight = FONT_HGT_SMALL + 4 * 2
+    self.controls.list.selected = 0;
+    self.controls.list.joypadParent = self;
+    self.controls.list.font = UIFont.NewSmall;
+    self.controls.list.doDrawItem = self.drawDatas;
+
+    self.controls.list.onRightMouseUp = function(target, x, y, a, b)
+        local row = target:rowAt(x, y)
+        if row == -1 then
+            return
         end
-    end);
-    self.page:initialise()
-    self:addChild(self.page)
+        if target.selected ~= row then
+            target.selected = row
+            target:ensureVisible(target.selected)
+        end
+        local item = target.items[target.selected].item
 
-    y = y + self.page.height + padding
+    end
 
-    self.tabPanel = ISTabPanel:new(x, y, w, h - self.page.height - padding);
+    self.controls.list:setOnMouseDownFunction(self, function()
+        local selectedIndex = self.controls.list.selected
+        if selectedIndex == nil or selectedIndex < 0 then
+            return
+        end
+        local selectedItem = self.controls.list.items[selectedIndex]
+        if selectedItem then
+
+            local props = PL.table.deepCopy(Core.shops[selectedItem.item.key])
+            if not props.key then
+                props.key = selectedItem.item.key
+            end
+            if not props.group then
+                props.group = "NONE"
+            end
+
+            self.controls.props:setData(props)
+        else
+            self.controls.props:setData(nil)
+        end
+    end)
+
+    self.controls.list.drawBorder = true;
+    self.controls.list:addColumn("Shop", 0);
+    self.controls.list:addColumn("Group", 140);
+    self:addChild(self.controls.list);
+
+    x = self.controls.list.x + self.controls.list.width + padding
+
+    self.tabPanel = ISTabPanel:new(x, y, w, h - y - padding);
     self.tabPanel:initialise()
     self:addChild(self.tabPanel)
-
-    self.properties = PhunMartUIShopProps:new(0, 100, self.tabPanel.width,
-        self.tabPanel.height - self.tabPanel.tabHeight, {
-            player = self.player
-        });
-    self.tabPanel:addView("Properties", self.properties)
-
-    self.pools = PhunMartUIAdminPools:new(0, 100, self.tabPanel.width, self.tabPanel.height - self.tabPanel.tabHeight, {
-        player = self.player
-    });
-    self.tabPanel:addView("Pools", self.pools)
 
     self.locations = PhunMartUIAdminLocations:new(0, 100, self.tabPanel.width,
         self.tabPanel.height - self.tabPanel.tabHeight, {
             player = self.player
         });
 
-    self.tabPanel:addView("Locations", self.locations)
+    self.tabPanel:addView("Instances", self.locations)
+
+    self.controls.props = Core.ui.admin.propEditor:new(0, 100, self.tabPanel.width,
+        self.tabPanel.height - self.tabPanel.tabHeight, {
+            player = self.player
+        });
+    self.controls.props:initialise()
+    self.tabPanel:addView("Properties", self.controls.props)
+
+    self.pools = PhunMartUIAdminPools:new(0, 100, self.tabPanel.width, self.tabPanel.height - self.tabPanel.tabHeight, {
+        player = self.player
+    });
+    self.tabPanel:addView("Pools", self.pools)
 
     self.sprites = PhunMartUIShopSprites:new(0, 100, self.tabPanel.width,
         self.tabPanel.height - self.tabPanel.tabHeight, {
@@ -176,29 +216,75 @@ function UI:prerender()
 
     ISCollapsableWindowJoypad.prerender(self);
 
+    local x = self.controls.list.x + self.controls.list.width + 10
+    local y = self.controls.list.y - HEADER_HGT
+    local w = self.width - x - 10
+    local h = self.height - y - (10 * 2) - HEADER_HGT
+
+    self.controls.list:setHeight(h)
+
+    self.tabPanel:setWidth(w)
+    self.tabPanel:setHeight(h)
+    self.tabPanel:setX(x)
+    self.tabPanel:setY(y)
+
+    self.tabPanel.activeView.view:setWidth(w)
+    self.tabPanel.activeView.view:setHeight(h)
+
 end
 
 function UI:refreshShops()
 
-    local shops = Core:getShops()
-    self.page:clear()
-    local data = {}
-    local groups = {}
+    self.controls.list:clear()
     for k, v in pairs(Core.shops) do
-        if v.abstract ~= true then
-            local entry = PL.table.shallowCopy(v)
-            entry.label = getTextOrNull("IGUI_PhunMart_Shop_" .. k) or k
-            entry.key = k
-            table.insert(data, entry)
-        end
+        self.controls.list:addItem(getTextOrNull("IGUI_PhunMart_Shop_" .. k) or k, {
+            key = k,
+            group = v.group or "NONE"
+        })
     end
 
-    self.page:addOption(" -- SHOP -- ")
-    for _, v in ipairs(data) do
-        if v.abstract ~= true then
-            self.page:addOptionWithData(v.label .. " (" .. v.key .. ")", v)
-        end
+end
+
+function UI:drawDatas(y, item, alt)
+    if y + self:getYScroll() + self.itemheight < 0 or y + self:getYScroll() >= self.height then
+        return y + self.itemheight
     end
+
+    local a = 0.9;
+
+    if self.selected == item.index then
+        self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.3, 0.7, 0.35, 0.15);
+    end
+
+    if alt then
+        self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.3, 0.6, 0.5, 0.5);
+    end
+
+    self:drawRectBorder(0, (y), self:getWidth(), self.itemheight, a, self.borderColor.r, self.borderColor.g,
+        self.borderColor.b);
+
+    local iconX = 4
+    local iconSize = FONT_HGT_SMALL;
+    local xoffset = 10;
+
+    local clipX = self.columns[1].size
+    local clipX2 = self.columns[2].size
+    local clipY = math.max(0, y + self:getYScroll())
+    local clipY2 = math.min(self.height, y + self:getYScroll() + self.itemheight)
+
+    self:setStencilRect(clipX, clipY, clipX2 - clipX, clipY2 - clipY)
+    self:drawText(item.text, xoffset, y + 4, 1, 1, 1, a, self.font);
+    self:clearStencilRect()
+
+    local value = item.item.group
+
+    local valueWidth = getTextManager():MeasureStringX(self.font, value)
+    local w = self.width
+    local cw = self.columns[2].size
+    self:drawText(value, cw + 4, y + 4, 1, 1, 1, a, self.font);
+
+    self.itemsHeight = y + self.itemheight;
+    return self.itemsHeight;
 end
 
 local zones = nil

@@ -13,7 +13,7 @@ local LABEL_HGT = FONT_HGT_MEDIUM + 6
 local Core = PhunMart
 local profileName = "PhunMartUIPropEditor"
 
-Core.ui.admin.propEditor = ISCollapsableWindowJoypad:derive(profileName);
+Core.ui.admin.propEditor = ISPanel:derive(profileName);
 Core.ui.admin.propEditor.instances = {}
 local UI = Core.ui.admin.propEditor
 
@@ -47,7 +47,8 @@ local shopProperties = {
     enabled = {
         type = "boolean",
         label = "Enabled",
-        tooltip = "Is the property enabled"
+        tooltip = "Is the property enabled",
+        default = true
     },
     minFill = {
         type = "int",
@@ -77,64 +78,62 @@ local shopProperties = {
     requiresPower = {
         type = "boolean",
         label = "Requires Power",
-        tooltip = "Does the property require power"
+        tooltip = "Does the property require power",
+        default = true
     }
 }
 
-function UI.OnOpenPanel(playerObj, data, cb)
+function UI:setData(data)
+    data = data or {}
+    local isNew = data.key == nil
 
-    local playerIndex = playerObj:getPlayerNum()
-
-    if not UI.instances[playerIndex] then
-        local core = getCore()
-        local width = 300 * FONT_SCALE
-        local height = 350 * FONT_SCALE
-
-        local x = (core:getScreenWidth() - width) / 2
-        local y = (core:getScreenHeight() - height) / 2
-
-        UI.instances[playerIndex] = UI:new(x, y, width, height, playerObj, playerIndex);
-        UI.instances[playerIndex]:initialise();
-        ISLayoutManager.RegisterWindow(profileName, UI, UI.instances[playerIndex])
-    end
-
-    local instance = UI.instances[playerIndex]
-
-    if not data then
-        data = {}
-    end
-
-    instance:addToUIManager();
-    instance:setVisible(true);
-
-    instance.data = {}
     for k, v in pairs(shopProperties) do
         if v.type == "string" or v.type == "int" then
-            instance.data[k] = data[k] or ""
-            instance.controls[k]:setText(tostring(instance.data[k]))
-
-            if v.disableOnEdit then
-                instance.controls["_" .. k]:setName(tostring(instance.data[k]))
-
-                instance.controls[k]:setVisible(false)
-                instance.controls["_" .. k]:setVisible(true)
+            self.controls[k]:clear()
+            if data[k] == nil then
+                if v.default ~= nil then
+                    self.controls[k]:setText(tostring(v.default))
+                end
+            else
+                self.controls[k]:setText(tostring(data[k]))
             end
 
         elseif v.type == "boolean" then
-            instance.data[k] = v.trueIsNil and data[k] == nil or data[k] == true
-            instance.controls[k]:setSelected(1, instance.data[k] == true)
+            if data[k] == nil then
+                self.controls[k]:setSelected(1, v.default == true)
+            else
+                self.controls[k]:setSelected(1, data[k] == true)
+            end
+
+        end
+        if v.disableOnEdit then
+            self.controls[k]:setEditable(not isNew)
         end
     end
-    instance.title = data.label or "New Shop"
-    instance.cb = cb
+    self.isDirty = false
+end
 
-    return instance;
+function UI:getData()
+    local data = {}
+    for k, v in pairs(shopProperties) do
+        if v.type == "string" then
+            data[k] = tostring(self.controls[k]:getText())
+        elseif v.type == "int" then
+            data[k] = tonumber(self.controls[k]:getText())
+        elseif v.type == "boolean" then
+            data[k] = self.controls[k]:isSelected(1)
+        end
+    end
+    return data
+end
+
+function UI:isValid()
 
 end
 
 function UI:new(x, y, width, height, options)
     local opts = options or {}
-    local o = ISCollapsableWindowJoypad:new(x, y, width, height);
+    local o = ISPanel:new(x, y, width, height);
     setmetatable(o, self);
     o.player = opts.player or getPlayer()
     o.playerIndex = o.player:getPlayerNum()
@@ -161,14 +160,6 @@ function UI:addTextInput(txt, key, tooltip, disableOnEdit)
     self.controls[key].tooltip = getTextOrNull(tooltip) or tooltip or ""
     self.controls._panel:addChild(self.controls[key]);
 
-    if disableOnEdit then
-        local noEdit = ISLabel:new(x + 100, y, h, getTextOrNull(txt) or txt or key, 1, 1, 1, 1, UIFont.Small, true);
-        noEdit:initialise();
-        noEdit:instantiate();
-        self.controls["_" .. key] = noEdit
-        self.controls._panel:addChild(noEdit);
-    end
-
     self.lastControlY = self.controls[key].y + self.controls[key].height + 10
 end
 
@@ -190,7 +181,7 @@ end
 
 function UI:createChildren()
 
-    ISCollapsableWindowJoypad.createChildren(self)
+    ISPanel.createChildren(self)
 
     local offset = 10
     local x = offset
@@ -208,6 +199,7 @@ function UI:createChildren()
     self.controls._panel:setAnchorBottom(true)
     self.controls._panel:addScrollBars()
     self.controls._panel.vscroll:setVisible(true)
+
     self.controls._panel.prerender = function(s)
         s:setStencilRect(0, 0, s.width, s.height);
         ISPanel.prerender(s)
@@ -243,32 +235,21 @@ function UI:createChildren()
     self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)
 
-    self.controls._save = ISButton:new(x, self.height - BUTTON_HGT - offset, self.width - offset * 2, BUTTON_HGT,
-        getText("UI_btn_save"), self, function()
-
-            local data = {}
-
-            if self.cb then
-                self.cb(data)
-            end
-            self:close()
-        end);
-    self.controls._save.internal = "SAVE";
-    self.controls._save:initialise();
-    self:addChild(self.controls._save);
-
 end
 
 function UI:prerender()
-    ISCollapsableWindowJoypad.prerender(self)
+    ISPanel.prerender(self)
 
-    local offset = 10
-    self.controls._panel:setWidth(self.width - self.scrollwidth - offset * 2)
-    self.controls._panel:setHeight(self.controls._save.y - self:titleBarHeight() - offset * 2)
+    local offset = 0
+    local w = self.parent.width
+    local h = self.parent.height
+    local x = offset
+    local y = offset
+
+    self.controls._panel:setX(x)
+    self.controls._panel:setY(y)
+    self.controls._panel:setWidth(w)
+    self.controls._panel:setHeight(h)
     self.controls._panel:updateScrollbars();
-    -- self.controls._save:setX(self.width - self.scrollwidth - 80 - offset)
-    self.controls._save:setX(offset)
-    self.controls._save:setY(self.height - BUTTON_HGT - offset)
-    self.controls._save:setWidth(self.width - offset * 2)
 
 end
