@@ -236,7 +236,7 @@ function UI:createChildren()
     -- save button
 
     self.save = ISButton:new(self.width - padding - 100, self.height - rh - padding - 35, 100, 35,
-        getText("UI_btn_save"), self, self.onSave);
+        getText("UI_btn_save"), self, self.onSaveChanges);
     self.save.internal = "SAVE";
     self.save:initialise();
     self.save:instantiate();
@@ -335,5 +335,12 @@ function UI:refreshItems(items)
 end
 
 function UI:onSaveChanges(a, b)
+
+    local data = self.controls.props:getData()
+    local pools = self.controls.pools:getData()
+    data.pools = pools
+
+    PL.debug("data", data, "----")
+
     print(tostring(a) .. " " .. tostring(b))
 end

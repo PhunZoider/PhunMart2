@@ -21,28 +21,33 @@ local shopProperties = {
     label = {
         type = "string",
         label = "Label",
-        tooltip = "The label of the property"
+        tooltip = "The label of the property",
+        default = ""
     },
     key = {
         type = "string",
         label = "Key",
         tooltip = "The key of the property",
-        disableOnEdit = true
+        disableOnEdit = true,
+        default = ""
     },
     group = {
         type = "string",
         label = "Group",
-        tooltip = "The group of the property"
+        tooltip = "The group of the property",
+        default = ""
     },
     price = {
         type = "int",
         label = "Price",
-        tooltip = "The price of the property"
+        tooltip = "The price of the property",
+        default = ""
     },
     currency = {
         type = "string",
         label = "Currency",
-        tooltip = "The currency of the property"
+        tooltip = "The currency of the property",
+        default = ""
     },
     enabled = {
         type = "boolean",
@@ -53,27 +58,32 @@ local shopProperties = {
     minFill = {
         type = "int",
         label = "Min Fill",
-        tooltip = "The minimum fill of the property"
+        tooltip = "The minimum fill of the property",
+        default = ""
     },
     maxFill = {
         type = "int",
         label = "Max Fill",
-        tooltip = "The maximum fill of the property"
+        tooltip = "The maximum fill of the property",
+        default = ""
     },
     hoursToRestock = {
         type = "int",
         label = "Hours To Restock",
-        tooltip = "The hours to restock of the property"
+        tooltip = "The hours to restock of the property",
+        default = ""
     },
     minDistance = {
         type = "int",
         label = "Min Distance",
-        tooltip = "The minimum distance of the property"
+        tooltip = "The minimum distance of the property",
+        default = ""
     },
     probability = {
         type = "int",
         label = "Probability",
-        tooltip = "The probability of the property"
+        tooltip = "The probability of the property",
+        default = ""
     },
     requiresPower = {
         type = "boolean",
@@ -114,16 +124,38 @@ function UI:setData(data)
 end
 
 function UI:getData()
+
     local data = {}
     for k, v in pairs(shopProperties) do
+
         if v.type == "string" then
-            data[k] = tostring(self.controls[k]:getText())
+
+            local str = self.controls[k]:getText():match("^%s*(.-)%s*$")
+
+            if str ~= v.default then
+                if v.isCsv then
+                    data[k] = {}
+                    for i in string.gmatch(str, "([^,]+)") do
+                        table.insert(data[k], i)
+                    end
+                else
+
+                    data[k] = str
+
+                end
+            end
+
         elseif v.type == "int" then
-            data[k] = tonumber(self.controls[k]:getText())
-        elseif v.type == "boolean" then
+            local str = self.controls[k]:getText():gsub("%D", "")
+            if str ~= "" and str ~= v.default then
+                data[k] = tonumber(str)
+            end
+        elseif v.type == "boolean" and v.default ~= self.controls[k]:isSelected(1) then
             data[k] = self.controls[k]:isSelected(1)
         end
+
     end
+
     return data
 end
 

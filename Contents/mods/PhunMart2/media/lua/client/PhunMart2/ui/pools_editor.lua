@@ -11,6 +11,7 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
+local PL = PhunLib
 local profileName = "PhunMartUIPropEditor"
 
 Core.ui.admin.poolsEditor = ISPanel:derive(profileName);
@@ -49,7 +50,11 @@ function UI:setData(data)
 end
 
 function UI:getData()
-
+    local pools = {}
+    for i, v in ipairs(self.tabPanel.viewList) do
+        table.insert(pools, v.view:getData())
+    end
+    return pools
 end
 
 function UI:isValid()

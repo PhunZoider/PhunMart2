@@ -33,12 +33,14 @@ local allProps = {
     price = {
         type = "int",
         label = "Base Price",
-        tooltip = "Overrides the shops base price"
+        tooltip = "Overrides the shops base price",
+        default = ""
     },
     currency = {
         type = "string",
         label = "Currency",
-        tooltip = "Overrides the shops currency"
+        tooltip = "Overrides the shops currency",
+        default = ""
     },
     enabled = {
         type = "boolean",
@@ -49,29 +51,34 @@ local allProps = {
     minFill = {
         type = "int",
         label = "Min Stock",
-        tooltip = "Overrides the shops minimum stock level"
+        tooltip = "Overrides the shops minimum stock level",
+        default = ""
     },
     maxFill = {
         type = "int",
         label = "Max Stock",
-        tooltip = "Overrides the shops maximum stock level"
+        tooltip = "Overrides the shops maximum stock level",
+        default = ""
     },
     zoneDifficulty = {
         type = "string",
         label = "Zone Difficulty",
         tooltip = "A CSV of PhunZone difficulties that this pool is valid for. eg 1,4 means that this pool will only be eligible in zones with 1 or 4 as the difficulty",
-        isCsv = true
+        isCsv = true,
+        default = ""
     },
     whenMonths = {
         type = "string",
         label = "Months valid",
         tooltip = "A CSV of months that this pool is valid for. eg 1,4 means that this pool will only be eligible in January or April",
-        isCsv = true
+        isCsv = true,
+        default = ""
     },
     probability = {
         type = "int",
         label = "Probability",
-        tooltip = "The probability that this pool has of being selected when there are more than 1 pools eligible to be picked"
+        tooltip = "The probability that this pool has of being selected when there are more than 1 pools eligible to be picked",
+        default = ""
     }
 }
 
@@ -142,20 +149,33 @@ end
 function UI:getData()
     local data = {}
     for k, v in pairs(allProps) do
+
         if v.type == "string" then
-            if v.isCsv then
-                data[k] = {}
-                for i in string.gmatch(self.controls[k]:getText(), "([^,]+)") do
-                    table.insert(data[k], i)
+
+            local str = self.controls[k]:getText():match("^%s*(.-)%s*$")
+
+            if str ~= v.default then
+                if v.isCsv then
+                    data[k] = {}
+                    for i in string.gmatch(str, "([^,]+)") do
+                        table.insert(data[k], i)
+                    end
+                else
+
+                    data[k] = str
+
                 end
-            else
-                data[k] = tostring(self.controls[k]:getText())
             end
+
         elseif v.type == "int" then
-            data[k] = tonumber(self.controls[k]:getText())
-        elseif v.type == "boolean" then
+            local str = self.controls[k]:getText():gsub("%D", "")
+            if str ~= "" and str ~= v.default then
+                data[k] = tonumber(str)
+            end
+        elseif v.type == "boolean" and v.default ~= self.controls[k]:isSelected(1) then
             data[k] = self.controls[k]:isSelected(1)
         end
+
     end
 
     data.keys = {}
