@@ -146,27 +146,27 @@ function UI:createChildren()
     self.controls.tabPanel:initialise()
     self:addChild(self.controls.tabPanel)
 
-    self.controls.items = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.items = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
         type = Core.consts.itemType.items
     });
 
-    self.controls.vehicles = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.vehicles = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
         type = Core.consts.itemType.vehicles
     });
 
-    self.controls.traits = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.traits = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
         type = Core.consts.itemType.traits
     });
 
-    self.controls.xp = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.xp = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
         type = Core.consts.itemType.xp
     });
 
-    self.controls.boosts = Core.ui.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.boosts = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
         type = Core.consts.itemType.boosts
     });
