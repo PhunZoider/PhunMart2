@@ -12,6 +12,7 @@ local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 
 local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
+local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 local profileName = "PhunMartUIAdminShops"
 PhunMartUIAdminShops = ISCollapsableWindowJoypad:derive(profileName);
@@ -157,6 +158,19 @@ function UI:createChildren()
         if selectedIndex == nil or selectedIndex < 0 then
             return
         end
+
+        -- if self.controls.props:isDirty() or self.controls.pools:isDirty() then
+        --     local w = 300 * FONT_SCALE
+        --     local h = 200 * FONT_SCALE
+        --     local modal = ISModalDialog:new(getCore():getScreenWidth() / 2 - w / 2,
+        --         getCore():getScreenHeight() / 2 - h / 2, w, h, getText("IGUI_Confirmation"), true, self,
+        --         self.onSaveChanges);
+        --     modal:initialise();
+        --     modal:addToUIManager();
+        --     modal:setAlwaysOnTop(true);
+        --     return
+        -- end
+
         local selectedItem = self.controls.list.items[selectedIndex]
         if selectedItem then
 
@@ -183,7 +197,7 @@ function UI:createChildren()
 
     x = self.controls.list.x + self.controls.list.width + padding
 
-    self.tabPanel = ISTabPanel:new(x, y, w, h - y - padding);
+    self.tabPanel = ISTabPanel:new(x, y, w, h - y - padding - 45);
     self.tabPanel:initialise()
     self:addChild(self.tabPanel)
 
@@ -219,6 +233,18 @@ function UI:createChildren()
     --     });
     -- self.tabPanel:addView("Sprites", self.sprites)
 
+    -- save button
+
+    self.save = ISButton:new(self.width - padding - 100, self.height - rh - padding - 35, 100, 35,
+        getText("UI_btn_save"), self, self.onSave);
+    self.save.internal = "SAVE";
+    self.save:initialise();
+    self.save:instantiate();
+    if self.save.enableAcceptColor then
+        self.save:enableAcceptColor()
+    end
+    self:addChild(self.save);
+
 end
 
 function UI:prerender()
@@ -233,13 +259,15 @@ function UI:prerender()
     self.controls.list:setHeight(h)
 
     self.tabPanel:setWidth(w)
-    self.tabPanel:setHeight(h)
+    self.tabPanel:setHeight(h - 45)
     self.tabPanel:setX(x)
     self.tabPanel:setY(y)
 
     self.tabPanel.activeView.view:setWidth(w)
-    self.tabPanel.activeView.view:setHeight(h)
+    self.tabPanel.activeView.view:setHeight(h - 45)
 
+    self.save:setX(self.width - 100 - 10)
+    self.save:setY(self.height - self:resizeWidgetHeight() - 35 - 10)
 end
 
 function UI:refreshShops()
@@ -306,3 +334,6 @@ function UI:refreshItems(items)
     self.pools:setItems(items)
 end
 
+function UI:onSaveChanges(a, b)
+    print(tostring(a) .. " " .. tostring(b))
+end

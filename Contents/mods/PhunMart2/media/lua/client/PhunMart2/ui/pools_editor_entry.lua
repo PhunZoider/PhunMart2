@@ -128,6 +128,14 @@ function UI:setData(data)
         self.keys[v] = true
     end
 
+    -- select the first entry
+    for i, v in ipairs(keys) do
+        if self.keys[v] == true then
+            self.controls.keys:ensureVisible(i)
+            break
+        end
+    end
+
     self.isDirty = false
 end
 
@@ -149,6 +157,14 @@ function UI:getData()
             data[k] = self.controls[k]:isSelected(1)
         end
     end
+
+    data.keys = {}
+    for k, v in pairs(self.keys) do
+        if v == true then
+            table.insert(data.keys, k)
+        end
+    end
+
     return data
 end
 
@@ -260,7 +276,7 @@ function UI:createChildren()
     self.controls["label_pools"] = label
     self.controls._panel:addChild(label);
 
-    self.controls.keys = ISScrollingListBox:new(110, y + HEADER_HGT, 200, 250);
+    self.controls.keys = ISScrollingListBox:new(110, y + HEADER_HGT, 200, 50);
     self.controls.keys:initialise();
     self.controls.keys:instantiate();
     self.controls.keys.itemheight = FONT_HGT_SMALL + 4 * 2

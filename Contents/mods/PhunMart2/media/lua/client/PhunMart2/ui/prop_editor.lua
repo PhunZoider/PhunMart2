@@ -131,6 +131,10 @@ function UI:isValid()
 
 end
 
+function UI:isDirty()
+    return self.isDirty
+end
+
 function UI:new(x, y, width, height, options)
     local opts = options or {}
     local o = ISPanel:new(x, y, width, height);
