@@ -128,12 +128,6 @@ function UI:setData(data)
         self.keys[v] = true
     end
 
-    -- for i, v in ipairs(data.keys or {}) do
-    --     self.controls.keys:addItem(v, {
-    --         text = v
-    --     })
-    -- end
-
     self.isDirty = false
 end
 

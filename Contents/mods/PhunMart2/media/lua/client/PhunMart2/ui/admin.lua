@@ -187,13 +187,6 @@ function UI:createChildren()
     self.tabPanel:initialise()
     self:addChild(self.tabPanel)
 
-    self.locations = PhunMartUIAdminLocations:new(0, 100, self.tabPanel.width,
-        self.tabPanel.height - self.tabPanel.tabHeight, {
-            player = self.player
-        });
-
-    self.tabPanel:addView("Instances", self.locations)
-
     self.controls.props = Core.ui.admin.propEditor:new(0, 100, self.tabPanel.width,
         self.tabPanel.height - self.tabPanel.tabHeight, {
             player = self.player
@@ -208,16 +201,23 @@ function UI:createChildren()
     self.controls.pools:initialise()
     self.tabPanel:addView("Pools", self.controls.pools)
 
+    self.locations = PhunMartUIAdminLocations:new(0, 100, self.tabPanel.width,
+        self.tabPanel.height - self.tabPanel.tabHeight, {
+            player = self.player
+        });
+
+    self.tabPanel:addView("Instances", self.locations)
+
     -- self.pools = PhunMartUIAdminPools:new(0, 100, self.tabPanel.width, self.tabPanel.height - self.tabPanel.tabHeight, {
     --     player = self.player
     -- });
     -- self.tabPanel:addView("Pools", self.pools)
 
-    self.sprites = PhunMartUIShopSprites:new(0, 100, self.tabPanel.width,
-        self.tabPanel.height - self.tabPanel.tabHeight, {
-            player = self.player
-        });
-    self.tabPanel:addView("Sprites", self.sprites)
+    -- self.sprites = PhunMartUIShopSprites:new(0, 100, self.tabPanel.width,
+    --     self.tabPanel.height - self.tabPanel.tabHeight, {
+    --         player = self.player
+    --     });
+    -- self.tabPanel:addView("Sprites", self.sprites)
 
 end
 

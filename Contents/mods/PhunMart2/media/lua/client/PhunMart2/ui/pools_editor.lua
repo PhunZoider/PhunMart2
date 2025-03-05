@@ -11,6 +11,7 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
+local PL = PhunLib
 local profileName = "PhunMartUIPropEditor"
 
 Core.ui.admin.poolsEditor = ISPanel:derive(profileName);
@@ -19,6 +20,8 @@ local UI = Core.ui.admin.poolsEditor
 
 function UI:setData(data)
     data = data or {}
+    self.data = data
+
     local isNew = data.key == nil
 
     -- remove all tabviews
@@ -101,15 +104,85 @@ function UI:createChildren()
 
     self:addChild(self.controls._panel);
 
+    -- add and remove pool buttons
+    self.controls.addPool = ISButton:new(10, 10, 100, BUTTON_HGT, getText("UI_btn_add"), self, self.onAddPool);
+    self.controls.addPool:initialise();
+    self.controls.addPool:instantiate();
+    self.controls.addPool.borderColor = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = 0.1
+    };
+    self.controls.addPool.backgroundColor = {
+        r = 0.1,
+        g = 0.1,
+        b = 0.1,
+        a = 0.9
+    };
+    self.controls.addPool.textColor = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = 1
+    };
+    self.controls.addPool.tooltip = getText("UI_btn_add_tooltip");
+    self.controls._panel:addChild(self.controls.addPool);
+
+    self.controls.removePool = ISButton:new(120, 10, 100, BUTTON_HGT, getText("UI_btn_remove"), self, self.onRemovePool);
+    self.controls.removePool:initialise();
+    self.controls.removePool:instantiate();
+    self.controls.removePool.borderColor = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = 0.1
+    };
+    self.controls.removePool.backgroundColor = {
+        r = 0.1,
+        g = 0.1,
+        b = 0.1,
+        a = 0.9
+    };
+    self.controls.removePool.textColor = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = 1
+    };
+    self.controls.removePool.tooltip = getText("UI_btn_remove_tooltip");
+    self.controls._panel:addChild(self.controls.removePool);
+
+    -- Duplicate pool button
+    self.controls.duplicatePool = ISButton:new(230, 10, 100, BUTTON_HGT, getText("UI_btn_duplicate"), self,
+        self.onDuplicatePool);
+    self.controls.duplicatePool:initialise();
+    self.controls.duplicatePool:instantiate();
+    self.controls.duplicatePool.borderColor = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = 0.1
+    };
+    self.controls.duplicatePool.backgroundColor = {
+        r = 0.1,
+        g = 0.1,
+        b = 0.1,
+        a = 0.9
+    };
+    self.controls.duplicatePool.textColor = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = 1
+    };
+    self.controls.duplicatePool.tooltip = getText("UI_btn_duplicate_tooltip");
+    self.controls._panel:addChild(self.controls.duplicatePool);
+
     self.tabPanel = ISTabPanel:new(x, 100, w, h - y - offset);
     self.tabPanel:initialise()
     self.tabPanel:instantiate()
-    self.tabPanel.backgroundColor = {
-        r = 0,
-        g = 1,
-        b = 0,
-        a = 0.5
-    }
+
     self.controls._panel:addChild(self.tabPanel)
 
     self.controls._panel:setScrollHeight(y + h + 10);
@@ -117,6 +190,63 @@ function UI:createChildren()
 
     self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)
+
+end
+
+-- Add pool
+function UI:onAddPool()
+
+    if not self.data.pools then
+        self.data.pools = {}
+    end
+
+    table.insert(self.data.pools, {
+        keys = {}
+    })
+
+    self:setData(self.data)
+
+    self.isDirty = true
+end
+
+-- Remove pool
+function UI:onRemovePool()
+    local index = 0
+    local view = self.tabPanel.activeView
+    for i, v in ipairs(self.tabPanel.viewList) do
+        if v == view then
+            index = i
+            break
+        end
+    end
+
+    if index > 0 then
+
+        table.remove(self.data.pools, index)
+
+        self:setData(self.data)
+        self.isDirty = true
+    end
+end
+
+-- Duplicate pool
+function UI:onDuplicatePool()
+
+    local index = 0
+    local view = self.tabPanel.activeView
+    for i, v in ipairs(self.tabPanel.viewList) do
+        if v == view then
+            index = i
+            break
+        end
+    end
+
+    if index > 0 then
+        local copy = PL.table.deepCopy(self.data.pools[index])
+        table.insert(self.data.pools, copy)
+        self:setData(self.data)
+        self.isDirty = true
+    end
 
 end
 
