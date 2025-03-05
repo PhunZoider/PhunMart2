@@ -169,8 +169,10 @@ function UI:createChildren()
             end
 
             self.controls.props:setData(props)
+            self.controls.pools:setData(props)
         else
             self.controls.props:setData(nil)
+            self.controls.pools:setData(nil)
         end
     end)
 
@@ -199,10 +201,17 @@ function UI:createChildren()
     self.controls.props:initialise()
     self.tabPanel:addView("Properties", self.controls.props)
 
-    self.pools = PhunMartUIAdminPools:new(0, 100, self.tabPanel.width, self.tabPanel.height - self.tabPanel.tabHeight, {
-        player = self.player
-    });
-    self.tabPanel:addView("Pools", self.pools)
+    self.controls.pools = Core.ui.admin.poolsEditor:new(0, 100, self.tabPanel.width,
+        self.tabPanel.height - self.tabPanel.tabHeight, {
+            player = self.player
+        });
+    self.controls.pools:initialise()
+    self.tabPanel:addView("Pools", self.controls.pools)
+
+    -- self.pools = PhunMartUIAdminPools:new(0, 100, self.tabPanel.width, self.tabPanel.height - self.tabPanel.tabHeight, {
+    --     player = self.player
+    -- });
+    -- self.tabPanel:addView("Pools", self.pools)
 
     self.sprites = PhunMartUIShopSprites:new(0, 100, self.tabPanel.width,
         self.tabPanel.height - self.tabPanel.tabHeight, {
