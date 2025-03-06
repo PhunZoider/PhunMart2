@@ -143,7 +143,7 @@ function UI:setData(data)
         end
     end
 
-    self.isDirty = false
+    self.isDirtyValue = false
 end
 
 function UI:getData()
@@ -190,6 +190,10 @@ end
 
 function UI:isValid()
 
+end
+
+function UI:isDirty()
+    return self.isDirtyValue
 end
 
 function UI:new(x, y, width, height, options)
@@ -317,7 +321,7 @@ function UI:createChildren()
         else
             self.keys[key] = true
         end
-        self.isDirty = true
+        self.isDirtyValue = true
     end)
 
     self.controls.keys.drawBorder = true;

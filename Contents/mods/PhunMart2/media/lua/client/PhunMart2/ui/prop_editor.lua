@@ -120,7 +120,7 @@ function UI:setData(data)
             self.controls[k]:setEditable(not isNew)
         end
     end
-    self.isDirty = false
+    self.isDirtyValue = false
 end
 
 function UI:getData()
@@ -164,7 +164,7 @@ function UI:isValid()
 end
 
 function UI:isDirty()
-    return self.isDirty
+    return self.isDirtyValue
 end
 
 function UI:new(x, y, width, height, options)

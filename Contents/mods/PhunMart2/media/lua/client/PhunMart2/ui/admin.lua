@@ -154,6 +154,24 @@ function UI:createChildren()
     end
 
     self.controls.list:setOnMouseDownFunction(self, function()
+
+        if self.controls.list.selected ~= self.lastSelected then
+            -- prompt to save changes if isDirty
+            local propsIsDirty = self.controls.props:isDirty()
+            local poolsIsDirty = self.controls.pools:isDirty()
+            if propsIsDirty or poolsIsDirty then
+                local w = 300 * FONT_SCALE
+                local h = 200 * FONT_SCALE
+                local modal = ISModalDialog:new(getCore():getScreenWidth() / 2 - w / 2,
+                    getCore():getScreenHeight() / 2 - h / 2, w, h, getText("IGUI_Confirmation"), true, self,
+                    self.onSaveChanges);
+                modal:initialise();
+                modal:addToUIManager();
+                modal:setAlwaysOnTop(true);
+                return
+            end
+        end
+
         local selectedIndex = self.controls.list.selected
         if selectedIndex == nil or selectedIndex < 0 then
             return

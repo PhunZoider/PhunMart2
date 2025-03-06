@@ -46,7 +46,7 @@ function UI:setData(data)
     end
 
     self.tabPanel:setVisible(#self.tabPanel.viewList > 0)
-    self.isDirty = false
+    self.isDirtyValue = false
 end
 
 function UI:getData()
@@ -59,6 +59,19 @@ end
 
 function UI:isValid()
 
+end
+
+function UI:isDirty()
+    local isDirty = self.isDirtyValue
+    if not isDirty then
+        for i, v in ipairs(self.tabPanel.viewList) do
+            if v.view:isDirty() then
+                isDirty = true
+                break
+            end
+        end
+    end
+    return isDirty
 end
 
 function UI:new(x, y, width, height, options)
@@ -171,7 +184,7 @@ function UI:onAddPool()
 
     self:setData(self.data)
 
-    self.isDirty = true
+    self.isDirtyValue = true
 end
 
 -- Remove pool
@@ -190,7 +203,7 @@ function UI:onRemovePool()
         table.remove(self.data.pools, index)
 
         self:setData(self.data)
-        self.isDirty = true
+        self.isDirtyValue = true
     end
 end
 
@@ -210,7 +223,7 @@ function UI:onDuplicatePool()
         local copy = PL.table.deepCopy(self.data.pools[index])
         table.insert(self.data.pools, copy)
         self:setData(self.data)
-        self.isDirty = true
+        self.isDirtyValue = true
     end
 
 end
