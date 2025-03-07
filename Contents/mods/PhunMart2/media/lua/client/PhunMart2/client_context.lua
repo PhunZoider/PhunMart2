@@ -24,7 +24,7 @@ Core.contexts.open = function(player, context, worldobjects, test)
                 end
             end
             local option = context:addOptionOnTop(text, getSpecificPlayer(player), function()
-                print("Open shop")
+                Core.ui.client.shop.OnOpenPanel(getSpecificPlayer(player))
             end)
             local toolTip = ISToolTip:new();
             toolTip:setVisible(false);
