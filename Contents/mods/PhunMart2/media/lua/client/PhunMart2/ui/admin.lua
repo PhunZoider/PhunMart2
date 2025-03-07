@@ -202,9 +202,11 @@ function UI:createChildren()
 
             self.controls.props:setData(props)
             self.controls.pools:setData(props)
+            self.controls.locations:setData(props.key)
         else
             self.controls.props:setData(nil)
             self.controls.pools:setData(nil)
+            self.controls.locations:setData(nil)
         end
     end)
 
@@ -233,12 +235,12 @@ function UI:createChildren()
     self.controls.pools:initialise()
     self.tabPanel:addView("Pools", self.controls.pools)
 
-    self.locations = PhunMartUIAdminLocations:new(0, 100, self.tabPanel.width,
+    self.controls.locations = Core.ui.admin.instancesPanel:new(0, 100, self.tabPanel.width,
         self.tabPanel.height - self.tabPanel.tabHeight, {
             player = self.player
         });
-
-    self.tabPanel:addView("Instances", self.locations)
+    self.controls.locations:initialise()
+    self.tabPanel:addView("Instances", self.controls.locations)
 
     -- self.pools = PhunMartUIAdminPools:new(0, 100, self.tabPanel.width, self.tabPanel.height - self.tabPanel.tabHeight, {
     --     player = self.player
@@ -343,10 +345,6 @@ function UI:drawDatas(y, item, alt)
 end
 
 local zones = nil
-
-function UI:refreshLocations(instances)
-    self.locations:setData(instances)
-end
 
 function UI:refreshItems(items)
     self.pools:setItems(items)

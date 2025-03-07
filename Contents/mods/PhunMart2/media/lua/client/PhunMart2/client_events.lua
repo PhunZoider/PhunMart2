@@ -39,6 +39,29 @@ local Commands = require("PhunMart2/client_commands")
 --     print("PhunMart2: OnRainStop")
 -- end)
 
+local _lastHighlighted = nil
+
+Events.OnObjectLeftMouseButtonUp.Add(function(object, x, y)
+    if _lastHighlighted then
+        _lastHighlighted:setHighlighted(false, false);
+    end
+    if object and Core.ClientSystem:isValidIsoObject(object) then
+        object:setHighlighted(true, false);
+        _lastHighlighted = object
+        local hasModData = object:getModData()
+    end
+end)
+
+Events.OnObjectRightMouseButtonUp.Add(function(object, x, y)
+    if _lastHighlighted then
+        _lastHighlighted:setHighlighted(false, false);
+    end
+    if object and Core.ClientSystem:isValidIsoObject(object) then
+        object:setHighlighted(true, false);
+        _lastHighlighted = object
+    end
+end)
+
 Events.OnPreFillWorldObjectContextMenu.Add(function(playerObj, context, worldobjects, test)
     Core.contexts.open(playerObj, context, worldobjects, test)
 end)
