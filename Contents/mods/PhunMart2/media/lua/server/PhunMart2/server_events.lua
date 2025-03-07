@@ -65,30 +65,16 @@ end)
 
 Events.OnObjectAdded.Add(function(object)
     print("PhunMart2 (server): OnObjectAdded")
-    local customName = object:getSprite():getProperties():Val("CustomName")
-    if customName and Core.shops[customName] then
-        print("ye")
-    end
-    local name = object:getName()
-    local name2 = object:getObjectName()
-    local name3 = object:getScriptName()
-    local name4 = object:getSpriteName()
-    local texture = object:getTextureName()
-    local sys = Core.ServerSystem.instance
-    local isValid = sys:isValidIsoObject(object)
-    local modData = object:getModData()
-
-    sys:checkObjectAdded(object)
-    print(tostring(modData))
+    Core.ServerSystem.instance:checkObjectAdded(object)
 end)
 
-print('- -- -- EVENTS! --  - ')
-local e = {}
-for k, v in pairs(Events) do
-    table.insert(e, k)
-end
-table.sort(e, function(a, b)
-    return a < b
-end)
-PhunLib.printTable(e)
-print(" /-------")
+-- print('- -- -- EVENTS! --  - ')
+-- local e = {}
+-- for k, v in pairs(Events) do
+--     table.insert(e, k)
+-- end
+-- table.sort(e, function(a, b)
+--     return a < b
+-- end)
+-- PhunLib.printTable(e)
+-- print(" /-------")
