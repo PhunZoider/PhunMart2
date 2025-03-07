@@ -22,8 +22,12 @@ Events.OnDoTileBuilding.Add(function()
     print("PhunMart2 (server): OnDoTileBuilding")
 end)
 
-Events.OnDoTileBuilding2.Add(function()
-    print("PhunMart2 (server): OnDoTileBuilding2")
+Events.OnDoTileBuilding2.Add(function(cursor, bRender, x, y, z, square)
+    if cursor and cursor.tryInitialInvItem and
+        luautils.stringStarts(cursor.tryInitialInvItem.worldSprite or "", "phunmart_") then
+
+    end
+
 end)
 
 Events.OnDoTileBuilding3.Add(function()
@@ -58,3 +62,33 @@ Events.OnClientCommand.Add(function(module, command, playerObj, arguments)
         end
     end
 end)
+
+Events.OnObjectAdded.Add(function(object)
+    print("PhunMart2 (server): OnObjectAdded")
+    local customName = object:getSprite():getProperties():Val("CustomName")
+    if customName and Core.shops[customName] then
+        print("ye")
+    end
+    local name = object:getName()
+    local name2 = object:getObjectName()
+    local name3 = object:getScriptName()
+    local name4 = object:getSpriteName()
+    local texture = object:getTextureName()
+    local sys = Core.ServerSystem.instance
+    local isValid = sys:isValidIsoObject(object)
+    local modData = object:getModData()
+
+    sys:checkObjectAdded(object)
+    print(tostring(modData))
+end)
+
+print('- -- -- EVENTS! --  - ')
+local e = {}
+for k, v in pairs(Events) do
+    table.insert(e, k)
+end
+table.sort(e, function(a, b)
+    return a < b
+end)
+PhunLib.printTable(e)
+print(" /-------")

@@ -27,7 +27,7 @@ function ServerSystem:new()
 end
 
 function ServerSystem:removeLuaObject(luaObject)
-    Core:removeInstance(luaObject:getModData())
+    Core:removeInstance(luaObject)
     SGlobalObjectSystem.removeLuaObject(self, luaObject)
 end
 
@@ -65,22 +65,26 @@ function ServerSystem.addToWorld(square, shop, direction)
     end
     local sprite = Core.shops[shop].sprites[index]
     local isoObject = IsoThumpable.new(square:getCell(), square, sprite, false, {})
-    isoObject:setName("PhunMartVendingMachine")
-    local data = {
-        key = shop,
-        facing = direction,
-        lockedBy = false,
-        created = GameTime:getInstance():getWorldAgeHours(),
-        x = square:getX(),
-        y = square:getY(),
-        z = square:getZ()
-    }
-    isoObject:setModData(data)
-    Core:addInstance(data)
+    ServerSystem.initializeShopObject(isoObject)
     square:AddSpecialObject(isoObject, -1)
     triggerEvent("OnObjectAdded", isoObject)
     isoObject:transmitCompleteItemToClients()
 
+end
+
+function ServerSystem.initializeShopObject(obj)
+    obj:setName("PhunMartVendingMachine")
+    local data = {
+        key = obj:getSprite():getProperties():Val("CustomName"),
+        facing = obj:getSprite():getProperties():Val("Facing"),
+        lockedBy = false,
+        created = GameTime:getInstance():getWorldAgeHours(),
+        x = obj:getX(),
+        y = obj:getY(),
+        z = obj:getZ()
+    }
+    obj:setModData(data)
+    Core:addInstance(data)
 end
 
 function ServerSystem:initSystem()
@@ -296,6 +300,18 @@ function ServerSystem:updateShopData(data)
         shop[k] = v
     end
 
+end
+
+function ServerSystem:checkObjectAdded(obj)
+    if obj and obj.getSprite then
+        local customName = obj:getSprite():getProperties():Val("CustomName")
+        if customName and Core.shops[customName] then
+            if not self:isValidIsoObject(obj) then
+                -- is a shop sprite but not an instance?
+                self.initializeShopObject(obj)
+            end
+        end
+    end
 end
 
 function ServerSystem:loadGridsquare(square)
