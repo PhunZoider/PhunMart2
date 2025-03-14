@@ -4,48 +4,54 @@ end
 
 require "ISUI/ISCollapsableWindowJoypad"
 local Core = PhunMart
-
+local PL = PhunLib
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 
 local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
+local BUTTON_HGT = FONT_HGT_SMALL + 6
 
-local profileName = "PhunMartUIPoolItemFilterBlacklist"
-PhunMartUIPoolItemFilterBlacklist = ISCollapsableWindowJoypad:derive(profileName);
-local UI = PhunMartUIPoolItemFilterBlacklist
+local profileName = "PhunMartUIShopPoolItemFilter"
+
+Core.ui.admin.shop_pool_items_filter = ISCollapsableWindowJoypad:derive(profileName);
+local UI = Core.ui.admin.shop_pool_items_filter
 local instances = {}
-Core.ui.admin.poolBlacklist = UI
 
-function UI.OnOpenPanel(playerObj, blacklist)
+function UI:refreshAll()
+    self.controls.items:setData(self.data.items or {})
+    self.controls.vehicles:setData(self.data.vehicles or {})
+    self.controls.traits:setData(self.data.traits or {})
+    self.controls.xp:setData(self.data.xp or {})
+    self.controls.boosts:setData(self.data.boosts or {})
+end
 
-    local playerIndex = playerObj:getPlayerNum()
-    local instance = instances[playerIndex]
+function UI.open(player, data, cb)
 
-    if not instance then
-        local core = getCore()
-        local width = 450 * FONT_SCALE
-        local height = 400 * FONT_SCALE
+    local playerIndex = player:getPlayerNum()
 
-        local x = (core:getScreenWidth() - width) / 2
-        local y = (core:getScreenHeight() - height) / 2
+    local core = getCore()
+    local width = 400 * FONT_SCALE
+    local height = 400 * FONT_SCALE
 
-        instances[playerIndex] = UI:new(x, y, width, height, playerObj, playerIndex);
-        instance = instances[playerIndex]
-        instance:initialise();
+    local x = (core:getScreenWidth() - width) / 2
+    local y = (core:getScreenHeight() - height) / 2
 
-        ISLayoutManager.RegisterWindow(profileName, PhunMartUIPoolItemFilterBlacklist, instance)
-    end
+    local instance = UI:new(x, y, width, height, player, playerIndex);
+    instance.data = data
+    instance.cb = cb
 
-    instance.data = blacklist or {}
+    instance:initialise();
 
+    ISLayoutManager.RegisterWindow(profileName, UI, instance)
+
+    instance.shopKey = shopKey or nil
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
     instance:refreshAll()
     return instance;
-
 end
 
 function UI:new(x, y, width, height, player, playerIndex)
@@ -79,11 +85,12 @@ function UI:new(x, y, width, height, player, playerIndex)
     o.anchorBottom = true
     o.player = player
     o.playerIndex = playerIndex
+    o.shopKey = shopKey
     o.zOffsetLargeFont = 25;
     o.zOffsetMediumFont = 20;
     o.zOffsetSmallFont = 6;
     o:setWantKeyEvents(true)
-    o:setTitle("Blacklist")
+    o:setTitle("shop_pool_items_filter")
     return o;
 end
 
@@ -115,46 +122,50 @@ end
 function UI:createChildren()
 
     ISCollapsableWindowJoypad.createChildren(self);
+
     local th = self:titleBarHeight()
     local rh = self:resizeWidgetHeight()
 
     local padding = 10
-    local x = padding
-    local y = th + padding
-    local w = self.width - x - padding
-    local h = self.height - rh - padding - FONT_HGT_SMALL - 4
+    local x = 0
+    local y = th
+    local w = self.width
+    local h = self.height - rh - th
+
+    self.controls = {}
+
+    local panel = ISPanel:new(x, y, w, h);
+    panel:initialise();
+    panel:instantiate();
+    self:addChild(panel);
+    self.controls._panel = panel;
 
     self.controls.tabPanel = ISTabPanel:new(x, y, w, h - y);
     self.controls.tabPanel:initialise()
-    self:addChild(self.controls.tabPanel)
+    self.controls._panel:addChild(self.controls.tabPanel)
 
     self.controls.items = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        blacklist = true,
         type = Core.consts.itemType.items
     });
 
     self.controls.vehicles = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        blacklist = true,
         type = Core.consts.itemType.vehicles
     });
 
     self.controls.traits = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        blacklist = true,
         type = Core.consts.itemType.traits
     });
 
     self.controls.xp = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        blacklist = true,
         type = Core.consts.itemType.xp
     });
 
     self.controls.boosts = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
-        blacklist = true,
         type = Core.consts.itemType.boosts
     });
 
@@ -173,18 +184,6 @@ function UI:createChildren()
     self:refreshAll()
 end
 
-function UI:refreshAll()
-
-    for k, v in pairs(self.controls) do
-        if v.setData then
-            v:setData(self.data[k] or {
-                categories = {},
-                exclude = {}
-            })
-        end
-    end
-end
-
 function UI:prerender()
 
     ISCollapsableWindowJoypad.prerender(self);
@@ -197,18 +196,15 @@ end
 
 function UI:onOK()
 
-    local selected = {}
-    for k, v in pairs(self.controls) do
-        if v.getSelected then
-            selected[k] = v:getSelected()
-        end
-    end
+    local selected = {
+        items = self.controls.items:getSelected(),
+        vehicles = self.controls.vehicles:getSelected(),
+        traits = self.controls.traits:getSelected(),
+        xp = self.controls.xp:getSelected(),
+        boosts = self.controls.boosts:getSelected()
+    }
 
-    if Core.isLocal then
-        Core.setBlacklist(selected)
-    else
-        sendClientCommand(Core.name, Core.commands.setBlacklist, selected)
-    end
+    self.cb(selected)
     self:close()
 
 end

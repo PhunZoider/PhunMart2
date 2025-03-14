@@ -142,11 +142,15 @@ function UI:setData(data)
     self.lastSelected = nil
 
     self.data.selected = {}
-    for k, item in ipairs(data or {}) do
-        self.data.selected[k] = true
+    -- for k, item in ipairs(data or {}) do
+    --     self.data.selected[k] = true
+    -- end
+    for k, item in pairs(data or {}) do
+        self.data.selected[k] = item
     end
 
     for _, item in ipairs(self.data.categories or {}) do
         self.list:addItem(item.label, item);
     end
 end
+

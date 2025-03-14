@@ -31,11 +31,16 @@ function Core:getInstanceDistancesFrom(x, y)
     end
 
     for k, v in pairs(self.instances) do
-        local dx = x - v.x
-        local dy = y - v.y
-        local distance = math.sqrt(dx * dx + dy * dy)
-        if distance < results[v.key] then
-            results[v.key] = distance
+        if results[v.key] then
+
+            local dx = x - v.x
+            local dy = y - v.y
+            local distance = math.sqrt(dx * dx + dy * dy)
+            if distance < results[v.key] then
+                results[v.key] = distance
+            end
+        else
+            print("PhunMart Error: No shop with key " .. k)
         end
     end
 

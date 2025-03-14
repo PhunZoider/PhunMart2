@@ -485,3 +485,57 @@ function Core.getAllBoosts(refresh)
 
     return Core.boostsAll
 end
+
+function Core.getAllSkills(refresh)
+
+    if Core.skillsAll ~= nil and not refresh then
+        return Core.skillsAll
+    end
+    Core.skillsAll = {}
+
+    local checked = {}
+    for i = 0, Perks.getMaxIndex() - 1 do
+        local perk = PerkFactory.getPerk(Perks.fromIndex(i))
+        if perk and perk:getParent() ~= Perks.None then
+            local name = perk:getName()
+            if not checked[name] then
+                checked[name] = true
+                table.insert(Core.skillsAll, {
+                    type = name,
+                    label = perk.translation
+                })
+            end
+        end
+    end
+    table.sort(Core.skillsAll, function(a, b)
+        return (a.label or a.type):lower() < (b.label or b.type):lower()
+    end)
+    return Core.skillsAll
+end
+
+function Core.getAllProfessions(refresh)
+
+    if Core.ProfessionsAll ~= nil and not refresh then
+        return Core.ProfessionsAll
+    end
+    Core.ProfessionsAll = {}
+    local checked = {}
+
+    local professionList = ProfessionFactory.getProfessions();
+    for i = 0, professionList:size() - 1 do
+        local prof = professionList:get(i)
+        table.insert(Core.ProfessionsAll, {
+            type = prof:getType(),
+            label = prof:getLabel(),
+            texture = prof:getTexture(),
+            tooltip = {
+                description = prof:getDescription()
+            }
+        })
+
+    end
+    table.sort(Core.ProfessionsAll, function(a, b)
+        return (a.label or a.type):lower() < (b.label or b.type):lower()
+    end)
+    return Core.ProfessionsAll
+end

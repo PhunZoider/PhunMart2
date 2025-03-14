@@ -12,11 +12,11 @@ local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
-local profileName = "PhunMartUIPoolEditorItems"
-PhunMartUIPoolEditorItems = ISCollapsableWindowJoypad:derive(profileName);
-local UI = PhunMartUIPoolEditorItems
+local profileName = "PhunMartUIPoolItemFilterItems"
+PhunMartUIPoolItemFilterItems = ISCollapsableWindowJoypad:derive(profileName);
+local UI = PhunMartUIPoolItemFilterItems
 local instances = {}
-Core.ui.admin.poolEditor = UI
+Core.ui.admin.poolItemFilter = UI
 
 function UI.OnOpenPanel(playerObj, pool)
 
@@ -35,7 +35,7 @@ function UI.OnOpenPanel(playerObj, pool)
         instance = instances[playerIndex]
         instance:initialise();
 
-        ISLayoutManager.RegisterWindow(profileName, PhunMartUIPoolEditorItems, instance)
+        ISLayoutManager.RegisterWindow(profileName, PhunMartUIPoolItemFilterItems, instance)
     end
 
     instance.pool = pool or {}
@@ -258,7 +258,5 @@ function UI:onOK()
         xp = self.controls.xp:getSelected(),
         boosts = self.controls.boosts:getSelected()
     }
-
-    PhunLib:debug(selected)
 
 end

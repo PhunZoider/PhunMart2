@@ -12,7 +12,7 @@ local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
 local PL = PhunLib
-local profileName = "PhunMartUIPropEditor"
+local profileName = "PhunMartUIPoolsEditor"
 
 Core.ui.admin.poolsEditor = ISPanel:derive(profileName);
 Core.ui.admin.poolsEditor.instances = {}
@@ -28,24 +28,31 @@ function UI:setData(data)
     local isNew = data.key == nil
 
     -- remove all tabviews
-    if #self.tabPanel.viewList > 0 then
-        for i = #self.tabPanel.viewList, 1, -1 do
-            self.tabPanel:removeView(self.tabPanel.viewList[i].view)
+    if #self.controls.tabPanel.viewList > 0 then
+        for i = #self.controls.tabPanel.viewList, 1, -1 do
+            self.controls.tabPanel:removeView(self.controls.tabPanel.viewList[i].view)
         end
     end
 
     local pools = self.data.pools
     for i, v in ipairs(pools) do
-        local p = Core.ui.admin.poolsEditorEntry:new(0, 0, self.tabPanel.width, self.tabPanel.height, {
-            player = self.player
-        })
+        local p = Core.ui.admin.poolsEditorEntry:new(0, 0, self.controls.tabPanel.width, self.controls.tabPanel.height,
+            {
+                player = self.player
+            })
         p:initialise()
         p:instantiate()
-        self.tabPanel:addView(tostring(i), p)
+        self.controls.tabPanel:addView(tostring(i), p)
+        -- self.tabPanel.viewList[#self.tabPanel.viewList].view.backgroundColor = {
+        --     r = 1,
+        --     g = 0,
+        --     b = 0,
+        --     a = 1.0
+        -- }
         p:setData(v)
     end
 
-    self.tabPanel:setVisible(#self.tabPanel.viewList > 0)
+    self.controls.tabPanel:setVisible(#self.controls.tabPanel.viewList > 0)
     self.isDirtyValue = false
 end
 
@@ -64,7 +71,7 @@ end
 function UI:isDirty()
     local isDirty = self.isDirtyValue
     if not isDirty then
-        for i, v in ipairs(self.tabPanel.viewList) do
+        for i, v in ipairs(self.controls.tabPanel.viewList) do
             if v.view:isDirty() then
                 isDirty = true
                 break
@@ -123,6 +130,13 @@ function UI:createChildren()
         return false
     end
 
+    -- self.controls._panel.backgroundColor = {
+    --     r = 0,
+    --     g = 1,
+    --     b = 0,
+    --     a = 1
+    -- }
+
     self:addChild(self.controls._panel);
 
     self.controls.addPool = ISButton:new(10, 10, 100, BUTTON_HGT, getText("UI_btn_add"), self, self.onAddPool);
@@ -154,11 +168,18 @@ function UI:createChildren()
     end
     self.controls._panel:addChild(self.controls.removePool);
 
-    self.tabPanel = ISTabPanel:new(x, 100, w, h - y - offset);
-    self.tabPanel:initialise()
-    self.tabPanel:instantiate()
+    self.controls.tabPanel = ISTabPanel:new(x, BUTTON_HGT + 20, w, h - y - offset);
+    self.controls.tabPanel:initialise()
+    self.controls.tabPanel:instantiate()
 
-    self.controls._panel:addChild(self.tabPanel)
+    -- self.tabPanel.backgroundColor = {
+    --     r = 0,
+    --     g = 0,
+    --     b = 1,
+    --     a = 1.0
+    -- }
+
+    self.controls._panel:addChild(self.controls.tabPanel)
 
     self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)
@@ -190,8 +211,8 @@ end
 -- Remove pool
 function UI:onRemovePool()
     local index = 0
-    local view = self.tabPanel.activeView
-    for i, v in ipairs(self.tabPanel.viewList) do
+    local view = self.controls.tabPanel.activeView
+    for i, v in ipairs(self.controls.tabPanel.viewList) do
         if v == view then
             index = i
             break
@@ -211,20 +232,28 @@ end
 function UI:onDuplicatePool()
 
     local index = 0
-    local view = self.tabPanel.activeView
-    for i, v in ipairs(self.tabPanel.viewList) do
-        if v == view then
-            index = i
-            break
-        end
-    end
-
-    if index > 0 then
-        local copy = PL.table.deepCopy(self.data.pools[index])
+    local view = self.controls.tabPanel.activeView
+    local data = view and view.view and view.view:getData() or nil
+    if data then
+        local copy = PL.table.deepCopy(data)
         table.insert(self.data.pools, copy)
         self:setData(self.data)
         self.isDirtyValue = true
     end
+
+    -- for i, v in ipairs(self.controls.tabPanel.viewList) do
+    --     if v == view then
+    --         index = i
+    --         break
+    --     end
+    -- end
+
+    -- if index > 0 then
+    --     local copy = PL.table.deepCopy(self.data.pools[index])
+    --     table.insert(self.data.pools, copy)
+    --     self:setData(self.data)
+    --     self.isDirtyValue = true
+    -- end
 
 end
 function UI:prerender()
@@ -242,13 +271,17 @@ function UI:prerender()
     self.controls._panel:setHeight(h)
     self.controls._panel:updateScrollbars();
 
-    self.tabPanel:setX(10)
-    self.tabPanel:setY(100)
-    self.tabPanel:setWidth(w - 20)
-    self.tabPanel:setHeight(h - 130)
+    self.controls.tabPanel:setX(10)
+    self.controls.tabPanel:setWidth(w - 20)
+    self.controls.tabPanel:setHeight(h - self.controls.tabPanel.y - HEADER_HGT - 10)
 
     self.controls.removePool:setX(w - 120)
     self.controls.duplicatePool:setX(w - 230)
     self.controls.addPool:setX(w - 340)
+
+    for _, view in ipairs(self.controls.tabPanel.viewList) do
+        view.view:setWidth(self.controls.tabPanel:getWidth())
+        view.view:setHeight(self.controls.tabPanel:getHeight())
+    end
 
 end

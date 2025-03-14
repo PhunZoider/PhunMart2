@@ -11,6 +11,7 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
+local PL = PhunLib
 local profileName = "PhunMartUIPropEditor"
 
 Core.ui.admin.poolsEditorEntry = ISPanel:derive(profileName);
@@ -112,36 +113,8 @@ function UI:setData(data)
         end
     end
 
-    self.keys = {}
-
-    local keys = {}
-    for k, v in pairs(itemGroupData or {}) do
-        self.keys[k] = false
-        table.insert(keys, k)
-    end
-
-    table.sort(keys, function(a, b)
-        return a:lower() < b:lower()
-    end)
-    self.controls.keys:clear()
-    for i, v in ipairs(keys) do
-        self.controls.keys:addItem(v, {
-            text = v,
-            index = i
-        })
-    end
-
-    for _, v in ipairs(data.keys or {}) do
-        self.keys[v] = true
-    end
-
-    -- select the first entry
-    for i, v in ipairs(keys) do
-        if self.keys[v] == true then
-            self.controls.keys:ensureVisible(i)
-            break
-        end
-    end
+    self.filters = data.filters or {}
+    self:refreshItems()
 
     self.isDirtyValue = false
 end
@@ -177,13 +150,7 @@ function UI:getData()
         end
 
     end
-
-    data.keys = {}
-    for k, v in pairs(self.keys) do
-        if v == true then
-            table.insert(data.keys, k)
-        end
-    end
+    data.filters = self.filters
 
     return data
 end
@@ -294,47 +261,236 @@ function UI:createChildren()
 
     end
 
-    local label = ISLabel:new(x, y, h, "Groups", 1, 1, 1, 1, UIFont.Small, true);
+    local label = ISLabel:new(x, y, h, "Items", 1, 1, 1, 1, UIFont.Small, true);
     label:initialise();
     label:instantiate();
     self.controls["label_pools"] = label
     self.controls._panel:addChild(label);
 
-    self.controls.keys = ISScrollingListBox:new(110, y + HEADER_HGT, 200, 50);
-    self.controls.keys:initialise();
-    self.controls.keys:instantiate();
-    self.controls.keys.itemheight = FONT_HGT_SMALL + 4 * 2
-    self.controls.keys.selected = 0;
-    self.controls.keys.joypadParent = self;
-    self.controls.keys.font = UIFont.NewSmall;
-    self.controls.keys.doDrawItem = self.drawDatas;
+    self.controls.list = ISScrollingListBox:new(110, y + HEADER_HGT, 300, 200);
+    self.controls.list:initialise();
+    self.controls.list:instantiate();
+    self.controls.list.itemheight = FONT_HGT_SMALL + 4 * 2
+    self.controls.list.selected = 0;
+    self.controls.list.joypadParent = self;
+    self.controls.list.font = UIFont.NewSmall;
+    self.controls.list.doDrawItem = self.drawDatas;
 
-    self.controls.keys:setOnMouseDownFunction(self, function(s, row)
-        local index = row.index
-        local key = row.text
-        local item = self.keys[key]
-        if item == nil then
-            return
-        end
-        if item == true then
-            self.keys[key] = false
-        else
-            self.keys[key] = true
-        end
-        self.isDirtyValue = true
+    self.controls.list:setOnMouseDownFunction(self, function(s, row)
+        -- local index = row.index
+        -- local key = row.text
+        -- local item = self.keys[key]
+        -- if item == nil then
+        --     return
+        -- end
+        -- if item == true then
+        --     self.keys[key] = false
+        -- else
+        --     self.keys[key] = true
+        -- end
+        -- self.isDirtyValue = true
     end)
 
-    self.controls.keys.drawBorder = true;
-    self.controls.keys:addColumn("Groups", 0);
-    self.controls._panel:addChild(self.controls.keys);
+    self.controls.list.onRightMouseUp = function(target, x, y, a, b)
+        local row = target:rowAt(x, y)
+        if row == -1 then
+            return
+        end
+        if target.selected ~= row then
+            target.selected = row
+            target:ensureVisible(target.selected)
+        end
+        local item = target.items[target.selected].item
 
-    y = y + self.controls.keys.height
+        if item then
+            local context = ISContextMenu.get(self.playerIndex, target:getAbsoluteX() + x,
+                target:getAbsoluteY() + y + target:getYScroll())
+            context:removeFromUIManager()
+            context:addToUIManager()
+
+            context:addOption("Properties", self, function()
+                self:itemProperties(item)
+            end, item)
+            context:addOption("Restrictions", self, self.onRemoveTile, item)
+            context:addOption("Remove", self, function()
+                self:promptToExcludeItem(item)
+            end, item)
+        end
+    end
+
+    self.controls.list.drawBorder = true;
+    self.controls.list:addColumn("Items", 0);
+    self.controls._panel:addChild(self.controls.list);
+
+    y = y + self.controls.list.height
 
     self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)
 
     self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)
+
+    y = y + 10 + HEADER_HGT
+
+    local label = ISLabel:new(x, y, h, "Filter", 1, 1, 1, 1, UIFont.Small, true);
+    label:initialise();
+    label:instantiate();
+    self.controls["label_filter"] = label
+    self.controls._panel:addChild(label);
+
+    self.controls.filterText = ISTextEntryBox:new("", 110, y, 215, h);
+    self.controls.filterText:initialise();
+    self.controls.filterText.onTextChange = function()
+        self:refreshItems()
+    end
+    self.controls._panel:addChild(self.controls.filterText);
+
+    local button = ISButton:new(self.controls.filterText.x + self.controls.filterText.width + 10, y, 75, BUTTON_HGT,
+        "...", self, function()
+            Core.ui.admin.shop_pool_items_filter.open(self.player, self.filters or {}, function(data)
+                local s = self
+                s.filters = data
+                s:setData(s:getData())
+            end)
+        end);
+    button:initialise();
+    button:instantiate();
+
+    self.controls.pool_filter = button
+    self.controls._panel:addChild(self.controls.pool_filter)
+    self.controls._panel:setScrollHeight(y + h + 20)
+end
+
+function UI:promptToExcludeItem(item)
+    local message = "Are you sure you want to exclude this item from the list?"
+    local w = 300 * FONT_SCALE
+    local h = 200 * FONT_SCALE
+    local modal = ISModalDialog:new(getCore():getScreenWidth() / 2 - w / 2, getCore():getScreenHeight() / 2 - h / 2, w,
+        h, message, true, self, function(s, button)
+            if button.internal == "YES" then
+                self.filters[item.source].exclude[item.type] = true
+                self:refreshItems()
+            end
+        end, nil);
+    modal:initialise()
+    modal:addToUIManager()
+end
+
+function UI:itemProperties(item)
+    Core.ui.admin.shop_config_item.open(self.player, item, function(data)
+        self:refreshItems()
+    end)
+end
+
+function UI:refreshItems()
+    self.controls.list:clear();
+    self.lastSelected = nil
+    self.data = self:getData()
+    local filterText = self.controls.filterText:getInternalText():lower()
+    local filters = self.data.filters or {}
+    local results = {}
+
+    if filters.items then
+        local allItems = Core.getAllItems()
+        for _, v in ipairs(allItems) do
+            if not filters.items.exclude[v.type] then
+                if filters.items.include[v.type] or filters.items.categories[v.category] then
+                    table.insert(results, {
+                        type = v.type,
+                        label = v.label,
+                        category = v.category,
+                        texture = v.texture,
+                        source = "items"
+                    })
+                end
+            end
+        end
+    end
+
+    if filters.vehicles then
+        local allCars = Core.getAllVehicles()
+        for _, v in ipairs(allCars) do
+            if not filters.vehicles.exclude[v.type] then
+                if filters.vehicles.include[v.type] or filters.vehicles.categories[v.category] then
+                    table.insert(results, {
+                        type = v.type,
+                        label = v.label,
+                        category = v.category,
+                        source = "vehicles"
+                    })
+                end
+            end
+        end
+    end
+
+    if filters.traits then
+        local allTraits = Core.getAllTraits()
+        for _, v in ipairs(allTraits) do
+            if not filters.traits.exclude[v.type] then
+                if filters.traits.include[v.type] or filters.traits.categories[v.category] then
+                    table.insert(results, {
+                        type = v.type,
+                        label = v.label,
+                        category = v.category,
+                        source = "traits"
+                    })
+                end
+            end
+        end
+    end
+
+    if filters.xp then
+        local allXp = Core.getAllXp()
+        for _, v in ipairs(allXp) do
+            if not filters.xp.exclude[v.type] then
+                if filters.xp.include[v.type] or filters.xp.categories[v.category] then
+                    table.insert(results, {
+                        type = v.type,
+                        label = v.label,
+                        category = v.category,
+                        source = "xp"
+                    })
+                end
+            end
+        end
+    end
+
+    if filters.boosts then
+        local allBoosts = Core.getAllBoosts()
+        for _, v in ipairs(allBoosts) do
+            if not filters.boosts.exclude[v.type] then
+                if filters.boosts.include[v.type] or filters.boosts.categories[v.category] then
+                    table.insert(results, {
+                        type = v.type,
+                        label = v.label,
+                        category = v.category,
+                        source = "boosts"
+                    })
+                end
+            end
+        end
+    end
+
+    table.sort(results, function(a, b)
+        return a.label:lower() < b.label:lower()
+    end)
+
+    self.itemlist = results
+    self.controls.list:clear()
+    for _, v in ipairs(results) do
+        if (filterText == "" or string.match(v.label:lower(), filterText)) then
+            self.controls.list:addItem(v.label, v);
+        end
+    end
+
+    if #results == 0 then
+        self.controls.list.columns[1].name = "No items set"
+    elseif #results ~= #self.controls.list.items then
+        self.controls.list.columns[1].name = "Items: " .. PL.string.formatWholeNumber(#self.controls.list.items) ..
+                                                 " of " .. PL.string.formatWholeNumber(#results)
+    else
+        self.controls.list.columns[1].name = "Items: " .. PL.string.formatWholeNumber(#results)
+    end
 
 end
 
@@ -345,7 +501,7 @@ function UI:drawDatas(y, item, alt)
 
     local a = 0.9;
 
-    if self.parent.parent.keys[item.item.text] == true then
+    if item.index == self.selected then
         self:drawRect(0, (y), self:getWidth(), self.itemheight, 0.3, 0.7, 0.35, 0.15);
     end
 
@@ -382,17 +538,12 @@ function UI:prerender()
     local x = offset
     local y = offset
 
-    self.controls._panel:setX(x)
-    self.controls._panel:setY(y)
-    self.controls._panel:setWidth(w)
-    self.controls._panel:setHeight(h)
-    self.controls._panel:updateScrollbars();
+    local panel = self.controls._panel
 
-    if self.controls.keys.y < (self.controls._panel.height - 10) then
-        -- resize
-        self.controls.keys:setHeight(self.controls._panel.height - self.controls.keys.y - 10)
-    else
-
-    end
+    panel:setX(x)
+    panel:setY(y)
+    panel:setWidth(w)
+    panel:setHeight(h)
+    panel:updateScrollbars();
 
 end

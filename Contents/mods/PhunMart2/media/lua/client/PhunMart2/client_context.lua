@@ -43,10 +43,15 @@ Core.contexts.open = function(player, context, worldobjects, test)
         adminSubMenu:addOption("Shops", player, function()
             local c = Core.ui
             c.admin.shops.OnOpenPanel(getSpecificPlayer(player))
+            Core.ui.admin.shop_selector.open(getSpecificPlayer(player))
+        end)
+
+        adminSubMenu:addOption("Pool Items", player, function()
+            Core.ui.admin.poolItems.OnOpenPanel(getSpecificPlayer(player))
         end)
 
         adminSubMenu:addOption("Pool Editor", player, function()
-            Core.ui.admin.poolEditor.OnOpenPanel(getSpecificPlayer(player))
+            Core.ui.admin.poolItemFilter.OnOpenPanel(getSpecificPlayer(player))
         end)
 
         adminSubMenu:addOption("Locations", player, function()
