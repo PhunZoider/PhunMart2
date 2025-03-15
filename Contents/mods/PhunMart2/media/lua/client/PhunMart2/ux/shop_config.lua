@@ -154,6 +154,7 @@ function UI:createChildren()
     self.controls.tabPanel:addView("Pools", self.controls.pools)
 
     self:refreshAll()
+    self:bringToTop()
 end
 
 function UI:prerender()

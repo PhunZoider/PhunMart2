@@ -166,6 +166,8 @@ function UI:createChildren()
     list.joypadParent = self;
     list.font = UIFont.NewSmall;
     list.doDrawItem = self.drawDatas;
+
+    list:setOnMouseDoubleClick(self, self.onEdit);
     list.onMouseUp = function(list, x, y)
         local row = list:rowAt(x, y)
         if row == nil or row == -1 then
@@ -229,6 +231,10 @@ function UI:createChildren()
     self.controls._controlPanel:addChild(btnSpawn);
 
     self:refreshAll()
+end
+
+function UI:onEdit(item)
+    Core.ui.admin.shop_config.open(self.player, item.key)
 end
 
 function UI:prerender()
@@ -308,11 +314,8 @@ function UI:drawDatas(y, item, alt)
     self:clearStencilRect()
 
     local value = item.item.group
-
-    local valueWidth = getTextManager():MeasureStringX(self.font, value)
-    local w = self.width
     local cw = self.columns[2].size
-    self:drawText(value, w - valueWidth - xoffset - 4, y + 4, 1, 1, 1, a, self.font);
+    self:drawText(value, cw + 4, y + 4, 1, 1, 1, a, self.font);
     self.itemsHeight = y + self.itemheight;
     return self.itemsHeight;
 end

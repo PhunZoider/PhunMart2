@@ -8,7 +8,7 @@ local Core = PhunMart
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
-
+local BUTTON_HGT = FONT_HGT_SMALL + 6
 local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
@@ -18,7 +18,7 @@ local UI = Core.ui.admin.shop_config_item
 local instances = {}
 
 function UI:setData(data)
-
+    self.data = data
 end
 
 function UI.open(player, item)
@@ -33,15 +33,15 @@ function UI.open(player, item)
     local y = (core:getScreenHeight() - height) / 2
 
     local instance = UI:new(x, y, width, height, player, playerIndex);
+    instance.item = item
     instance:initialise();
 
     ISLayoutManager.RegisterWindow(profileName, UI, instance)
 
-    instance.shopKey = shopKey or nil
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
-    instance:setData(item)
+
     return instance;
 
 end
@@ -169,7 +169,7 @@ function UI:createChildren()
 
     self.controls = {}
 
-    local panel = ISPanel:new(x, y, w, h);
+    local panel = ISPanel:new(x, y, w - 210, h);
     panel:initialise();
     panel:instantiate();
     self:addChild(panel);
@@ -180,7 +180,7 @@ function UI:createChildren()
     self.controls.itemPropsTabs:instantiate();
     panel:addChild(self.controls.itemPropsTabs);
 
-    local propsPanel = ISPanel:new(0, 0, self.controls.itemPropsTabs.width, self.controls.itemPropsTabs.height);
+    local propsPanel = ISPanel:new(x, 0, self.controls.itemPropsTabs.width, self.controls.itemPropsTabs.height);
     propsPanel:initialise();
     propsPanel:instantiate();
     self.controls.itemPropsTabs:addView("Props", propsPanel);
@@ -398,7 +398,116 @@ function UI:createChildren()
     self.controls.minCharTime:instantiate();
     self.controls.purchaseLimitsPanel:addChild(self.controls.minCharTime);
 
+    x = x + self.controls._panel.width + padding
+    y = 0
+    local infoPanel = ISPanel:new(x, y, self.width - x, h);
+    infoPanel:initialise();
+    infoPanel:instantiate();
+    self:addChild(infoPanel);
+    self.controls.infoPanel = infoPanel;
+
+    local previewPanel = nil
+    if self.item.source == "vehicles" then
+        previewPanel = ISUI3DScene:new(10, 10, 180, 180)
+        previewPanel:initialise()
+        previewPanel.onMouseMove = function(self, dx, dy)
+            if self.mouseDown then
+                local vector = self:getRotation()
+                local x = vector:x() + dy
+                x = x > 90 and 90 or x < -90 and -90 or x
+                self:setRotation(x, vector:y() + dx)
+            end
+        end
+        previewPanel.setRotation = function(self, x, y)
+            self.javaObject:fromLua3("setViewRotation", x, y, 0)
+        end
+        previewPanel.getRotation = function(self)
+            return self.javaObject:fromLua0("getViewRotation")
+        end
+
+    else
+        previewPanel = ISPanel:new(10, 10, 180, 180);
+        previewPanel:initialise();
+        previewPanel:instantiate();
+
+        previewPanel.render = function(self)
+            local item = self.parent.parent.item
+            if item.texture then
+                self:drawTextureScaledAspect(item.texture, 0, 0, self:getWidth(), self:getHeight(), 1)
+            end
+        end
+    end
+    infoPanel:addChild(previewPanel);
+    self.controls.previewPanel = previewPanel;
+
+    local label = getTextManager():WrapText(UIFont.Medium, self.item.label, infoPanel.width - 20)
+
+    local name = ISLabel:new(10, 200, FONT_HGT_MEDIUM, label, 1, 1, 1, 1, UIFont.Medium, true);
+    name:initialise();
+    name:instantiate();
+    infoPanel:addChild(name);
+    self.controls.name = name;
+
+    local category = ISLabel:new(10, name.y + name.height + 10, FONT_HGT_SMALL, self.item.category, 1, 1, 1, 1,
+        UIFont.Small, true);
+    category:initialise();
+    category:instantiate();
+    infoPanel:addChild(category);
+    self.controls.category = category;
+
+    local save = ISButton:new(previewPanel.x, infoPanel.height - BUTTON_HGT, previewPanel.width, BUTTON_HGT, "Save",
+        self, UI.onSave);
+    save:initialise();
+    save:instantiate();
+    if save.enableAcceptColor then
+        save:enableAcceptColor()
+    end
+    save:setAnchorRight(true);
+    save:setAnchorBottom(true);
+    infoPanel:addChild(save);
+    self.controls.save = save;
+
+    local y = category.y + category.height + 10
+    local description = ISRichTextPanel:new(previewPanel.x, y, previewPanel.width, save.y - y - 20);
+    description:initialise();
+    description:instantiate();
+    description.borderColor = {
+        r = 0.7,
+        g = 0.7,
+        b = 0.7,
+        a = 1
+    };
+    description.backgroundColor = {
+        r = 0,
+        g = 0,
+        b = 0,
+        a = 0.8
+    };
+    description:setMargins(10, 10, 10, 10);
+    description:setAnchorRight(true);
+    description:setAnchorBottom(true);
+    description.autosetheight = false
+    description:setText("")
+    description:paginate()
+    infoPanel:addChild(description);
+    self.controls.description = description;
+
     self:refreshAll()
+end
+
+function UI:instantiate()
+    ISCollapsableWindowJoypad.instantiate(self);
+    local previewPanel = self.controls.previewPanel
+    previewPanel.initialized = true
+    previewPanel.javaObject:fromLua1("setDrawGrid", false)
+    previewPanel.javaObject:fromLua1("createVehicle", "vehicle")
+    previewPanel.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
+    previewPanel.javaObject:fromLua1("setView", "UserDefined")
+    previewPanel.javaObject:fromLua2("dragView", 0, 30)
+    previewPanel.javaObject:fromLua1("setZoom", 6)
+    previewPanel.vehicleName = self.item.type
+    previewPanel.javaObject:fromLua2("setVehicleScript", "vehicle", previewPanel.vehicleName)
+
 end
 
 function UI:setSelectedItem()
@@ -466,7 +575,7 @@ function UI:promptMinMaxBoosts(item)
     end
     Core.ui.admin.minmax.open(self.player, data, {
         minMin = 0,
-        maxMax = 10
+        maxMax = 3
     }, function(data)
         local s = self
         if self.data.boosts == nil then
@@ -733,7 +842,7 @@ function UI:prerender()
     local padding = 0
     local th = self:titleBarHeight()
     local rh = self:resizeWidgetHeight()
-    local w = self.width
+    local w = self.width - 200 - padding
     local h = self.height - rh - th
     local x = padding
     local y = padding + th
@@ -785,6 +894,42 @@ function UI:prerender()
     purchaseLimitsPanel:setWidth(w)
     purchaseLimitsPanel:setHeight(h)
 
+    local infoPanel = self.controls.infoPanel
+    infoPanel:setX(self.width - infoPanel.width + 10)
+    infoPanel:setY(y)
+    infoPanel:setHeight(h)
+
+    if self.lastActiveViewName ~= itemPropsTabs.activeView.name then
+        self.lastActiveViewName = itemPropsTabs.activeView.name
+        local txt = ""
+        if itemPropsTabs.activeView.name == "Skills" then
+            txt =
+                "Skills: Double click to set min/max levels required to purchase this item. Leave the value blank to ignore."
+        elseif itemPropsTabs.activeView.name == "Boosts" then
+            txt =
+                "Boosts: Double click to set min/max levels required to purchase this item. Leave the value blank to ignore."
+        elseif itemPropsTabs.activeView.name == "Traits" then
+            txt =
+                "Traits: Right click to set if the trait is required, forbidden or no restriction. You can also toggle between states by double clicking"
+        elseif itemPropsTabs.activeView.name == "Professions" then
+            txt =
+                "Professions: Right click to set if the profession is required, forbidden or no restriction. You can also toggle between states by double clicking"
+        elseif itemPropsTabs.activeView.name == "Purchase Limits" then
+            txt =
+                "Purchase Limits: Set the limits to how many times this item can be purchased. Leave the value blank to ignore."
+        elseif itemPropsTabs.activeView.name == "Props" then
+            txt =
+                "Props: Set the min/max price, currency, inventory and probability of this item. Leave blank to use defaults"
+        end
+
+        self.controls.description:setText(txt)
+        self.controls.description:paginate()
+        self.controls.description.textDirty = true;
+
+    end
+
+    self.controls.save:setHeight(BUTTON_HGT)
+    self.controls.save:setY(infoPanel.height - BUTTON_HGT - 10)
 end
 
 function UI:toggleTraitRequirement(item)

@@ -45,7 +45,7 @@ function UI.open(player, data, acceptableRanges, cb)
         max = tostring(data.max) or ""
     }
     instance.cb = cb
-    instance:bringToTop()
+    instance:setAlwaysOnTop(true);
     return instance;
 
 end
@@ -171,6 +171,9 @@ function UI:onAccept()
     end
     if max == 0 then
         max = nil
+    end
+    if max ~= nil and max > self.acceptableRanges.max then
+        max = self.acceptableRanges.max
     end
 
     self.cb({
