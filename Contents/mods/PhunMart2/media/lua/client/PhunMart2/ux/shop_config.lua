@@ -90,11 +90,11 @@ end
 
 function UI:RestoreLayout(name, layout)
 
-    -- ISLayoutManager.DefaultRestoreWindow(self, layout)
-    -- if name == profileName then
-    --     ISLayoutManager.DefaultRestoreWindow(self, layout)
-    --     self.userPosition = layout.userPosition == 'true'
-    -- end
+    ISLayoutManager.DefaultRestoreWindow(self, layout)
+    if name == profileName then
+        ISLayoutManager.DefaultRestoreWindow(self, layout)
+        self.userPosition = layout.userPosition == 'true'
+    end
     self:recalcSize();
 end
 
@@ -155,34 +155,4 @@ function UI:createChildren()
 
     self:refreshAll()
     self:bringToTop()
-end
-
-function UI:prerender()
-    ISCollapsableWindowJoypad.prerender(self)
-
-    local th = self:titleBarHeight()
-    local rh = self:resizeWidgetHeight()
-
-    local x = 0
-    local y = th
-    local w = self.width
-    local h = self.height - rh - th
-
-    self.controls._panel:setX(x)
-    self.controls._panel:setY(y)
-    self.controls._panel:setWidth(w)
-    self.controls._panel:setHeight(h)
-    self.controls._panel:updateScrollbars();
-
-    self.controls.tabPanel:setX(10)
-    self.controls.tabPanel:setY(10)
-    self.controls.tabPanel:setWidth(w - 20)
-    self.controls.tabPanel:setHeight(h - 20 - HEADER_HGT)
-    self.controls.tabPanel:updateScrollbars();
-
-    for _, view in ipairs(self.controls.tabPanel.viewList) do
-        view.view:setWidth(self.controls.tabPanel:getWidth())
-        view.view:setHeight(self.controls.tabPanel:getHeight())
-    end
-
 end

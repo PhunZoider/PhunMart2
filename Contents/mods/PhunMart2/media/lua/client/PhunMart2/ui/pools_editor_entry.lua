@@ -311,12 +311,13 @@ function UI:createChildren()
             context:addOption("Properties", self, function()
                 self:itemProperties(item)
             end, item)
-            context:addOption("Restrictions", self, self.onRemoveTile, item)
             context:addOption("Remove", self, function()
                 self:promptToExcludeItem(item)
             end, item)
         end
     end
+
+    self.controls.list:setOnMouseDoubleClick(self, self.itemProperties)
 
     self.controls.list.drawBorder = true;
     self.controls.list:addColumn("Items", 0);
@@ -416,6 +417,7 @@ function UI:refreshItems()
                         type = v.type,
                         label = v.label,
                         category = v.category,
+
                         source = "vehicles"
                     })
                 end
@@ -432,6 +434,7 @@ function UI:refreshItems()
                         type = v.type,
                         label = v.label,
                         category = v.category,
+                        texture = v.texture,
                         source = "traits"
                     })
                 end
@@ -448,6 +451,7 @@ function UI:refreshItems()
                         type = v.type,
                         label = v.label,
                         category = v.category,
+                        texture = v.texture,
                         source = "xp"
                     })
                 end
@@ -464,6 +468,7 @@ function UI:refreshItems()
                         type = v.type,
                         label = v.label,
                         category = v.category,
+                        texture = v.texture,
                         source = "boosts"
                     })
                 end

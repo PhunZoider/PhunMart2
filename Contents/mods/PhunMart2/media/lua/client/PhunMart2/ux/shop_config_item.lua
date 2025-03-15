@@ -41,7 +41,7 @@ function UI.open(player, item)
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
-
+    instance:bringToTop()
     return instance;
 
 end
@@ -141,7 +141,7 @@ function UI:addLabel(text, parent, y)
 end
 
 function UI:addTextbox(name, text, tooltip, parent, y)
-    local textbox = ISTextEntryBox:new("", 100, y, 100, FONT_HGT_SMALL + 4);
+    local textbox = ISTextEntryBox:new("", 120, y, 100, FONT_HGT_SMALL + 4);
     textbox:initialise();
     textbox:instantiate();
     textbox:setTooltip(tooltip)
@@ -155,6 +155,40 @@ function UI:addLabeledTextbox(name, text, tooltip, parent, y)
     return self:addTextbox(name, text, tooltip, parent, y)
 end
 
+function UI:addPropTabListbox(label, drawFn, columns)
+
+    local y = HEADER_HGT
+    local panel = ISPanel:new(0, y, self.controls.itemPropsTabs.width,
+        self.controls.itemPropsTabs.height - y - self:resizeWidgetHeight());
+    panel:initialise();
+    panel:instantiate();
+    panel:setAnchorRight(true);
+    panel:setAnchorBottom(true);
+
+    local box = ISScrollingListBox:new(0, y, panel.width, panel.height - y);
+    box:initialise();
+    box:instantiate();
+    box.doDrawItem = drawFn;
+    box.itemheight = FONT_HGT_SMALL + 6 * 2
+    box.selected = 0;
+    box.joypadParent = self;
+    box.font = UIFont.NewSmall;
+    box:setAnchorRight(true);
+    box:setAnchorBottom(true);
+    box:setAnchorTop(true);
+    box:setAnchorLeft(true);
+
+    for i, v in ipairs(columns) do
+        box:addColumn(v, (i - 1) * 200);
+    end
+
+    panel:addChild(box);
+    self.controls.itemPropsTabs:addView(label, panel);
+    local view = self.controls.itemPropsTabs.viewList[#self.controls.itemPropsTabs.viewList].view
+
+    return box
+end
+
 function UI:createChildren()
 
     ISCollapsableWindowJoypad.createChildren(self);
@@ -162,27 +196,36 @@ function UI:createChildren()
     local rh = self:resizeWidgetHeight()
 
     local padding = 10
-    local x = padding
-    local y = th + padding
-    local w = self.width - x - padding
-    local h = self.height - rh - padding - FONT_HGT_SMALL - 4
+    local th = self:titleBarHeight()
+    local rh = self:resizeWidgetHeight()
+    local w = self.width - 200
+    local h = self.height - rh - th
+    local x = 0
+    local y = th
 
     self.controls = {}
 
-    local panel = ISPanel:new(x, y, w - 210, h);
+    local panel = ISPanel:new(x, y, w, h);
     panel:initialise();
     panel:instantiate();
+    panel:setAnchorRight(true);
+    panel:setAnchorBottom(true);
     self:addChild(panel);
     self.controls._panel = panel;
 
-    self.controls.itemPropsTabs = ISTabPanel:new(0, 0, panel.width, panel.height);
+    self.controls.itemPropsTabs = ISTabPanel:new(0, y, panel.width, panel.height);
     self.controls.itemPropsTabs:initialise();
     self.controls.itemPropsTabs:instantiate();
+    self.controls.itemPropsTabs:setAnchorRight(true);
+    self.controls.itemPropsTabs:setAnchorBottom(true);
     panel:addChild(self.controls.itemPropsTabs);
 
     local propsPanel = ISPanel:new(x, 0, self.controls.itemPropsTabs.width, self.controls.itemPropsTabs.height);
     propsPanel:initialise();
     propsPanel:instantiate();
+    propsPanel:setAnchorRight(true);
+    propsPanel:setAnchorBottom(true);
+
     self.controls.itemPropsTabs:addView("Props", propsPanel);
 
     local row = self:addLabeledTextbox("minPrice", "Min Price", "Min Price", propsPanel, y)
@@ -203,54 +246,28 @@ function UI:createChildren()
     row = self:addLabeledTextbox("probability", "Probability", "Probability", propsPanel, y)
     y = y + row.height + padding
 
-    self.controls.propsSkills = ISScrollingListBox:new(0, HEADER_HGT, self.controls.itemPropsTabs.width,
-        self.controls.itemPropsTabs.height - HEADER_HGT);
-    self.controls.propsSkills:initialise();
-    self.controls.propsSkills:instantiate();
-    self.controls.propsSkills.itemheight = FONT_HGT_SMALL + 6 * 2
-    self.controls.propsSkills.selected = 0;
-    self.controls.propsSkills.joypadParent = self;
-    self.controls.propsSkills.font = UIFont.NewSmall;
-    self.controls.propsSkills.doDrawItem = self.drawSkillDatas;
-    self.controls.propsSkills:setOnMouseDoubleClick(self, function()
+    y = 100
+
+    -- Skills
+    local skills = self:addPropTabListbox("Skills", self.drawSkillDatas, {"Skill", "Requires"})
+    skills:setOnMouseDoubleClick(self, function()
         local item = self.controls.propsSkills.items[self.controls.propsSkills.selected].item
         self:promptMinMaxSkills(item)
     end)
-    self.controls.propsSkills:addColumn("Skill", 0);
-    self.controls.propsSkills:addColumn("Requires", 200);
+    self.controls.propsSkills = skills
 
-    self.controls.itemPropsTabs:addView("Skills", self.controls.propsSkills);
-
-    self.controls.propsBoosts = ISScrollingListBox:new(0, HEADER_HGT, self.controls.itemPropsTabs.width,
-        self.controls.itemPropsTabs.height - HEADER_HGT);
-    self.controls.propsBoosts:initialise();
-    self.controls.propsBoosts:instantiate();
-    self.controls.propsBoosts.itemheight = FONT_HGT_SMALL + 6 * 2
-    self.controls.propsBoosts.selected = 0;
-    self.controls.propsBoosts.joypadParent = self;
-    self.controls.propsBoosts.font = UIFont.NewSmall;
-    self.controls.propsBoosts.doDrawItem = self.drawBoostsDatas;
-    self.controls.propsBoosts:setOnMouseDoubleClick(self, function()
+    -- Boosts
+    local boosts = self:addPropTabListbox("Boosts", self.drawBoostsDatas, {"Boost", "Requires"})
+    boosts:setOnMouseDoubleClick(self, function()
         local item = self.controls.propsBoosts.items[self.controls.propsBoosts.selected].item
         self:promptMinMaxBoosts(item)
     end)
+    self.controls.propsBoosts = boosts
 
-    self.controls.propsBoosts:addColumn("Boost", 0);
-    self.controls.propsBoosts:addColumn("Requires", 200);
-
-    self.controls.itemPropsTabs:addView("Boosts", self.controls.propsBoosts);
-
-    self.controls.propsTraits = ISScrollingListBox:new(0, HEADER_HGT, self.controls.itemPropsTabs.width,
-        self.controls.itemPropsTabs.height - HEADER_HGT);
-    self.controls.propsTraits:initialise();
-    self.controls.propsTraits:instantiate();
-    self.controls.propsTraits.itemheight = FONT_HGT_SMALL + 6 * 2
-    self.controls.propsTraits.selected = 0;
-    self.controls.propsTraits.joypadParent = self;
-    self.controls.propsTraits.font = UIFont.NewSmall;
-    self.controls.propsTraits.doDrawItem = self.drawTraitDatas;
-
-    self.controls.propsTraits.onRightMouseUp = function(target, x, y, a, b)
+    -- Traits
+    local traits = self:addPropTabListbox("Traits", self.drawTraitDatas, {"Trait", "Requires"})
+    traits:setOnMouseDoubleClick(self, self.toggleTraitRequirement)
+    traits.onRightMouseUp = function(target, x, y, a, b)
         local row = target:rowAt(x, y)
         if row == -1 then
             return
@@ -287,24 +304,12 @@ function UI:createChildren()
             end, item)
         end
     end
-    self.controls.propsTraits:setOnMouseDoubleClick(self, self.toggleTraitRequirement)
+    self.controls.propsTraits = traits
 
-    self.controls.propsTraits:addColumn("Trait", 0);
-    self.controls.propsTraits:addColumn("Requires", 200);
-
-    self.controls.itemPropsTabs:addView("Traits", self.controls.propsTraits);
-
-    self.controls.propsProf = ISScrollingListBox:new(0, HEADER_HGT, self.controls.itemPropsTabs.width,
-        self.controls.itemPropsTabs.height - HEADER_HGT);
-    self.controls.propsProf:initialise();
-    self.controls.propsProf:instantiate();
-    self.controls.propsProf.itemheight = FONT_HGT_SMALL + 6 * 2
-    self.controls.propsProf.selected = 0;
-    self.controls.propsProf.joypadParent = self;
-    self.controls.propsProf.font = UIFont.NewSmall;
-    self.controls.propsProf.doDrawItem = self.drawProfDatas;
-
-    self.controls.propsProf.onRightMouseUp = function(target, x, y, a, b)
+    -- Professions
+    local profs = self:addPropTabListbox("Professions", self.drawProfDatas, {"Profession", "Requires"})
+    profs:setOnMouseDoubleClick(self, self.toggleProfRequirement)
+    profs.onRightMouseUp = function(target, x, y, a, b)
         local row = target:rowAt(x, y)
         if row == -1 then
             return
@@ -341,72 +346,48 @@ function UI:createChildren()
             end, item)
         end
     end
+    self.controls.propsProf = profs
 
-    self.controls.propsProf:setOnMouseDoubleClick(self, self.toggleProfRequirement)
-
-    self.controls.propsProf:addColumn("Profession", 0);
-    self.controls.propsProf:addColumn("Requires", 200);
-
-    self.controls.itemPropsTabs:addView("Professions", self.controls.propsProf);
-
+    -- Limits
     self.controls.purchaseLimitsPanel = ISPanel:new(0, 0, self.controls.itemPropsTabs.width,
         self.controls.itemPropsTabs.height);
     self.controls.purchaseLimitsPanel:initialise();
     self.controls.purchaseLimitsPanel:instantiate();
+    self.controls.purchaseLimitsPanel:setAnchorRight(true);
+    self.controls.purchaseLimitsPanel:setAnchorBottom(true);
     self.controls.itemPropsTabs:addView("Purchase Limits", self.controls.purchaseLimitsPanel);
 
-    self.controls.maxPurchasesLabel = ISLabel:new(10, 10, FONT_HGT_SMALL, "Max Purchases", 1, 1, 1, 1, UIFont.Small,
-        true);
-    self.controls.maxPurchasesLabel:initialise();
-    self.controls.maxPurchasesLabel:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.maxPurchasesLabel);
+    y = 20
 
-    self.controls.maxPurchases = ISTextEntryBox:new("0", 10, 30, 100, FONT_HGT_SMALL + 4);
-    self.controls.maxPurchases:initialise();
-    self.controls.maxPurchases:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.maxPurchases);
+    row = self:addLabeledTextbox("maxCharPurchases", "Max Purchases",
+        "Maximum times this item can be purchased by a character", self.controls.purchaseLimitsPanel, y)
+    y = y + row.height + padding
 
-    self.controls.maxPurchasesAllCharsLabel = ISLabel:new(10, 60, FONT_HGT_SMALL, "Max Purchases All Chars", 1, 1, 1, 1,
-        UIFont.Small, true);
-    self.controls.maxPurchasesAllCharsLabel:initialise();
-    self.controls.maxPurchasesAllCharsLabel:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.maxPurchasesAllCharsLabel);
+    row = self:addLabeledTextbox("maxActPurchases", "Max Act Purchases",
+        "Maximum times this item can be purchased by an account", self.controls.purchaseLimitsPanel, y)
+    y = y + row.height + padding
 
-    self.controls.maxPurchasesAllChars = ISTextEntryBox:new("0", 10, 80, 100, FONT_HGT_SMALL + 4);
-    self.controls.maxPurchasesAllChars:initialise();
-    self.controls.maxPurchasesAllChars:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.maxPurchasesAllChars);
+    row = self:addLabeledTextbox("minCharTime", "Min time",
+        "Minimum amount of time played before character can purchase item", self.controls.purchaseLimitsPanel, y)
+    y = y + row.height + padding
 
-    self.controls.minTimeLabel = ISLabel:new(10, 110, FONT_HGT_SMALL, "Min Time", 1, 1, 1, 1, UIFont.Small, true);
-    self.controls.minTimeLabel:initialise();
-    self.controls.minTimeLabel:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.minTimeLabel);
+    row = self:addLabeledTextbox("minActTime", "Min Act time",
+        "Minimum amount of time user must have played before character can purchase item",
+        self.controls.purchaseLimitsPanel, y)
+    y = y + row.height + padding
 
-    self.controls.minTime = ISTextEntryBox:new("0", 10, 130, 100, FONT_HGT_SMALL + 4);
-    self.controls.minTime:initialise();
-    self.controls.minTime:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.minTime);
-
-    self.controls.minCharTimeLabel = ISLabel:new(10, 110, FONT_HGT_SMALL, "Min Char Time", 1, 1, 1, 1, UIFont.Small,
-        true);
-    self.controls.minCharTimeLabel:initialise();
-    self.controls.minCharTimeLabel:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.minCharTimeLabel);
-
-    self.controls.minCharTime = ISTextEntryBox:new("0", 10, 130, 100, FONT_HGT_SMALL + 4);
-    self.controls.minCharTime:initialise();
-    self.controls.minCharTime:instantiate();
-    self.controls.purchaseLimitsPanel:addChild(self.controls.minCharTime);
-
-    x = x + self.controls._panel.width + padding
-    y = 0
-    local infoPanel = ISPanel:new(x, y, self.width - x, h);
+    x = self.controls._panel.width + padding
+    y = th
+    local infoPanel = ISPanel:new(x, y, 200, h);
     infoPanel:initialise();
     infoPanel:instantiate();
+    infoPanel:setAnchorBottom(true);
     self:addChild(infoPanel);
     self.controls.infoPanel = infoPanel;
 
     local previewPanel = nil
+    local lblY = 200
+
     if self.item.source == "vehicles" then
         previewPanel = ISUI3DScene:new(10, 10, 180, 180)
         previewPanel:initialise()
@@ -424,8 +405,9 @@ function UI:createChildren()
         previewPanel.getRotation = function(self)
             return self.javaObject:fromLua0("getViewRotation")
         end
-
-    else
+        infoPanel:addChild(previewPanel);
+        self.controls.previewPanel = previewPanel;
+    elseif self.item.texture then
         previewPanel = ISPanel:new(10, 10, 180, 180);
         previewPanel:initialise();
         previewPanel:instantiate();
@@ -436,13 +418,15 @@ function UI:createChildren()
                 self:drawTextureScaledAspect(item.texture, 0, 0, self:getWidth(), self:getHeight(), 1)
             end
         end
+        infoPanel:addChild(previewPanel);
+        self.controls.previewPanel = previewPanel;
+    else
+        lblY = 10
     end
-    infoPanel:addChild(previewPanel);
-    self.controls.previewPanel = previewPanel;
 
     local label = getTextManager():WrapText(UIFont.Medium, self.item.label, infoPanel.width - 20)
 
-    local name = ISLabel:new(10, 200, FONT_HGT_MEDIUM, label, 1, 1, 1, 1, UIFont.Medium, true);
+    local name = ISLabel:new(10, lblY, FONT_HGT_MEDIUM, label, 1, 1, 1, 1, UIFont.Medium, true);
     name:initialise();
     name:instantiate();
     infoPanel:addChild(name);
@@ -455,8 +439,8 @@ function UI:createChildren()
     infoPanel:addChild(category);
     self.controls.category = category;
 
-    local save = ISButton:new(previewPanel.x, infoPanel.height - BUTTON_HGT, previewPanel.width, BUTTON_HGT, "Save",
-        self, UI.onSave);
+    local save = ISButton:new(padding, infoPanel.height - BUTTON_HGT, infoPanel.width - (padding * 2), BUTTON_HGT,
+        "Save", self, UI.onSave);
     save:initialise();
     save:instantiate();
     if save.enableAcceptColor then
@@ -468,7 +452,7 @@ function UI:createChildren()
     self.controls.save = save;
 
     local y = category.y + category.height + 10
-    local description = ISRichTextPanel:new(previewPanel.x, y, previewPanel.width, save.y - y - 20);
+    local description = ISRichTextPanel:new(padding, y, infoPanel.width - (padding * 2), save.y - y - 20);
     description:initialise();
     description:instantiate();
     description.borderColor = {
@@ -497,16 +481,18 @@ end
 
 function UI:instantiate()
     ISCollapsableWindowJoypad.instantiate(self);
-    local previewPanel = self.controls.previewPanel
-    previewPanel.initialized = true
-    previewPanel.javaObject:fromLua1("setDrawGrid", false)
-    previewPanel.javaObject:fromLua1("createVehicle", "vehicle")
-    previewPanel.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
-    previewPanel.javaObject:fromLua1("setView", "UserDefined")
-    previewPanel.javaObject:fromLua2("dragView", 0, 30)
-    previewPanel.javaObject:fromLua1("setZoom", 6)
-    previewPanel.vehicleName = self.item.type
-    previewPanel.javaObject:fromLua2("setVehicleScript", "vehicle", previewPanel.vehicleName)
+    if self.item.source == "vehicles" then
+        local previewPanel = self.controls.previewPanel
+        previewPanel.initialized = true
+        previewPanel.javaObject:fromLua1("setDrawGrid", false)
+        previewPanel.javaObject:fromLua1("createVehicle", "vehicle")
+        previewPanel.javaObject:fromLua3("setViewRotation", 45 / 2, 45, 0)
+        previewPanel.javaObject:fromLua1("setView", "UserDefined")
+        previewPanel.javaObject:fromLua2("dragView", 0, 30)
+        previewPanel.javaObject:fromLua1("setZoom", 6)
+        previewPanel.vehicleName = self.item.type
+        previewPanel.javaObject:fromLua2("setVehicleScript", "vehicle", previewPanel.vehicleName)
+    end
 
 end
 
@@ -666,7 +652,7 @@ function UI:drawSkillDatas(y, item, alt)
     self:clearStencilRect()
 
     local value = ""
-    local data = self.parent.parent.parent.data
+    local data = self.parent.parent.parent.parent.data
     if data.skills and data.skills[item.item.type] then
         if data.skills[item.item.type].min and data.skills[item.item.type].max then
             value = "Min: " .. data.skills[item.item.type].min .. " Max: " .. data.skills[item.item.type].max
@@ -717,7 +703,7 @@ function UI:drawBoostsDatas(y, item, alt)
     self:clearStencilRect()
 
     local value = ""
-    local data = self.parent.parent.parent.data
+    local data = self.parent.parent.parent.parent.data
     if data.boosts and data.boosts[item.item.type] then
         if data.boosts[item.item.type].min and data.boosts[item.item.type].max then
             value = "Min: " .. data.boosts[item.item.type].min .. " Max: " .. data.boosts[item.item.type].max
@@ -740,7 +726,7 @@ function UI:drawTraitDatas(y, item, alt)
     end
 
     local value = nil
-    local data = self.parent.parent.parent.data.traits
+    local data = self.parent.parent.parent.parent.data.traits
     if data and data[item.item.type] ~= nil then
         if data[item.item.type] then
             value = "Required"
@@ -791,7 +777,7 @@ function UI:drawProfDatas(y, item, alt)
     end
 
     local value = nil
-    local data = self.parent.parent.parent.data.professions
+    local data = self.parent.parent.parent.parent.data.professions
     if data and data[item.item.type] ~= nil then
         if data[item.item.type] then
             value = "Required"
@@ -837,87 +823,34 @@ function UI:drawProfDatas(y, item, alt)
 end
 
 function UI:prerender()
+
     ISCollapsableWindowJoypad.prerender(self);
 
-    local padding = 0
-    local th = self:titleBarHeight()
-    local rh = self:resizeWidgetHeight()
-    local w = self.width - 200 - padding
-    local h = self.height - rh - th
-    local x = padding
-    local y = padding + th
+    self.controls.infoPanel:setX(self.width - self.controls.infoPanel.width)
+    self.controls.save:setHeight(BUTTON_HGT)
+    self.controls.save:setY(self.controls.infoPanel.height - BUTTON_HGT - 10)
 
-    local panel = self.controls._panel
+    -- self.controls.propsSkills:setY(30)
+    if self.lastActiveViewName ~= self.controls.itemPropsTabs.activeView.name then
 
-    panel:setX(x)
-    panel:setY(y)
-    panel:setWidth(w)
-    panel:setHeight(h)
-    panel:updateScrollbars();
-
-    local itemPropsTabs = self.controls.itemPropsTabs
-    itemPropsTabs:setX(0)
-    itemPropsTabs:setY(10)
-    itemPropsTabs:setWidth(itemPropsTabs.parent.width)
-    itemPropsTabs:setHeight(itemPropsTabs.parent.height)
-
-    local viewY = y + HEADER_HGT + 4
-    local viewH = itemPropsTabs.height - viewY
-
-    local propsSkills = self.controls.propsSkills
-    propsSkills:setX(x)
-    propsSkills:setY(viewY)
-    propsSkills:setWidth(w)
-    propsSkills:setHeight(viewH)
-
-    local propsBoosts = self.controls.propsBoosts
-    propsBoosts:setX(x)
-    propsBoosts:setY(viewY)
-    propsBoosts:setWidth(w)
-    propsBoosts:setHeight(viewH)
-
-    local propsTraits = self.controls.propsTraits
-    propsTraits:setX(x)
-    propsTraits:setY(viewY)
-    propsTraits:setWidth(w)
-    propsTraits:setHeight(viewH)
-
-    local propsProf = self.controls.propsProf
-    propsProf:setX(x)
-    propsProf:setY(viewY)
-    propsProf:setWidth(w)
-    propsProf:setHeight(viewH)
-
-    local purchaseLimitsPanel = self.controls.purchaseLimitsPanel
-    purchaseLimitsPanel:setX(x)
-    purchaseLimitsPanel:setY(y)
-    purchaseLimitsPanel:setWidth(w)
-    purchaseLimitsPanel:setHeight(h)
-
-    local infoPanel = self.controls.infoPanel
-    infoPanel:setX(self.width - infoPanel.width + 10)
-    infoPanel:setY(y)
-    infoPanel:setHeight(h)
-
-    if self.lastActiveViewName ~= itemPropsTabs.activeView.name then
-        self.lastActiveViewName = itemPropsTabs.activeView.name
+        self.lastActiveViewName = self.controls.itemPropsTabs.activeView.name
         local txt = ""
-        if itemPropsTabs.activeView.name == "Skills" then
+        if self.controls.itemPropsTabs.activeView.name == "Skills" then
             txt =
                 "Skills: Double click to set min/max levels required to purchase this item. Leave the value blank to ignore."
-        elseif itemPropsTabs.activeView.name == "Boosts" then
+        elseif self.controls.itemPropsTabs.activeView.name == "Boosts" then
             txt =
                 "Boosts: Double click to set min/max levels required to purchase this item. Leave the value blank to ignore."
-        elseif itemPropsTabs.activeView.name == "Traits" then
+        elseif self.controls.itemPropsTabs.activeView.name == "Traits" then
             txt =
                 "Traits: Right click to set if the trait is required, forbidden or no restriction. You can also toggle between states by double clicking"
-        elseif itemPropsTabs.activeView.name == "Professions" then
+        elseif self.controls.itemPropsTabs.activeView.name == "Professions" then
             txt =
                 "Professions: Right click to set if the profession is required, forbidden or no restriction. You can also toggle between states by double clicking"
-        elseif itemPropsTabs.activeView.name == "Purchase Limits" then
+        elseif self.controls.itemPropsTabs.activeView.name == "Purchase Limits" then
             txt =
                 "Purchase Limits: Set the limits to how many times this item can be purchased. Leave the value blank to ignore."
-        elseif itemPropsTabs.activeView.name == "Props" then
+        elseif self.controls.itemPropsTabs.activeView.name == "Props" then
             txt =
                 "Props: Set the min/max price, currency, inventory and probability of this item. Leave blank to use defaults"
         end
@@ -928,8 +861,6 @@ function UI:prerender()
 
     end
 
-    self.controls.save:setHeight(BUTTON_HGT)
-    self.controls.save:setY(infoPanel.height - BUTTON_HGT - 10)
 end
 
 function UI:toggleTraitRequirement(item)
