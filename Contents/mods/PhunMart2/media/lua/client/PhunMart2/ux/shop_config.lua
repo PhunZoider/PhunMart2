@@ -3,6 +3,7 @@ if isServer() then
 end
 
 require "ISUI/ISCollapsableWindowJoypad"
+local tools = require "PhunMart2/ux/tools"
 local Core = PhunMart
 local PL = PhunLib
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
@@ -113,6 +114,22 @@ function UI:close()
     end
 end
 
+function UI:onResize()
+    ISCollapsableWindowJoypad.onResize(self)
+    local tabPanel = self.controls.tabPanel
+    local padding = 10
+    local th = self:titleBarHeight()
+    local rh = self:resizeWidgetHeight()
+    tabPanel:setX(padding)
+    tabPanel:setY(th)
+    tabPanel:setWidth(self.width - padding * 2)
+    tabPanel:setHeight(self.height - th - rh)
+    for _, view in ipairs(tabPanel.viewList) do
+        view.view:setWidth(tabPanel.width)
+        view.view:setHeight(tabPanel.height - tabPanel.tabHeight)
+    end
+end
+
 function UI:createChildren()
 
     ISCollapsableWindowJoypad.createChildren(self);
@@ -128,17 +145,10 @@ function UI:createChildren()
 
     self.controls = {}
 
-    local panel = ISPanel:new(x, y, w, h);
-    panel:initialise();
-    panel:instantiate();
-    self:addChild(panel);
-    self.controls._panel = panel;
+    local tabPanel = tools.getTabPanel(x, y, w, h)
 
-    local tabPanel = ISTabPanel:new(0, 0, w, h);
-    tabPanel:initialise()
-    tabPanel:instantiate()
     self.controls.tabPanel = tabPanel
-    self.controls._panel:addChild(tabPanel)
+    self:addChild(tabPanel)
 
     local props = Core.ui.admin.propEditor:new(0, 0, w, h, {
         player = self.player
@@ -155,4 +165,14 @@ function UI:createChildren()
 
     self:refreshAll()
     self:bringToTop()
+end
+
+function UI:isKeyConsumed(key)
+    return key == Keyboard.KEY_ESCAPE
+end
+
+function UI:onKeyRelease(key)
+    if key == Keyboard.KEY_ESCAPE then
+        self:close()
+    end
 end

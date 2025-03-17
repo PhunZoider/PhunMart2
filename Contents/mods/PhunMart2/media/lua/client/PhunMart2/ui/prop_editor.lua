@@ -1,7 +1,7 @@
 if isServer() then
     return
 end
-
+local tools = require "PhunMart2/ux/tools"
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
@@ -159,10 +159,6 @@ function UI:getData()
     return data
 end
 
-function UI:isValid()
-
-end
-
 function UI:isDirty()
     return self.isDirtyValue
 end
@@ -225,52 +221,81 @@ function UI:createChildren()
     local h = FONT_HGT_MEDIUM
 
     self.controls = {}
-    self.controls._panel = ISPanel:new(x, y, self.width - self.scrollwidth - offset * 2,
-        self.height - y - 10 - BUTTON_HGT - offset);
-    self.controls._panel:initialise();
-    self.controls._panel:instantiate();
-    self.controls._panel:setAnchorRight(true)
-    self.controls._panel:setAnchorLeft(true)
-    self.controls._panel:setAnchorTop(true)
-    self.controls._panel:setAnchorBottom(true)
-    self.controls._panel:addScrollBars()
-    self.controls._panel.vscroll:setVisible(true)
-
-    self.controls._panel.prerender = function(s)
-        s:setStencilRect(0, 0, s.width, s.height);
-        ISPanel.prerender(s)
-    end
-    self.controls._panel.render = function(s)
-        ISPanel.render(s)
-        s:clearStencilRect()
-    end
-    self.controls._panel.onMouseWheel = function(s, del)
-        if s:getScrollHeight() > 0 then
-            s:setYScroll(s:getYScroll() - (del * 40))
-            return true
-        end
-        return false
-    end
-
+    local panel = tools.getContainerPanel(x, y, self.width - self.scrollwidth - offset * 2,
+        self.height - y - 10 - BUTTON_HGT - offset, {
+            prerender = function(s)
+                s:setStencilRect(0, 0, s.width, s.height);
+                ISPanel.prerender(s)
+            end,
+            render = function(s)
+                ISPanel.render(s)
+                s:clearStencilRect()
+            end,
+            onMouseWheel = function(s, del)
+                if s:getScrollHeight() > 0 then
+                    s:setYScroll(s:getYScroll() - (del * 40))
+                    return true
+                end
+                return false
+            end
+        })
+    self.controls._panel = panel
     self:addChild(self.controls._panel);
+    -- self.controls._panel = ISPanel:new(x, y, self.width - self.scrollwidth - offset * 2,
+    --     self.height - y - 10 - BUTTON_HGT - offset);
+    -- self.controls._panel:initialise();
+    -- self.controls._panel:instantiate();
+    -- self.controls._panel:setAnchorRight(true)
+    -- self.controls._panel:setAnchorLeft(true)
+    -- self.controls._panel:setAnchorTop(true)
+    -- self.controls._panel:setAnchorBottom(true)
+    -- self.controls._panel:addScrollBars()
+    -- self.controls._panel.vscroll:setVisible(true)
+
+    -- self.controls._panel.prerender = function(s)
+    --     s:setStencilRect(0, 0, s.width, s.height);
+    --     ISPanel.prerender(s)
+    -- end
+    -- self.controls._panel.render = function(s)
+    --     ISPanel.render(s)
+    --     s:clearStencilRect()
+    -- end
+    -- self.controls._panel.onMouseWheel = function(s, del)
+    --     if s:getScrollHeight() > 0 then
+    --         s:setYScroll(s:getYScroll() - (del * 40))
+    --         return true
+    --     end
+    --     return false
+    -- end
 
     for k, v in pairs(shopProperties) do
 
         if v.type == "string" or v.type == "int" then
-            self:addTextInput(v.label, k, v.tooltip, v.disableOnEdit)
+            local lbl, input = tools.getLabeledTextbox(v.label, v.tooltip, v.default, x, y)
+            self.controls[k] = input
+            self.controls._panel:addChild(lbl)
+            self.controls._panel:addChild(input)
+            -- self:addTextInput(v.label, k, v.tooltip, v.disableOnEdit)
         elseif v.type == "boolean" then
-            self:addBool(v.label, k, v.tooltip)
+            local chk = tools.getBool(v.label, v.tooltip, x, y)
+            self.controls[k] = chk
+            self.controls._panel:addChild(chk)
+            -- self:addBool(v.label, k, v.tooltip)
         end
 
         y = y + h + 10
 
     end
-    self.controls._panel:setScrollHeight(y + h + 10);
-    self.controls._panel:setScrollChildren(true)
 
-    self.controls._panel:setScrollHeight(y + h + 10);
-    self.controls._panel:setScrollChildren(true)
+    panel:setScrollHeight(y + h + 10);
+    -- self.controls._panel:setScrollHeight(y + h + 10);
+    -- self.controls._panel:setScrollChildren(true)
 
+end
+
+function UI:resize()
+    ISPanel.resize(self)
+    self.controls._panel:updateScrollbars();
 end
 
 function UI:prerender()
@@ -282,10 +307,10 @@ function UI:prerender()
     local x = offset
     local y = offset
 
-    self.controls._panel:setX(x)
-    self.controls._panel:setY(y)
-    self.controls._panel:setWidth(w)
-    self.controls._panel:setHeight(h)
-    self.controls._panel:updateScrollbars();
+    -- self.controls._panel:setX(x)
+    -- self.controls._panel:setY(y)
+    -- self.controls._panel:setWidth(w)
+    -- self.controls._panel:setHeight(h)
+    -- self.controls._panel:updateScrollbars();
 
 end

@@ -26,18 +26,68 @@ function tools.getLabel(text, x, y)
     return label;
 end
 
-function tools.getTextbox(name, text, tooltip, y)
-    local textbox = ISTextEntryBox:new("", 120, y, 100, tools.FONT_HGT_SMALL + 4);
+function tools.getTextbox(value, tooltip, x, y)
+    local textbox = ISTextEntryBox:new(value and tostring(value) or "", x, y, 200, tools.FONT_HGT_SMALL + 4);
     textbox:initialise();
-    textbox:instantiate();
-    textbox:setTooltip(tooltip)
-    self.controls[name] = textbox
+    -- textbox:instantiate();
+    if tooltip then
+        textbox:setTooltip(tooltip)
+    end
     return textbox;
 end
 
-function tools.addLabeledTextbox(name, text, tooltip, parent, y)
-    self:addLabel(text, parent, y)
-    return self:addTextbox(name, text, tooltip, parent, y)
+function tools.getLabeledTextbox(label, tooltip, value, x, y)
+    local lbl = tools.getLabel(label, x, y)
+    local text = tools.getTextbox(value, tooltip, x + 150, y)
+    return lbl, text
+end
+
+function tools.getBool(txt, tooltip, x, y)
+
+    local checkbox = ISTickBox:new(x, y, tools.BUTTON_HGT, tools.BUTTON_HGT, getTextOrNull(txt) or txt)
+    checkbox:initialise();
+    checkbox:instantiate();
+    checkbox:addOption(getTextOrNull(txt) or txt, nil)
+    checkbox:setSelected(1, true)
+    checkbox:setWidthToFit()
+    if tooltip then
+        checkbox.tooltip = tooltip
+    end
+    return checkbox
+
+end
+
+function tools.getContainerPanel(x, y, w, h, fns)
+    local panel = ISPanel:new(x, y, w, h);
+    panel:initialise();
+    panel:instantiate();
+    panel:setAnchorRight(true);
+    panel:setAnchorBottom(true);
+    panel:setAnchorTop(true);
+    panel:setAnchorLeft(true);
+    panel:addScrollBars();
+    panel.vscroll:setVisible(true)
+    panel:setScrollChildren(true)
+    panel.prerender = fns.prerender or panel.prerender;
+    panel.render = fns.render or panel.render;
+    panel.onMouseWheel = fns.onMouseWheel or panel.onMouseWheel;
+    return panel;
+
+end
+
+function tools.getTabPanel(x, y, w, h, fns)
+    local f = fns or {}
+    local panel = ISTabPanel:new(x, y, w, h);
+    panel:initialise();
+    panel:instantiate();
+    panel:setAnchorRight(true);
+    panel:setAnchorBottom(true);
+    panel:setAnchorTop(true);
+    panel:setAnchorLeft(true);
+    panel.prerender = f.prerender or panel.prerender;
+    panel.render = f.render or panel.render;
+    panel.onMouseWheel = f.onMouseWheel or panel.onMouseWheel;
+    return panel;
 end
 
 function tools.getListbox(x, y, w, h, columns, fns)

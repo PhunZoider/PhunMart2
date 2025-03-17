@@ -43,12 +43,6 @@ function UI:setData(data)
         p:initialise()
         p:instantiate()
         self.controls.tabPanel:addView(tostring(i), p)
-        -- self.tabPanel.viewList[#self.tabPanel.viewList].view.backgroundColor = {
-        --     r = 1,
-        --     g = 0,
-        --     b = 0,
-        --     a = 1.0
-        -- }
         p:setData(v)
     end
 
@@ -180,9 +174,6 @@ function UI:createChildren()
     -- }
 
     self.controls._panel:addChild(self.controls.tabPanel)
-
-    self.controls._panel:setScrollHeight(y + h + 10);
-    self.controls._panel:setScrollChildren(true)
 
     self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)

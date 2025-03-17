@@ -283,8 +283,10 @@ function UI:prerender()
     self.tabPanel:setX(x)
     self.tabPanel:setY(y)
 
-    self.tabPanel.activeView.view:setWidth(w)
-    self.tabPanel.activeView.view:setHeight(h - 45)
+    if self.tabPanel.activeView then
+        self.tabPanel.activeView.view:setWidth(w)
+        self.tabPanel.activeView.view:setHeight(h - 45)
+    end
 
     self.save:setX(self.width - 100 - 10)
     self.save:setY(self.height - self:resizeWidgetHeight() - 35 - 10)
