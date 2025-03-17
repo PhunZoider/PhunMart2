@@ -2,6 +2,8 @@ if isServer() then
     return
 end
 
+local tools = require "PhunMart2/ux/tools"
+
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
@@ -10,8 +12,8 @@ local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local Core = PhunMart
 local profileName = "PhunMartUIItemCats"
-PhunMartUIItemCats = ISPanelJoypad:derive(profileName);
-local UI = PhunMartUIItemCats
+Core.ui.admin.categorySelector = ISPanelJoypad:derive(profileName);
+local UI = Core.ui.admin.categorySelector
 
 function UI:new(x, y, width, height, options)
     local opts = options or {}
@@ -25,14 +27,39 @@ function UI:new(x, y, width, height, options)
     return o;
 end
 
-function UI:prerender()
-    ISPanelJoypad.prerender(self)
-    local padding = 10
-    local maxWidth = self.parent.activeView.view.width
-    local maxHeight = self.parent.height - HEADER_HGT -- BUTTON_HGT - padding * 2
-    self:setWidth(maxWidth)
-    self:setHeight(maxHeight)
-    self.list:setHeight(maxHeight - HEADER_HGT)
+function UI:click(x, y)
+    local list = self.parent.controls.list
+    self.selectedProperty = nil
+    local row = list:rowAt(x, y)
+    if row == nil or row == -1 then
+        return
+    end
+    list:ensureVisible(row)
+    local item = list.items[row].item
+    local data = list.parent.data.selected
+    data[item.label] = data[item.label] == nil and true or nil
+
+    if isShiftKeyDown() and self.lastSelected then
+        local start = math.min(row, self.lastSelected)
+        local finish = math.max(row, self.lastSelected)
+        for i = start, finish do
+            data[list.items[i].item.label] = data[item.label]
+        end
+    end
+    self.lastSelected = row
+end
+
+function UI:rightClick(x, y)
+    local row = self.parent.controls.list:rowAt(x, y)
+    if row == -1 then
+        return
+    end
+    if self.selected ~= row then
+        self.selected = row
+        self.controls.list.selected = row
+        self.controls.list:ensureVisible(self.list.selected)
+    end
+    local item = self.controls.list.items[self.list.selected].item
 end
 
 function UI:createChildren()
@@ -41,53 +68,66 @@ function UI:createChildren()
     local padding = 10
     local x = 0
     local y = HEADER_HGT - 1
+    self.controls = {}
+    local list = tools.getListbox(x, y, self:getWidth(), self.height, {"Category"}, {
+        draw = self.drawDatas,
+        click = self.click,
+        rightClick = self.rightClick
+    })
 
-    self.list = ISScrollingListBox:new(x, y, self:getWidth(), self.height - HEADER_HGT);
-    self.list:initialise();
-    self.list:instantiate();
-    self.list.itemheight = FONT_HGT_SMALL + 6 * 2
-    self.list.selected = 0;
-    self.list.joypadParent = self;
-    self.list.font = UIFont.NewSmall;
-    self.list.doDrawItem = self.drawDatas;
+    self.controls.list = list
+    self:addChild(list)
 
-    self.list.onMouseUp = function(list, x, y)
-        self.selectedProperty = nil
-        local row = list:rowAt(x, y)
-        if row == nil or row == -1 then
-            return
-        end
-        list:ensureVisible(row)
-        local item = list.items[row].item
-        local data = list.parent.data.selected
-        data[item.label] = data[item.label] == nil and true or nil
+    -- self.controls.list = ISScrollingListBox:new(x, y, self:getWidth(), self.height - HEADER_HGT);
+    -- self.controls.list:initialise();
+    -- self.controls.list:instantiate();
 
-        if isShiftKeyDown() and self.lastSelected then
-            local start = math.min(row, self.lastSelected)
-            local finish = math.max(row, self.lastSelected)
-            for i = start, finish do
-                data[list.items[i].item.label] = data[item.label]
-            end
-        end
-        self.lastSelected = row
-    end
+    -- self.controls.list:setAnchorRight(true);
+    -- self.controls.list:setAnchorBottom(true);
 
-    self.list.onRightMouseUp = function(target, x, y, a, b)
-        local row = self.list:rowAt(x, y)
-        if row == -1 then
-            return
-        end
-        if self.selected ~= row then
-            self.selected = row
-            self.list.selected = row
-            self.list:ensureVisible(self.list.selected)
-        end
-        local item = self.list.items[self.list.selected].item
+    -- self.controls.list.itemheight = FONT_HGT_SMALL + 6 * 2
+    -- self.controls.list.selected = 0;
+    -- self.controls.list.joypadParent = self;
+    -- self.controls.list.font = UIFont.NewSmall;
+    -- self.controls.list.doDrawItem = self.drawDatas;
 
-    end
-    self.list.drawBorder = true;
-    self.list:addColumn("Category", 0);
-    self:addChild(self.list);
+    -- self.controls.list.onMouseUp = function(list, x, y)
+    --     self.selectedProperty = nil
+    --     local row = list:rowAt(x, y)
+    --     if row == nil or row == -1 then
+    --         return
+    --     end
+    --     list:ensureVisible(row)
+    --     local item = list.items[row].item
+    --     local data = list.parent.data.selected
+    --     data[item.label] = data[item.label] == nil and true or nil
+
+    --     if isShiftKeyDown() and self.lastSelected then
+    --         local start = math.min(row, self.lastSelected)
+    --         local finish = math.max(row, self.lastSelected)
+    --         for i = start, finish do
+    --             data[list.items[i].item.label] = data[item.label]
+    --         end
+    --     end
+    --     self.lastSelected = row
+    -- end
+
+    -- self.controls.list.onRightMouseUp = function(target, x, y, a, b)
+    --     local row = self.list:rowAt(x, y)
+    --     if row == -1 then
+    --         return
+    --     end
+    --     if self.selected ~= row then
+    --         self.selected = row
+    --         self.list.selected = row
+    --         self.list:ensureVisible(self.list.selected)
+    --     end
+    --     local item = self.list.items[self.list.selected].item
+
+    -- end
+    -- self.controls.list.drawBorder = true;
+    -- self.controls.list:addColumn("Category", 0);
+    -- self:addChild(self.controls.list);
 
     self.data = {
         selected = {}
@@ -138,7 +178,7 @@ end
 
 function UI:setData(data)
 
-    self.list:clear();
+    self.controls.list:clear();
     self.lastSelected = nil
 
     self.data.selected = {}
@@ -150,7 +190,7 @@ function UI:setData(data)
     end
 
     for _, item in ipairs(self.data.categories or {}) do
-        self.list:addItem(item.label, item);
+        self.controls.list:addItem(item.label, item);
     end
 end
 

@@ -329,7 +329,7 @@ function UI:createChildren()
     self.tabPanel:initialise()
     self:addChild(self.tabPanel)
 
-    self.categories = PhunMartUIItemCats:new(0, 100, w, self.tabPanel.height - th, {
+    self.categories = Core.ui.admin.categorySelector:new(0, 100, w, self.tabPanel.height - th, {
         player = self.player
     });
 

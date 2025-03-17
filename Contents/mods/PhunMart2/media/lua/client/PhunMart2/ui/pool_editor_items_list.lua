@@ -1,7 +1,7 @@
 if isServer() then
     return
 end
-
+local tools = require "PhunMart2/ux/tools"
 local sandbox = SandboxVars.PhunMart
 
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
@@ -14,8 +14,8 @@ local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
 local profileName = "PhunMartUIItemList"
-PhunMartUIItemList = ISPanelJoypad:derive(profileName);
-local UI = PhunMartUIItemList
+Core.ui.admin.itemSelector = ISPanelJoypad:derive(profileName);
+local UI = Core.ui.admin.itemSelector
 
 function UI:new(x, y, width, height, options)
     local opts = options or {}
@@ -29,87 +29,105 @@ function UI:new(x, y, width, height, options)
     return o;
 end
 
+function UI:click(x, y)
+    local list = self.parent.controls.list
+    self.selectedProperty = nil
+    local row = list:rowAt(x, y)
+    if row == nil or row == -1 then
+        return
+    end
+    list:ensureVisible(row)
+    local item = list.items[row].item
+    local data = list.parent.data.selected
+    data[item.type] = data[item.type] == nil and true or nil
+
+    -- range select
+    if isShiftKeyDown() and self.lastSelected then
+        local start = math.min(row, self.lastSelected)
+        local finish = math.max(row, self.lastSelected)
+        for i = start, finish do
+            data[list.items[i].item.type] = data[item.type]
+        end
+    end
+
+    -- remember last selected for range select
+    self.lastSelected = row
+end
+
+function UI:rightClick(x, y)
+    local list = self.parent.controls.list
+    local row = list:rowAt(x, y)
+    local row = list:rowAt(x, y)
+    if row == -1 then
+        return
+    end
+    if list.selected ~= row then
+        list.selected = row
+        list.selected = row
+        list:ensureVisible(list.selected)
+    end
+    local item = list.items[list.selected].item
+end
+
 function UI:createChildren()
     ISPanelJoypad.createChildren(self)
 
     local padding = 10
     local x = padding
     local y = HEADER_HGT - 1
+    self.controls = {}
+    local filtersPanel = ISPanel:new(0, self.height - 100, self.width, 100);
+    filtersPanel.drawBorder = false
+    filtersPanel:initialise();
+    filtersPanel:instantiate();
 
-    self.list = ISScrollingListBox:new(0, y, self:getWidth(), 300);
-    self.list:initialise();
-    self.list:instantiate();
-    self.list.itemheight = FONT_HGT_SMALL + 6 * 2
-    self.list.selected = 0;
-    self.list.joypadParent = self;
-    self.list.font = UIFont.NewSmall;
-    self.list.doDrawItem = self.drawDatas;
+    filtersPanel.backgroundColor = {
+        r = 0.1,
+        g = 0.1,
+        b = 0.1,
+        a = 0.8
+    }
 
-    self.list.onMouseUp = function(list, x, y)
-        self.selectedProperty = nil
-        local row = list:rowAt(x, y)
-        if row == nil or row == -1 then
-            return
-        end
-        list:ensureVisible(row)
-        local item = list.items[row].item
-        local data = list.parent.data.selected
-        data[item.type] = data[item.type] == nil and true or nil
+    self.controls.filtersPanel = filtersPanel
+    self:addChild(filtersPanel);
 
-        -- range select
-        if isShiftKeyDown() and self.lastSelected then
-            local start = math.min(row, self.lastSelected)
-            local finish = math.max(row, self.lastSelected)
-            for i = start, finish do
-                data[list.items[i].item.type] = data[item.type]
-            end
-        end
+    local list = tools.getListbox(x, y, self:getWidth(), filtersPanel.y + HEADER_HGT, {"Item", "Category"}, {
+        draw = self.drawDatas,
+        click = self.click,
+        rightClick = self.rightClick
+    })
 
-        -- remember last selected for range select
-        self.lastSelected = row
-    end
+    self.controls.list = list
+    self:addChild(list)
 
-    self.list.onRightMouseUp = function(target, x, y, a, b)
-        local row = self.list:rowAt(x, y)
-        if row == -1 then
-            return
-        end
-        if self.selected ~= row then
-            self.selected = row
-            self.list.selected = row
-            self.list:ensureVisible(self.list.selected)
-        end
-        local item = self.list.items[self.list.selected].item
+    local lblFilter = tools.getLabel("Filter", padding, padding)
+    filtersPanel:addChild(lblFilter)
 
-    end
-    self.list.drawBorder = true;
-    self.list.onMouseMove = self.doOnMouseMove
-    self.list.onMouseMoveOutside = self.doOnMouseMoveOutside
-
-    self.list:addColumn("Item", 0);
-    self.list:addColumn("Category", 300);
-    self:addChild(self.list);
-
-    self.filters = ISPanel:new(0, 200, self.width, 100);
-    self.filters.drawBorder = false
-    self.filters:initialise();
-    self.filters:instantiate();
-    self:addChild(self.filters);
-
-    self.filter = ISTextEntryBox:new("", x, y, self.width, BUTTON_HGT);
-    self.filter.onTextChange = function()
+    local filter = ISTextEntryBox:new("", x, y, filtersPanel.width - 200, BUTTON_HGT);
+    filter.onTextChange = function()
         self:refreshData()
     end
-    self.filter:initialise();
-    self.filter:instantiate();
-    self.filters:addChild(self.filter);
+    filter:initialise();
+    filter:instantiate();
+    filter:setAnchorLeft(true);
+    filter:setAnchorRight(true);
 
-    self.filterCategory = ISComboBox:new(x, y, self.width - x - padding, FONT_HGT_MEDIUM, self, function()
+    self.controls.filter = filter
+    filtersPanel:addChild(filter);
+
+    local left = filter.x + filter.width + padding
+
+    local lblFilterCategory = tools.getLabel("Category", filtersPanel.width - x - left, padding)
+    filtersPanel:addChild(lblFilterCategory)
+    self.controls.lblFilterCategory = lblFilterCategory
+    local filterCategory = ISComboBox:new(left, y, filtersPanel.width - x - left, FONT_HGT_MEDIUM, self, function()
         self:refreshData()
     end);
-    self.filterCategory:initialise();
-    self.filterCategory:instantiate();
-    self.filters:addChild(self.filterCategory);
+    filterCategory:initialise();
+    filterCategory:instantiate();
+
+    self.controls.filterCategory = filterCategory
+    filtersPanel:addChild(filterCategory);
 
     self.data = {
         selected = {}
@@ -143,12 +161,12 @@ function UI:createChildren()
     self.tooltip:setVisible(false);
     self.tooltip:setAlwaysOnTop(true)
     self.tooltip.description = "";
-    self.tooltip:setOwner(self.list)
+    self.tooltip:setOwner(self.controls.list)
 
     local catMap = {}
     local categories = {}
-    self.filterCategory:clear()
-    self.filterCategory:addOption("")
+    filterCategory:clear()
+    filterCategory:addOption("")
     for _, item in ipairs(self.data.items) do
         if not catMap[item.category] then
             catMap[item.category] = true
@@ -161,27 +179,34 @@ function UI:createChildren()
     end)
 
     for _, category in ipairs(categories) do
-        self.filterCategory:addOption(category)
+        filterCategory:addOption(category)
     end
 
     self:refreshData()
 end
 
 function UI:prerender()
+
     ISPanelJoypad.prerender(self)
     local padding = 10
-    local maxWidth = self.parent.activeView.view.width
-    local maxHeight = self.parent.height - HEADER_HGT -- BUTTON_HGT - padding * 2
-    self:setWidth(maxWidth)
-    self:setHeight(maxHeight)
-    self.filters:setWidth(self.width)
-    self.filters:setY(self.height - self.filters.height)
+    local filterPanel = self.controls.filtersPanel
+    filterPanel:setWidth(filterPanel.parent.width)
+    filterPanel:setY(filterPanel.parent.height - filterPanel.height)
 
-    self.filter:setWidth(self.list.columns[2].size - (padding / 2))
-    self.filterCategory:setX(self.filter:getX() + self.filter.width + (padding / 2))
-    self.filterCategory:setWidth(self.width - self.filter.width - padding * 2)
+    local filterCategory = self.controls.filterCategory
+    filterCategory:setX(filterCategory.parent.width - filterCategory.width - padding)
 
-    self.list:setHeight(self.filters:getY() - self.list.y)
+    local lblFilterCategory = self.controls.lblFilterCategory
+    lblFilterCategory:setX(filterCategory.x)
+
+    local list = self.controls.list
+    list:setHeight(filterPanel.y - list.y)
+
+    if #list.columns > 1 and list.width < list.columns[#list.columns].size then
+        for i = 2, #list.columns do
+            list.columns[i].size = list.width / #list.columns
+        end
+    end
 
 end
 
@@ -311,13 +336,13 @@ function UI:doOnMouseMoveOutside(dx, dy)
 end
 
 function UI:refreshData()
-    self.list:clear();
+    self.controls.list:clear();
     self.lastSelected = nil
-    local filter = self.filter:getInternalText():lower()
-    local category = self.filterCategory:getOptionText(self.filterCategory.selected)
+    local filter = self.controls.filter:getInternalText():lower()
+    local category = self.controls.filterCategory:getOptionText(self.controls.filterCategory.selected)
     for _, item in ipairs(self.data.items) do
         if (filter == "" or string.match(item.label:lower(), filter)) and (category == "" or item.category == category) then
-            self.list:addItem(item.label, item);
+            self.controls.list:addItem(item.label, item);
         end
     end
 end

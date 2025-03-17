@@ -2,7 +2,6 @@ if isServer() then
     return
 end
 
-require "ISUI/ISCollapsableWindowJoypad"
 local Core = PhunMart
 local PL = PhunLib
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
@@ -137,34 +136,46 @@ function UI:createChildren()
     local panel = ISPanel:new(x, y, w, h);
     panel:initialise();
     panel:instantiate();
+    panel:setAnchorLeft(true);
+    panel:setAnchorRight(true);
+    panel:setAnchorTop(true);
+    panel:setAnchorBottom(true);
+
     self:addChild(panel);
     self.controls._panel = panel;
 
-    self.controls.tabPanel = ISTabPanel:new(x, y, w, h - y);
+    self.controls.tabPanel = ISTabPanel:new(x, y, w, h - y - (padding * 2) - BUTTON_HGT);
     self.controls.tabPanel:initialise()
-    self.controls._panel:addChild(self.controls.tabPanel)
+    self.controls.tabPanel:instantiate()
+    self.controls.tabPanel:setAnchorLeft(true)
+    self.controls.tabPanel:setAnchorRight(true)
+    self.controls.tabPanel:setAnchorTop(true)
+    self.controls.tabPanel:setAnchorBottom(true)
+    panel:addChild(self.controls.tabPanel)
 
-    self.controls.items = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    h = self.controls.tabPanel.height - (HEADER_HGT - 5)
+
+    self.controls.items = Core.ui.admin.poolEditorGroup:new(0, 0, w, h, {
         player = self.player,
         type = Core.consts.itemType.items
     });
 
-    self.controls.vehicles = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.vehicles = Core.ui.admin.poolEditorGroup:new(0, 0, w, h, {
         player = self.player,
         type = Core.consts.itemType.vehicles
     });
 
-    self.controls.traits = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.traits = Core.ui.admin.poolEditorGroup:new(0, 0, w, h, {
         player = self.player,
         type = Core.consts.itemType.traits
     });
 
-    self.controls.xp = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.xp = Core.ui.admin.poolEditorGroup:new(0, 0, w, h, {
         player = self.player,
         type = Core.consts.itemType.xp
     });
 
-    self.controls.boosts = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.boosts = Core.ui.admin.poolEditorGroup:new(0, 0, w, h, {
         player = self.player,
         type = Core.consts.itemType.boosts
     });
@@ -179,19 +190,31 @@ function UI:createChildren()
         self, UI.onOK);
     self.controls.ok:initialise();
     self.controls.ok:instantiate();
+    if self.controls.ok.enableAcceptColor then
+        self.controls.ok:enableAcceptColor()
+    end
     self:addChild(self.controls.ok);
 
     self:refreshAll()
 end
 
+function UI:isKeyConsumed(key)
+    return key == Keyboard.KEY_ESCAPE
+end
+
+function UI:onKeyRelease(key)
+    if key == Keyboard.KEY_ESCAPE then
+        self:close()
+    end
+end
+
 function UI:prerender()
 
     ISCollapsableWindowJoypad.prerender(self);
+    local ok = self.controls.ok
+    self.controls.ok:setX(ok.parent.width - ok.width - 10)
+    self.controls.ok:setY(ok.parent.height - ok.height - self:resizeWidgetHeight() - 10)
 
-    self.controls.ok:setX(self.width - self.controls.ok.width - 10)
-    self.controls.ok:setY(self.height - self.controls.ok.height - self:resizeWidgetHeight() - 10)
-    self.controls.tabPanel:setWidth(self.width - 20)
-    self.controls.tabPanel:setHeight(self.controls.ok.y - self.controls.tabPanel.y - 50)
 end
 
 function UI:onOK()
