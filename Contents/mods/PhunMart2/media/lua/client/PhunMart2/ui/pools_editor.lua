@@ -2,20 +2,11 @@ if isServer() then
     return
 end
 
-local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
-local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
-local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
-local FONT_SCALE = FONT_HGT_SMALL / 14
-local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
-local BUTTON_HGT = FONT_HGT_SMALL + 6
-local LABEL_HGT = FONT_HGT_MEDIUM + 6
-
+local tools = require "PhunMart2/ux/tools"
 local Core = PhunMart
-local PL = PhunLib
 local profileName = "PhunMartUIPoolsEditor"
 
 Core.ui.admin.poolsEditor = ISPanel:derive(profileName);
-Core.ui.admin.poolsEditor.instances = {}
 local UI = Core.ui.admin.poolsEditor
 
 function UI:setData(data)
@@ -58,10 +49,6 @@ function UI:getData()
     return pools
 end
 
-function UI:isValid()
-
-end
-
 function UI:isDirty()
     local isDirty = self.isDirtyValue
     if not isDirty then
@@ -92,58 +79,23 @@ function UI:createChildren()
 
     local offset = 10
     local x = offset
-    local y = HEADER_HGT
-    local h = FONT_HGT_MEDIUM
+    local y = offset
+    local h = tools.FONT_HGT_MEDIUM
     local w = self.width - offset * 2
 
     self.controls = {}
-    self.controls._panel = ISPanel:new(x, y, self.width - self.scrollwidth - offset * 2,
-        self.height - y - 10 - BUTTON_HGT - offset);
-    self.controls._panel:initialise();
-    self.controls._panel:instantiate();
-    self.controls._panel:setAnchorRight(true)
-    self.controls._panel:setAnchorLeft(true)
-    self.controls._panel:setAnchorTop(true)
-    self.controls._panel:setAnchorBottom(true)
-    self.controls._panel:addScrollBars()
-    self.controls._panel.vscroll:setVisible(true)
 
-    self.controls._panel.prerender = function(s)
-        s:setStencilRect(0, 0, s.width, s.height);
-        ISPanel.prerender(s)
-    end
-    self.controls._panel.render = function(s)
-        ISPanel.render(s)
-        s:clearStencilRect()
-    end
-    self.controls._panel.onMouseWheel = function(s, del)
-        if s:getScrollHeight() > 0 then
-            s:setYScroll(s:getYScroll() - (del * 40))
-            return true
-        end
-        return false
-    end
-
-    -- self.controls._panel.backgroundColor = {
-    --     r = 0,
-    --     g = 1,
-    --     b = 0,
-    --     a = 1
-    -- }
-
-    self:addChild(self.controls._panel);
-
-    self.controls.addPool = ISButton:new(10, 10, 100, BUTTON_HGT, getText("UI_btn_add"), self, self.onAddPool);
+    self.controls.addPool = ISButton:new(10, 10, 100, tools.BUTTON_HGT, getText("UI_btn_add"), self, self.onAddPool);
     self.controls.addPool:initialise();
     self.controls.addPool:instantiate();
     self.controls.addPool.tooltip = getText("UI_btn_add_tooltip");
     if self.controls.addPool.enableAcceptColor then
         self.controls.addPool:enableAcceptColor()
     end
-    self.controls._panel:addChild(self.controls.addPool);
+    self:addChild(self.controls.addPool);
 
     -- Duplicate pool button
-    self.controls.duplicatePool = ISButton:new(230, 10, 100, BUTTON_HGT, getText("UI_btn_duplicate"), self,
+    self.controls.duplicatePool = ISButton:new(230, 10, 100, tools.BUTTON_HGT, getText("UI_btn_duplicate"), self,
         self.onDuplicatePool);
     self.controls.duplicatePool:initialise();
     self.controls.duplicatePool:instantiate();
@@ -151,32 +103,22 @@ function UI:createChildren()
     if self.controls.duplicatePool.enableAcceptColor then
         self.controls.duplicatePool:enableAcceptColor()
     end
-    self.controls._panel:addChild(self.controls.duplicatePool);
+    self:addChild(self.controls.duplicatePool);
 
-    self.controls.removePool = ISButton:new(120, 10, 100, BUTTON_HGT, getText("UI_btn_remove"), self, self.onRemovePool);
+    self.controls.removePool = ISButton:new(120, 10, 100, tools.BUTTON_HGT, getText("UI_btn_remove"), self,
+        self.onRemovePool);
     self.controls.removePool:initialise();
     self.controls.removePool:instantiate();
     self.controls.removePool.tooltip = getText("UI_btn_remove_tooltip");
     if self.controls.removePool.enableCancelColor then
         self.controls.removePool:enableCancelColor()
     end
-    self.controls._panel:addChild(self.controls.removePool);
+    self:addChild(self.controls.removePool);
 
-    self.controls.tabPanel = ISTabPanel:new(x, BUTTON_HGT + 20, w, h - y - offset);
-    self.controls.tabPanel:initialise()
-    self.controls.tabPanel:instantiate()
-
-    -- self.tabPanel.backgroundColor = {
-    --     r = 0,
-    --     g = 0,
-    --     b = 1,
-    --     a = 1.0
-    -- }
-
-    self.controls._panel:addChild(self.controls.tabPanel)
-
-    self.controls._panel:setScrollHeight(y + h + 10);
-    self.controls._panel:setScrollChildren(true)
+    local tabPanel = tools.getTabPanel(x, tools.BUTTON_HGT + 20, self.width - offset * 2,
+        self.height - tools.BUTTON_HGT - tools.HEADER_HGT - 20 - offset, {})
+    self.controls.tabPanel = tabPanel
+    self:addChild(tabPanel)
 
 end
 
@@ -232,47 +174,16 @@ function UI:onDuplicatePool()
         self.isDirtyValue = true
     end
 
-    -- for i, v in ipairs(self.controls.tabPanel.viewList) do
-    --     if v == view then
-    --         index = i
-    --         break
-    --     end
-    -- end
-
-    -- if index > 0 then
-    --     local copy = PL.table.deepCopy(self.data.pools[index])
-    --     table.insert(self.data.pools, copy)
-    --     self:setData(self.data)
-    --     self.isDirtyValue = true
-    -- end
-
 end
-function UI:prerender()
-    ISPanel.prerender(self)
 
-    local offset = 0
-    local w = self.parent.width
-    local h = self.parent.height
-    local x = offset
-    local y = offset
+function UI:onResize()
 
-    self.controls._panel:setX(x)
-    self.controls._panel:setY(y)
-    self.controls._panel:setWidth(w)
-    self.controls._panel:setHeight(h)
-    self.controls._panel:updateScrollbars();
-
-    self.controls.tabPanel:setX(10)
-    self.controls.tabPanel:setWidth(w - 20)
-    self.controls.tabPanel:setHeight(h - self.controls.tabPanel.y - HEADER_HGT - 10)
-
-    self.controls.removePool:setX(w - 120)
-    self.controls.duplicatePool:setX(w - 230)
-    self.controls.addPool:setX(w - 340)
+    self.controls.removePool:setX(self.width - self.controls.removePool.width - 10)
+    self.controls.duplicatePool:setX(self.controls.removePool.x - self.controls.duplicatePool.width - 10)
+    self.controls.addPool:setX(self.controls.duplicatePool.x - self.controls.addPool.width - 10)
 
     for _, view in ipairs(self.controls.tabPanel.viewList) do
         view.view:setWidth(self.controls.tabPanel:getWidth())
         view.view:setHeight(self.controls.tabPanel:getHeight())
     end
-
 end

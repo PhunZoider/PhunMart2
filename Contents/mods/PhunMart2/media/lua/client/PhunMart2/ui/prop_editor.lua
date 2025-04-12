@@ -241,32 +241,6 @@ function UI:createChildren()
         })
     self.controls._panel = panel
     self:addChild(self.controls._panel);
-    -- self.controls._panel = ISPanel:new(x, y, self.width - self.scrollwidth - offset * 2,
-    --     self.height - y - 10 - BUTTON_HGT - offset);
-    -- self.controls._panel:initialise();
-    -- self.controls._panel:instantiate();
-    -- self.controls._panel:setAnchorRight(true)
-    -- self.controls._panel:setAnchorLeft(true)
-    -- self.controls._panel:setAnchorTop(true)
-    -- self.controls._panel:setAnchorBottom(true)
-    -- self.controls._panel:addScrollBars()
-    -- self.controls._panel.vscroll:setVisible(true)
-
-    -- self.controls._panel.prerender = function(s)
-    --     s:setStencilRect(0, 0, s.width, s.height);
-    --     ISPanel.prerender(s)
-    -- end
-    -- self.controls._panel.render = function(s)
-    --     ISPanel.render(s)
-    --     s:clearStencilRect()
-    -- end
-    -- self.controls._panel.onMouseWheel = function(s, del)
-    --     if s:getScrollHeight() > 0 then
-    --         s:setYScroll(s:getYScroll() - (del * 40))
-    --         return true
-    --     end
-    --     return false
-    -- end
 
     for k, v in pairs(shopProperties) do
 
@@ -275,12 +249,10 @@ function UI:createChildren()
             self.controls[k] = input
             self.controls._panel:addChild(lbl)
             self.controls._panel:addChild(input)
-            -- self:addTextInput(v.label, k, v.tooltip, v.disableOnEdit)
         elseif v.type == "boolean" then
             local chk = tools.getBool(v.label, v.tooltip, x, y)
             self.controls[k] = chk
             self.controls._panel:addChild(chk)
-            -- self:addBool(v.label, k, v.tooltip)
         end
 
         y = y + h + 10
@@ -288,8 +260,6 @@ function UI:createChildren()
     end
 
     panel:setScrollHeight(y + h + 10);
-    -- self.controls._panel:setScrollHeight(y + h + 10);
-    -- self.controls._panel:setScrollChildren(true)
 
 end
 
