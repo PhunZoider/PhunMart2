@@ -87,6 +87,13 @@ function UI:createChildren()
         return false
     end
 
+    self.controls._panel.backgroundColor = {
+        r = 0,
+        g = 1,
+        b = 0,
+        a = 0.7
+    }
+
     self:addChild(self.controls._panel);
 
     self.controls.tabPanel = ISTabPanel:new(x, 100, w, h - y - offset);
@@ -117,6 +124,7 @@ function UI:createChildren()
     self.invTooltip:setVisible(true)
     self.invTooltip:setOwner(self.tabPanel)
     self.invTooltip:setCharacter(self.viewer)
+
 end
 
 function UI:doDrawItem(y, row, alt)

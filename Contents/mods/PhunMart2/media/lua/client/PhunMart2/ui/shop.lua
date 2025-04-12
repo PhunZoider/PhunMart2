@@ -262,24 +262,24 @@ function UI:prerender()
             self:drawTextureScaledAspect(self.backgroundTexture, 0, 0, self.width, self.height, 1);
         end
     end
-    local selected = self.tabPanel:getSelected()
-    if selected then
-        local item = shop.items[selected.text]
-        if not item then
-            self.disabledBuyButton:setVisible(true)
-            return
-        end
-        self.preview:setItem(item, selected.item)
-        self.pricePanel:setItem(item, selected.item)
-        local canBuy = self.pricePanel.canBuy.passed == true
-        if canBuy then
-            -- is there inventory?
-            if item.inventory ~= false and item.inventory < 1 then
-                canBuy = false
-            end
-        end
-        self.disabledBuyButton:setVisible(not canBuy)
-    else
-        self.disabledBuyButton:setVisible(true)
-    end
+    -- local selected = self.tabPanel and self.tabPanel:getSelected() or nil
+    -- if selected then
+    --     local item = shop.items[selected.text]
+    --     if not item then
+    --         self.disabledBuyButton:setVisible(true)
+    --         return
+    --     end
+    --     self.preview:setItem(item, selected.item)
+    --     self.pricePanel:setItem(item, selected.item)
+    --     local canBuy = self.pricePanel.canBuy.passed == true
+    --     if canBuy then
+    --         -- is there inventory?
+    --         if item.inventory ~= false and item.inventory < 1 then
+    --             canBuy = false
+    --         end
+    --     end
+    --     self.disabledBuyButton:setVisible(not canBuy)
+    -- else
+    --     self.disabledBuyButton:setVisible(true)
+    -- end
 end
