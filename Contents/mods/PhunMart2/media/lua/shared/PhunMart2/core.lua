@@ -80,6 +80,7 @@ PhunMart = {
 }
 
 local Core = PhunMart
+local PL = PhunLib
 Core.isLocal = not isClient() and not isServer() and not isCoopHost()
 local sb = SandboxVars
 Core.settings = sb["PhunMart"]
@@ -149,6 +150,7 @@ function Core:updateInstanceInventory(key, data)
     if Core.instanceInventory == nil then
         Core.instanceInventory = {}
     end
+    PL.debug("Updating instance inventory for " .. key, data)
     Core.instanceInventory[key] = data
 end
 

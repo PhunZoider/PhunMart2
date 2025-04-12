@@ -160,9 +160,11 @@ function ServerSystem:purchase(playerObj, item, location)
     end
 end
 
+local doit = false
+
 function ServerSystem:openShop(player, args, forceRestock)
     local shop = self:getLuaObjectAt(args.x, args.y, args.z)
-    local shop2 = self:getIsoObjectAt(args.x, args.y, args.z)
+
     if not shop then
         print("ERROR! shop not found for " .. shop.id)
         self:sendCommand(player, Core.commands.openError, {

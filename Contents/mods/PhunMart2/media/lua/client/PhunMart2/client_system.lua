@@ -25,6 +25,8 @@ end
 function ClientSystem:openShop(player, obj)
     obj:updateFromIsoObject()
     self:sendCommand(player or getSpecificPlayer(0), Core.commands.openShop, {
+        key = obj:getKey(),
+        type = obj.type,
         x = obj.x,
         y = obj.y,
         z = obj.z

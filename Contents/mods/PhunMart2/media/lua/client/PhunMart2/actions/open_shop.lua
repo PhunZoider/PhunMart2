@@ -28,16 +28,30 @@ function action:isValid()
 end
 
 function action:waitToStart()
+
     self.character:faceLocation(self.shopObj.x, self.shopObj.y)
-    if Core:getInstanceInventory(self.shopObj:getKey()) then
-        return false
-    end
-    local isit = self.character:isTurning() or self.character:shouldBeTurning()
-    return isit
+    return self.character:isTurning() or self.character:shouldBeTurning()
+
 end
 
 function action:update()
 
+    -- fires every tick (I think). Once complete, we will start checking to see if we have recieved inventory
+    -- from the server. If not, we will keep ticking until we do
+
+    if self:getJobDelta() == 1 then
+        self.isReady = true
+    end
+
+    if self.isReady then
+        self.data = Core:getInstanceInventory(self.shopObj:getKey())
+        if not self.data then
+            self:resetJobDelta()
+            return true
+        else
+            self.delta = 1
+        end
+    end
 end
 
 function action:start()
