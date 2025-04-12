@@ -13,9 +13,9 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
-local profileName = "PhunMartUIItemList"
-Core.ui.admin.itemSelector = ISPanelJoypad:derive(profileName);
-local UI = Core.ui.admin.itemSelector
+local profileName = "PhunMartUIItems"
+Core.ui.pools_items = ISPanelJoypad:derive(profileName);
+local UI = Core.ui.pools_items
 
 function UI:new(x, y, width, height, options)
     local opts = options or {}

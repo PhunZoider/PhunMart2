@@ -13,14 +13,14 @@ local LABEL_HGT = FONT_HGT_MEDIUM + 6
 local Core = PhunMart
 local profileName = "PhunMartUIPropEditor"
 
-Core.ui.admin.propEditor = ISPanel:derive(profileName);
-Core.ui.admin.propEditor.instances = {}
-local UI = Core.ui.admin.propEditor
+Core.ui.propEditor = ISPanel:derive(profileName);
+Core.ui.propEditor.instances = {}
+local UI = Core.ui.propEditor
 
 local shopProperties = {
     label = {
         type = "string",
-        label = "Label",
+        label = "Labelz",
         tooltip = "The label of the property",
         default = ""
     },

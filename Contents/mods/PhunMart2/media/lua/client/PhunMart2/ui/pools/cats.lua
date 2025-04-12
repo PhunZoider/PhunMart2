@@ -11,9 +11,9 @@ local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local Core = PhunMart
-local profileName = "PhunMartUIItemCats"
-Core.ui.admin.categorySelector = ISPanelJoypad:derive(profileName);
-local UI = Core.ui.admin.categorySelector
+local profileName = "PhunMartUIPoolsCats"
+Core.ui.pools_cats = ISPanelJoypad:derive(profileName);
+local UI = Core.ui.pools_cats
 
 function UI:new(x, y, width, height, options)
     local opts = options or {}

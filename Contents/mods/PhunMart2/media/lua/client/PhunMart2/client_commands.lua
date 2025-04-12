@@ -9,7 +9,7 @@ local Commands = {}
 Commands[Core.commands.getBlackList] = function(args)
     local player = PL.getPlayerByUsername(args.username)
     if player then
-        Core.ui.poolBlacklist.OnOpenPanel(player, args.data)
+        Core.ui.pools_blacklist_main.OnOpenPanel(player, args.data)
     end
 end
 

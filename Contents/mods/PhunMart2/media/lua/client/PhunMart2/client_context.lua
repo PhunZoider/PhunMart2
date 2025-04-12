@@ -43,38 +43,15 @@ Core.contexts.open = function(player, context, worldobjects, test)
         adminSubMenu:addOption("Shops", player, function()
             local c = Core.ui
             -- c.admin.shops.OnOpenPanel(getSpecificPlayer(player))
-            Core.ui.admin.shop_selector.open(getSpecificPlayer(player))
-        end)
-
-        adminSubMenu:addOption("Pool Items", player, function()
-            Core.ui.admin.poolItems.OnOpenPanel(getSpecificPlayer(player))
-        end)
-
-        adminSubMenu:addOption("Pool Editor", player, function()
-            Core.ui.admin.poolItemFilter.OnOpenPanel(getSpecificPlayer(player))
-        end)
-
-        adminSubMenu:addOption("Locations", player, function()
-
-        end)
-
-        if obj then
-            adminSubMenu:addOption("Reroll", player, function()
-
-            end)
-        end
-
-        adminSubMenu:addOption("Convert", player, function()
-
+            Core.ui.shop_selector.open(getSpecificPlayer(player))
         end)
 
         adminSubMenu:addOption("Global Blacklist", player, function()
             if Core.isLocal then
-                Core.ui.admin.poolBlacklist.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
+                Core.ui.pools_blacklist_main.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
             else
                 sendClientCommand(Core.name, Core.commands.getBlackList, {})
             end
-
         end)
 
         context:addSubMenu(adminOption, adminSubMenu)

@@ -13,8 +13,8 @@ local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local profileName = "PhunMartUIMinMax"
-Core.ui.admin.minmax = ISPanel:derive(profileName);
-local UI = Core.ui.admin.minmax
+Core.ui.minmax = ISPanel:derive(profileName);
+local UI = Core.ui.minmax
 
 function UI:setData(data)
 

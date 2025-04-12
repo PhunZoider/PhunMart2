@@ -16,8 +16,8 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 local profileName = "PhunMartUIShopConfig"
 
-Core.ui.admin.shop_config = ISCollapsableWindowJoypad:derive(profileName);
-local UI = Core.ui.admin.shop_config
+Core.ui.shop_config = ISCollapsableWindowJoypad:derive(profileName);
+local UI = Core.ui.shop_config
 local instances = {}
 
 function UI:refreshAll()
@@ -150,13 +150,13 @@ function UI:createChildren()
     self.controls.tabPanel = tabPanel
     self:addChild(tabPanel)
 
-    local props = Core.ui.admin.propEditor:new(0, 0, w, h, {
+    local props = Core.ui.propEditor:new(0, 0, w, h, {
         player = self.player
     })
     self.controls.props = props
     self.controls.tabPanel:addView("Props", props)
 
-    local pools = Core.ui.admin.poolsEditor:new(0, 100, tabPanel.width, tabPanel.height - tabPanel.tabHeight, {
+    local pools = Core.ui.pools:new(0, 100, tabPanel.width, tabPanel.height - tabPanel.tabHeight, {
         player = self.player
     });
     pools:initialise()

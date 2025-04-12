@@ -15,8 +15,8 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 local profileName = "PhunMartUIShopListing"
 
-Core.ui.admin.shop_selector = ISCollapsableWindowJoypad:derive(profileName);
-local UI = Core.ui.admin.shop_selector
+Core.ui.shop_selector = ISCollapsableWindowJoypad:derive(profileName);
+local UI = Core.ui.shop_selector
 local instances = {}
 
 function UI:refreshAll()
@@ -200,10 +200,17 @@ function UI:createChildren()
     self.controls.list = list;
     self.controls._listPanel:addChild(list);
 
-    local btnConfig = ISButton:new(0, 10, 100, BUTTON_HGT, "Config", self, function()
-        local shop = self.controls.list.items[self.controls.list.selected].item
-        Core.ui.admin.shop_config.open(self.player, shop.key)
-    end);
+    local btnClose = ISButton:new(0, 10, 100, BUTTON_HGT, "Close", self, self.close);
+    btnClose.internal = "CLOSE";
+    btnClose:initialise();
+    btnClose:instantiate();
+    if btnClose.enableCancelColor then
+        btnClose:enableCancelColor()
+    end
+    self.controls.btnClose = btnClose;
+    self.controls._controlPanel:addChild(btnClose);
+
+    local btnConfig = ISButton:new(0, 10, 100, BUTTON_HGT, "Config", self, self.onEdit);
     btnConfig.internal = "EDIT";
     btnConfig:initialise();
     btnConfig:instantiate();
@@ -213,7 +220,9 @@ function UI:createChildren()
 
     local btnInstances = ISButton:new(0, 10, 100, BUTTON_HGT, "Locations", self, function()
         local shop = self.controls.list.items[self.controls.list.selected].item
-        Core.ui.admin.shop_instances.open(self.player, shop.key)
+        if shop and shop.key then
+            Core.ui.shop_instances.open(self.player, shop.key)
+        end
     end);
     btnInstances.internal = "INSTANCES";
     btnInstances:initialise();
@@ -222,19 +231,24 @@ function UI:createChildren()
     self.controls.btnInstances = btnInstances;
     self.controls._controlPanel:addChild(btnInstances);
 
-    local btnSpawn = ISButton:new(0, 10, 100, BUTTON_HGT, "Create", self, self.onEdit);
-    btnSpawn.internal = "SPAWN";
-    btnSpawn:initialise();
-    btnSpawn:instantiate();
-    btnSpawn:setEnable(false);
-    self.controls.btnSpawn = btnSpawn;
-    self.controls._controlPanel:addChild(btnSpawn);
-
     self:refreshAll()
 end
 
+function UI:isKeyConsumed(key)
+    return key == Keyboard.KEY_ESCAPE
+end
+
+function UI:onKeyRelease(key)
+    if key == Keyboard.KEY_ESCAPE then
+        self:close()
+    end
+end
+
 function UI:onEdit(item)
-    Core.ui.admin.shop_config.open(self.player, item.key)
+    local shop = self.controls.list.items[self.controls.list.selected].item
+    if shop and shop.key then
+        Core.ui.shop_config.open(self.player, shop.key)
+    end
 end
 
 function UI:prerender()
@@ -261,17 +275,17 @@ function UI:prerender()
     self.controls._controlPanel:setHeight(BUTTON_HGT + 20)
     self.controls._controlPanel:setY(self.controls._controlPanel.parent.height - self.controls._controlPanel.height)
 
+    -- close button
+    self.controls.btnClose:setX(self.controls.btnClose.parent.width - self.controls.btnClose.width - 10)
+    self.controls.btnClose:setEnable(self.controls.list.selected > 0)
+
     -- config button
-    self.controls.btnConfig:setX(self.controls.btnConfig.parent.width - self.controls.btnConfig.width - 10)
+    self.controls.btnConfig:setX(self.controls.btnClose.x - self.controls.btnClose.width - 10)
     self.controls.btnConfig:setEnable(self.controls.list.selected > 0)
 
     -- instances button
     self.controls.btnInstances:setX(self.controls.btnConfig.x - self.controls.btnInstances.width - 10)
     self.controls.btnInstances:setEnable(self.controls.list.selected > 0)
-
-    -- spawn button
-    self.controls.btnSpawn:setX(self.controls.btnInstances.x - self.controls.btnSpawn.width - 10)
-    self.controls.btnSpawn:setEnable(self.controls.list.selected > 0)
 
 end
 

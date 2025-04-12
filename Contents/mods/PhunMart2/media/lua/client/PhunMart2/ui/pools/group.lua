@@ -5,9 +5,9 @@ local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
-local profileName = "PhunMartUIPoolEditorGroup"
-Core.ui.admin.poolEditorGroup = ISPanelJoypad:derive(profileName);
-local UI = Core.ui.admin.poolEditorGroup
+local profileName = "PhunMartUIPoolsGroup"
+Core.ui.pools_group = ISPanelJoypad:derive(profileName);
+local UI = Core.ui.pools_group
 local instances = {}
 
 function UI.OnOpenPanel(playerObj, data)
@@ -82,16 +82,16 @@ function UI:createChildren()
     self.tabPanel:setAnchorBottom(true)
     self:addChild(self.tabPanel)
 
-    self.categories = Core.ui.admin.categorySelector:new(0, y, w, self.tabPanel.height, {
+    self.categories = Core.ui.pools_cats:new(0, y, w, self.tabPanel.height, {
         player = self.player,
         type = self.listType
     });
-    self.exclusions = Core.ui.admin.itemSelector:new(0, y, w, self.tabPanel.height, {
+    self.exclusions = Core.ui.pools_items:new(0, y, w, self.tabPanel.height, {
         player = self.player,
         type = self.listType
     });
     if self.blacklist ~= true then
-        self.inclusions = Core.ui.admin.itemSelector:new(0, y, w, self.tabPanel.height, {
+        self.inclusions = Core.ui.pools_items:new(0, y, w, self.tabPanel.height, {
             player = self.player,
             type = self.listType
         });

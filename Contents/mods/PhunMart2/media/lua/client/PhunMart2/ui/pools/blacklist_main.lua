@@ -12,13 +12,13 @@ local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
-local profileName = "PhunMartUIPoolItemFilterItems"
-PhunMartUIPoolItemFilterItems = ISCollapsableWindowJoypad:derive(profileName);
-local UI = PhunMartUIPoolItemFilterItems
+local profileName = "PhunMartUIPoolsBlacklistMain"
+PhunMartUIPoolsBlacklistMain = ISCollapsableWindowJoypad:derive(profileName);
+local UI = PhunMartUIPoolsBlacklistMain
 local instances = {}
-Core.ui.admin.poolItemFilter = UI
+Core.ui.pools_blacklist_main = UI
 
-function UI.OnOpenPanel(playerObj, pool)
+function UI.OnOpenPanel(playerObj, blacklist)
 
     local playerIndex = playerObj:getPlayerNum()
     local instance = instances[playerIndex]
@@ -35,10 +35,10 @@ function UI.OnOpenPanel(playerObj, pool)
         instance = instances[playerIndex]
         instance:initialise();
 
-        ISLayoutManager.RegisterWindow(profileName, PhunMartUIPoolItemFilterItems, instance)
+        ISLayoutManager.RegisterWindow(profileName, UI, instance)
     end
 
-    instance.pool = pool or {}
+    instance.data = blacklist or {}
 
     instance:addToUIManager();
     instance:setVisible(true);
@@ -83,7 +83,7 @@ function UI:new(x, y, width, height, player, playerIndex)
     o.zOffsetMediumFont = 20;
     o.zOffsetSmallFont = 6;
     o:setWantKeyEvents(true)
-    o:setTitle("Pool")
+    o:setTitle("pools_blacklist_main")
     return o;
 end
 
@@ -122,52 +122,39 @@ function UI:createChildren()
     local x = padding
     local y = th + padding
     local w = self.width - x - padding
-    -- local h = self.height - y - rh - padding
     local h = self.height - rh - padding - FONT_HGT_SMALL - 4
-
-    self.controls.pools = ISComboBox:new(self.width - 210, y, 200, FONT_HGT_SMALL + 4, self, function()
-        self:setPool(self.controls.pools:getOptionText(self.controls.pools.selected))
-    end);
-    self.controls.pools:initialise();
-    self.controls.pools:instantiate();
-    self.controls.pools:setAnchorRight(true);
-    self:addChild(self.controls.pools);
-
-    local txt = "Pool"
-    self.controls.poolsLabel = ISLabel:new(self.controls.pools.x - 10 - getTextManager():MeasureStringX(self.font, txt),
-        y, FONT_HGT_SMALL, txt, 1, 1, 1, 1, UIFont.Small, true);
-    self.controls.poolsLabel:initialise();
-    self.controls.poolsLabel:instantiate();
-    self:addChild(self.controls.poolsLabel);
-
-    y = y + self.controls.pools.height + padding
 
     self.controls.tabPanel = ISTabPanel:new(x, y, w, h - y);
     self.controls.tabPanel:initialise()
     self:addChild(self.controls.tabPanel)
 
-    self.controls.items = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.items = Core.ui.pools_group:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
+        blacklist = true,
         type = Core.consts.itemType.items
     });
 
-    self.controls.vehicles = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.vehicles = Core.ui.pools_group:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
+        blacklist = true,
         type = Core.consts.itemType.vehicles
     });
 
-    self.controls.traits = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.traits = Core.ui.pools_group:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
+        blacklist = true,
         type = Core.consts.itemType.traits
     });
 
-    self.controls.xp = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.xp = Core.ui.pools_group:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
+        blacklist = true,
         type = Core.consts.itemType.xp
     });
 
-    self.controls.boosts = Core.ui.admin.poolEditorGroup:new(0, 100, w, self.controls.tabPanel.height - th, {
+    self.controls.boosts = Core.ui.pools_group:new(0, 100, w, self.controls.tabPanel.height - th, {
         player = self.player,
+        blacklist = true,
         type = Core.consts.itemType.boosts
     });
 
@@ -186,57 +173,16 @@ function UI:createChildren()
     self:refreshAll()
 end
 
-function UI:setPool(pool)
-    local groups = require("PhunMart2/data/groups")
-    local group = groups[pool]
-    self:setTitle("Pool: " .. pool)
-
-    local items = group.items or {}
-    items.categories = items.categories or {}
-    items.include = items.include or {}
-    items.exclude = items.exclude or {}
-
-    local vehicles = group.vehicles or {}
-    vehicles.categories = vehicles.categories or {}
-    vehicles.include = vehicles.include or {}
-    vehicles.exclude = vehicles.exclude or {}
-
-    local traits = group.traits or {}
-    traits.categories = traits.categories or {}
-    traits.include = traits.include or {}
-    traits.exclude = traits.exclude or {}
-
-    local xp = group.xp or {}
-    xp.categories = xp.categories or {}
-    xp.include = xp.include or {}
-    xp.exclude = xp.exclude or {}
-
-    local boosts = group.boosts or {}
-    boosts.categories = boosts.categories or {}
-    boosts.include = boosts.include or {}
-    boosts.exclude = boosts.exclude or {}
-
-    self.controls.items:setData(items)
-    self.controls.vehicles:setData(vehicles)
-    self.controls.traits:setData(traits)
-    self.controls.xp:setData(xp)
-    self.controls.boosts:setData(boosts)
-
-end
-
 function UI:refreshAll()
 
-    local groups = require("PhunMart2/data/groups")
-    self.controls.pools:clear()
-    for k, v in pairs(groups) do
-        self.controls.pools:addOption(k)
+    for k, v in pairs(self.controls) do
+        if v.setData then
+            v:setData(self.data[k] or {
+                categories = {},
+                exclude = {}
+            })
+        end
     end
-
-    self.controls.items:refreshAll()
-    self.controls.vehicles:refreshAll()
-    self.controls.traits:refreshAll()
-    self.controls.xp:refreshAll()
-    self.controls.boosts:refreshAll()
 end
 
 function UI:prerender()
@@ -251,12 +197,18 @@ end
 
 function UI:onOK()
 
-    local selected = {
-        items = self.controls.items:getSelected(),
-        vehicles = self.controls.vehicles:getSelected(),
-        traits = self.controls.traits:getSelected(),
-        xp = self.controls.xp:getSelected(),
-        boosts = self.controls.boosts:getSelected()
-    }
+    local selected = {}
+    for k, v in pairs(self.controls) do
+        if v.getSelected then
+            selected[k] = v:getSelected()
+        end
+    end
+
+    if Core.isLocal then
+        Core.setBlacklist(selected)
+    else
+        sendClientCommand(Core.name, Core.commands.setBlacklist, selected)
+    end
+    self:close()
 
 end

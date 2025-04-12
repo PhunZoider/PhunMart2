@@ -15,8 +15,8 @@ local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 local profileName = "PhunMartUIShopInstances"
 
-Core.ui.admin.shop_instances = ISCollapsableWindowJoypad:derive(profileName);
-local UI = Core.ui.admin.shop_instances
+Core.ui.shop_instances = ISCollapsableWindowJoypad:derive(profileName);
+local UI = Core.ui.shop_instances
 local instances = {}
 
 local pz = nil
@@ -30,7 +30,7 @@ function UI:refreshAll()
 
     local px, py = self.player:getX(), self.player:getY()
     local data = {}
-    for k, v in pairs(Core.instances) do
+    for k, v in pairs(Core.instances or {}) do
 
         if self.shopKey == nil or self.shopKey == v.key then
             table.insert(data, {

@@ -12,11 +12,11 @@ local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
 local Core = PhunMart
 local PL = PhunLib
-local profileName = "PhunMartUIPropEditor"
+local profileName = "PhunMartUIPoolsEntry"
 
-Core.ui.admin.poolsEditorEntry = ISPanel:derive(profileName);
-Core.ui.admin.poolsEditorEntry.instances = {}
-local UI = Core.ui.admin.poolsEditorEntry
+Core.ui.pools_entry = ISPanel:derive(profileName);
+Core.ui.pools_entry.instances = {}
+local UI = Core.ui.pools_entry
 
 -- pools = {{
 -- currency = Base.money,
@@ -348,7 +348,7 @@ function UI:createChildren()
 
     local button = ISButton:new(self.controls.filterText.x + self.controls.filterText.width + 10, y, 75, BUTTON_HGT,
         "...", self, function()
-            Core.ui.admin.shop_pool_items_filter.open(self.player, self.filters or {}, function(data)
+            Core.ui.pools_filters_main.open(self.player, self.filters or {}, function(data)
                 local s = self
                 s.filters = data
                 s:setData(s:getData())
@@ -378,7 +378,7 @@ function UI:promptToExcludeItem(item)
 end
 
 function UI:itemProperties(item)
-    Core.ui.admin.shop_config_item.open(self.player, item, function(data)
+    Core.ui.shop_config_item.open(self.player, item, function(data)
         self:refreshItems()
     end)
 end

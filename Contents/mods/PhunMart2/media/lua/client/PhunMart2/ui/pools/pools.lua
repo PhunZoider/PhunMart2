@@ -4,10 +4,11 @@ end
 
 local tools = require "PhunMart2/ux/tools"
 local Core = PhunMart
-local profileName = "PhunMartUIPoolsEditor"
+local PL = PhunLib
+local profileName = "PhunMartUIPoolsPools"
 
-Core.ui.admin.poolsEditor = ISPanel:derive(profileName);
-local UI = Core.ui.admin.poolsEditor
+Core.ui.pools = ISPanel:derive(profileName);
+local UI = Core.ui.pools
 
 function UI:setData(data)
 
@@ -27,10 +28,9 @@ function UI:setData(data)
 
     local pools = self.data.pools
     for i, v in ipairs(pools) do
-        local p = Core.ui.admin.poolsEditorEntry:new(0, 0, self.controls.tabPanel.width, self.controls.tabPanel.height,
-            {
-                player = self.player
-            })
+        local p = Core.ui.pools_entry:new(0, 0, self.controls.tabPanel.width, self.controls.tabPanel.height, {
+            player = self.player
+        })
         p:initialise()
         p:instantiate()
         self.controls.tabPanel:addView(tostring(i), p)

@@ -13,8 +13,8 @@ local FONT_SCALE = FONT_HGT_SMALL / 14
 local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 
 local profileName = "PhunMartUIConfigItem"
-Core.ui.admin.shop_config_item = ISCollapsableWindowJoypad:derive(profileName);
-local UI = Core.ui.admin.shop_config_item
+Core.ui.shop_config_item = ISCollapsableWindowJoypad:derive(profileName);
+local UI = Core.ui.shop_config_item
 local instances = {}
 
 function UI:setData(data)
@@ -533,7 +533,7 @@ function UI:promptMinMaxSkills(item)
     if self.data.skills[item.type] then
         data = self.data.skills[item.type]
     end
-    Core.ui.admin.minmax.open(self.player, item, {
+    Core.ui.minmax.open(self.player, item, {
         minMin = 0,
         maxMax = 10
     }, function(data)
@@ -559,7 +559,7 @@ function UI:promptMinMaxBoosts(item)
     if self.data.boosts[item.type] then
         data = self.data.boosts[item.type]
     end
-    Core.ui.admin.minmax.open(self.player, data, {
+    Core.ui.minmax.open(self.player, data, {
         minMin = 0,
         maxMax = 3
     }, function(data)
