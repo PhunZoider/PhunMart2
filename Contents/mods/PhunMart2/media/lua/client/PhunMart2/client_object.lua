@@ -32,6 +32,10 @@ function ClientObject:reroll(target)
     ClientSystem.instance:reroll(self, target)
 end
 
+function ClientObject:getKey()
+    return tostring(self.type) .. "-" .. self.x .. "-" .. self.y .. "-" .. self.z
+end
+
 function ClientObject:getFrontSquare()
     local front = {
         x = self.x,

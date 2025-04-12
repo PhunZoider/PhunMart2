@@ -14,12 +14,7 @@ Core.contexts.open = function(player, context, worldobjects, test)
             local text = getText("IGUI_PhunMart_Open_X", getText("IGUI_PhunMart_Shop_" .. obj.type))
             local desc = getText("IGUI_PhunMart_Shop_" .. obj.type .. "_tooltip")
             local disabled = false
-            local lockedBy = obj.lockedBy
-            if lockedBy ~= false and lockedBy ~= playerObj:getUsername() then
-                desc = getText("IGUI_PhunMart_Open_X_locked_tooltip", obj.lockedBy,
-                    getText("IGUI_PhunMart_Shop_" .. obj.type))
-                disabled = true
-            elseif obj.powered then
+            if obj.powered then
                 if not obj:getSquare():haveElectricity() and SandboxVars.ElecShutModifier > -1 and
                     GameTime:getInstance():getNightsSurvived() > SandboxVars.ElecShutModifier then
                     desc = getText("IGUI_PhunMart_Open_X_nopower_tooltip", getText("IGUI_PhunMart_Shop_" .. obj.type))

@@ -8,11 +8,6 @@ local action = Core.actions.openShop
 
 function action:isValidStart()
     local txt = nil
-    if self.shopObj.lockedBy and self.shopObj.lockedBy ~= self.character:getUsername() then
-        txt = getText("IGUI_PhunMart_Open_X_locked_tooltip", self.shopObj.lockedBy,
-            getText("IGUI_PhunMart_Shop_" .. self.shopObj.type))
-        return false
-    end
     if self.shopObj.powered then
         if not self.shopObj:getSquare():haveElectricity() and SandboxVars.ElecShutModifier > -1 and
             GameTime:getInstance():getNightsSurvived() > SandboxVars.ElecShutModifier then
@@ -29,13 +24,12 @@ function action:isValidStart()
 end
 
 function action:isValid()
-    return not self.shopObj.lockedBy or self.shopObj.lockedBy ==
-               (Core.isLocal and self.character:getPlayerNum() or self.character:getUsername())
+    return true
 end
 
 function action:waitToStart()
     self.character:faceLocation(self.shopObj.x, self.shopObj.y)
-    if Core:getInstanceInventory(self.shopObj.key) then
+    if Core:getInstanceInventory(self.shopObj:getKey()) then
         return false
     end
     local isit = self.character:isTurning() or self.character:shouldBeTurning()
@@ -50,7 +44,7 @@ function action:start()
     self:setActionAnim("Loot")
     self.character:SetVariable("LootPosition", "Mid")
     -- clear any local cache of the instance inventory
-    Core:resetInstanceInventory(self.shopObj.key)
+    Core:resetInstanceInventory(self.shopObj:getKey())
     -- request a lock and the inventory
     Core.ClientSystem.instance:openShop(self.character, self.shopObj)
 
@@ -172,11 +166,6 @@ local function getOpeningPositions(playerObj, shopObj)
 end
 
 function action:open(playerObj, shopObj)
-
-    if shopObj.lockedBy and shopObj.lockedBy ~= playerObj:getUsername() then
-        playerObj:Say("Shop is being used by " .. shopObj.lockedBy)
-        return
-    end
 
     -- get the squares we can open from
     local squares = getOpeningPositions(playerObj, shopObj)

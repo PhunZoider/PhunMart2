@@ -77,13 +77,10 @@ function ServerSystem.initializeShopObject(obj)
     local data = {
         type = obj:getSprite():getProperties():Val("CustomName"),
         facing = obj:getSprite():getProperties():Val("Facing"),
-        lockedBy = false,
         created = GameTime:getInstance():getWorldAgeHours(),
         x = obj:getX(),
         y = obj:getY(),
-        z = obj:getZ(),
-        key = obj:getSprite():getProperties():Val("CustomName") .. "_" .. obj:getX() .. "_" .. obj:getY() .. "_" ..
-            obj:getZ()
+        z = obj:getZ()
     }
     obj:setModData(data)
     Core:addInstance(data)
@@ -97,7 +94,7 @@ function ServerSystem:initSystem()
     -- Specify GlobalObject fields that should be saved.
     -- ids = array of all shop ids that have been generated
     -- chunks = array of all chunk coordinates that have shops?
-    self.system:setObjectModDataKeys({'ids', 'chunks', 'key', 'type', 'facing', 'lockedBy', 'created', 'x', 'y', 'z'})
+    self.system:setObjectModDataKeys({'type', 'facing', 'created', 'x', 'y', 'z'})
 end
 
 function ServerSystem:isValidIsoObject(isoObject)
@@ -176,17 +173,6 @@ function ServerSystem:openShop(player, args, forceRestock)
         return
     end
 
-    if shop.lockedBy and shop.lockedBy ~= player:getUsername() then
-        print("ERROR! shop locked by " .. shop.lockedBy)
-        self:sendCommand(player, Core.commands.openError, {
-            id = shop.id,
-            location = shop.location,
-            error = "shopLocked",
-            lockedBy = shop.lockedBy
-        })
-        return
-    end
-
     if shop:requiresPower() then
         self:sendCommand(player, Core.commands.openError, {
             id = shop.id,
@@ -202,13 +188,11 @@ function ServerSystem:openShop(player, args, forceRestock)
         shop:restock()
     end
 
-    shop:lock(player)
-
     if Core.isLocal then
-        Core:updateInstanceInventory(shop.key, self:getInventoryForShop(shop))
+        Core:updateInstanceInventory(shop:getKey(), self:getInventoryForShop(shop))
     else
         sendServerCommand(player, Core.name, Core.commands.requestShop, {
-            key = shop.key,
+            key = shop:getKey(),
             data = self:getInventoryForShop(shop)
         })
     end
@@ -217,7 +201,7 @@ end
 
 function ServerSystem:getInventoryForShop(shop)
 
-    local key = shop.key .. "_" .. shop.x .. "_" .. shop.y .. "_" .. shop.z
+    local key = shop:getKey()
     return {
         key = key,
         items = 1

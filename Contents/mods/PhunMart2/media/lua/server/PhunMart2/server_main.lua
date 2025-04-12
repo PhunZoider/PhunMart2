@@ -2,6 +2,7 @@ if isClient() then
     return
 end
 local Core = PhunMart
+local PL = PhunLib
 
 Core.instances = {}
 
@@ -40,6 +41,7 @@ end
 function Core:ini()
     self.inied = true
     self.instances = ModData.getOrCreate(self.name)
+    self.lastStart = getTimestamp()
     Core.ServerSystem.instance:removeInvalidInstanceData()
     triggerEvent(self.events.OnReady, self)
 end

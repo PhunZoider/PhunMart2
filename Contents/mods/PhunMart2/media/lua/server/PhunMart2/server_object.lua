@@ -13,24 +13,14 @@ local SandboxVars = SandboxVars
 
 -- all valid property and default values
 local fields = {
-    key = {
-        -- a unique key to identify this shop type (eg shop-good-phoods)
-        type = "string",
-        default = "default"
-    },
     type = {
         -- a unique key to identify this shop type (eg shop-good-phoods)
         type = "string",
         default = "default"
     },
-    lockedBy = {
-        -- player that has locked this shop
-        type = "boolOrString",
-        default = false
-    },
     created = {
         -- what hour this shop was created
-        type = "number",
+        type = "numberToTens",
         default = 0
     },
     facing = {
@@ -83,10 +73,8 @@ function ServerObject:stateFromIsoObject(isoObject)
     -- specify props derived from sprite
 
     data.type = isoObject:getSprite():getProperties():Val("CustomName")
-    data.key = data.type .. "_" .. isoObject:getX() .. "_" .. isoObject:getY() .. "_" .. isoObject:getZ()
     data.facing = isoObject:getSprite():getProperties():Val("Facing")
     data.created = data.created or GameTime:getInstance():getWorldAgeHours()
-    data.lockedBy = data.lockedBy or false
     data.x = isoObject:getX()
     data.y = isoObject:getY()
     data.z = isoObject:getZ()
@@ -99,16 +87,6 @@ function ServerObject:stateFromIsoObject(isoObject)
 
     -- send data to clients 
     isoObject:transmitModData()
-end
-
-function ServerObject:unlock()
-    self.lockedBy = false
-    self:saveData()
-end
-
-function ServerObject:lock(player)
-    self.lockedBy = (Core.isLocal and player:getPlayerNum() or player:getUsername())
-    self:saveData()
 end
 
 function ServerObject:getSpriteIndex()
@@ -152,6 +130,10 @@ function ServerObject:updateSprite(force)
     end
 end
 
+function ServerObject:getKey()
+    return tostring(self.type) .. "-" .. self.x .. "-" .. self.y .. "-" .. self.z
+end
+
 function ServerObject:setType(type)
     -- generate from definitions
     self:changeSprite(true)
@@ -172,6 +154,8 @@ function ServerObject:toModData(modData)
         if self[k] ~= nil then
             if v.type == "number" then
                 modData[k] = tonumber(self[k])
+            elseif v.type == "numberToTens" then
+                modData[k] = tonumber(string.format("%.1f", self[k] or 0))
             elseif v.type == "string" then
                 modData[k] = tostring(self[k])
             elseif v.type == "bool" then
@@ -235,10 +219,6 @@ end
 function ServerObject:purchase(playerObj, item, qty)
 
     qty = qty or 1
-
-    if self.lockedBy ~= playerObj:getUsername() then
-        return false, "Shop is locked by someone else"
-    end
 
     if self:requiresPower() then
         return false, "Shop is out of power"

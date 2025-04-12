@@ -31,23 +31,6 @@ function ClientSystem:openShop(player, obj)
     })
 end
 
-function ClientSystem:requestLock(obj, playerObj)
-    obj:updateFromIsoObject()
-    self:sendCommand(playerObj or getSpecificPlayer(0), Core.commands.requestLock, {
-        id = obj.id,
-        location = obj.location
-    })
-end
-
-function ClientSystem:requestUnlock(player, obj)
-    self:sendCommand(player, Core.commands.unlockShop, {
-        key = obj.key,
-        x = obj.x,
-        y = obj.y,
-        z = obj.z
-    })
-end
-
 function ClientSystem:requestPurchase(obj, itemId, playerObj)
 
     local item = obj.items[itemId]
