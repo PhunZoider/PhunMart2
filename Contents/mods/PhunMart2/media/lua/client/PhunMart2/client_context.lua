@@ -52,7 +52,7 @@ Core.contexts.open = function(player, context, worldobjects, test)
         adminSubMenu:addOption("Shops", player, function()
             local c = Core.ui
             -- c.admin.shops.OnOpenPanel(getSpecificPlayer(player))
-            Core.ui.shop_selector.open(obj)
+            Core.ui.shop_selector.open(playerObj)
         end)
 
         adminSubMenu:addOption("unlock", player, function()
