@@ -6,6 +6,17 @@ local Core = PhunMart
 local PL = PhunLib
 local Commands = {}
 
+Commands[Core.commands.openError] = function(args)
+    local player = getSpecificPlayer(args.playerIndex)
+    local w = 300
+    local h = 150
+    local message = getTextOrNull("IGUI_PhunMart.Error." .. args.message) or args.message
+    local modal = ISModalDialog:new(getCore():getScreenWidth() / 2 - w / 2, getCore():getScreenHeight() / 2 - h / 2, w,
+        h, message, false, nil, nil, nil);
+    modal:initialise()
+    modal:addToUIManager()
+end
+
 Commands[Core.commands.getBlackList] = function(args)
     local player = PL.getPlayerByUsername(args.username)
     if player then
@@ -81,6 +92,13 @@ Commands[Core.commands.modifyTraits] = function(arguments)
             target:getContainer():DoRemoveItem(target)
         end
     end
+end
+
+Commands[Core.commands.requestShop] = function(arguments)
+    local player = getSpecificPlayer(arguments.playerIndex)
+    local shop = Core.ClientSystem.instance:getLuaObjectAt(arguments.location.x, arguments.location.y,
+        arguments.location.z)
+    shop:updateFromIsoObject()
 end
 
 Commands[Core.commands.requestShopDefs] = function(arguments)

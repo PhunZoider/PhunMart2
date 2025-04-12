@@ -5,21 +5,11 @@ local Core = PhunMart
 
 Core.instances = {}
 
-function Core:getInstanceByLocation(x, y, z)
-    if type(x) == "table" then
-        if x.getX then
-            return self.instances[x:getX() .. "_" .. x:getY() .. "_" .. x:getZ()]
-        end
-        return self.instances[x.x .. "_" .. x.y .. "_" .. x.z]
-    end
-    return self.instances[x .. "_" .. y .. "_" .. z]
-end
-
 function Core:addInstance(instance)
-    self.instances[instance.x .. "_" .. instance.y .. "_" .. instance.z] = instance
+    self.instances[instance.key] = instance
 end
 function Core:removeInstance(instance)
-    self.instances[instance.x .. "_" .. instance.y .. "_" .. instance.z] = nil
+    self.instances[instance.key] = nil
 end
 
 function Core:getInstanceDistancesFrom(x, y)

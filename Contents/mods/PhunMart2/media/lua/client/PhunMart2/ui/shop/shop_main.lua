@@ -5,20 +5,12 @@ end
 require "ISUI/ISCollapsableWindowJoypad"
 local Core = PhunMart
 local PL = PhunLib
-
-local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
-local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
-local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
-
-local FONT_SCALE = FONT_HGT_SMALL / 14
-local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
-local BUTTON_HGT = FONT_HGT_SMALL + 6
+local tools = require "PhunMart2/ux/tools"
 
 local profileName = "PhunMartUIShop"
-PhunMartUIShop = ISCollapsableWindowJoypad:derive(profileName);
-local UI = PhunMartUIShop
+Core.ui.client.shop = ISCollapsableWindowJoypad:derive(profileName);
+local UI = Core.ui.client.shop
 local instances = {}
-Core.ui.client.shop = UI
 
 UI.layouts = {
     default = {
@@ -107,35 +99,41 @@ UI.layouts = {
     }
 }
 
-function UI.OnOpenPanel(playerObj)
+-- obj = Core.ClientSystem.instance:getLuaObjectOnSquare
+function UI.open(player, data)
 
-    local playerIndex = playerObj:getPlayerNum()
+    local playerIndex = player:getPlayerNum()
     local instance = instances[playerIndex]
+
+    if instance and instance.player ~= player then
+        instance:close()
+        instance = nil
+    end
 
     if not instance then
         local core = getCore()
-        local FONT_SCALE = getTextManager():getFontHeight(UIFont.Small) / 14
-        local width = 450 * FONT_SCALE
-        local height = 590 * FONT_SCALE
+        local width = 450 * tools.FONT_SCALE
+        local height = 590 * tools.FONT_SCALE
 
         local x = (core:getScreenWidth() - width) / 2
         local y = (core:getScreenHeight() - height) / 2
 
-        instances[playerIndex] = UI:new(x, y, width, height, playerObj, playerIndex);
+        instances[playerIndex] = UI:new(x, y, width, height, player, playerIndex, data);
         instance = instances[playerIndex]
         instance:initialise();
 
-        ISLayoutManager.RegisterWindow(profileName, PhunMartUIAdminShops, instance)
+        ISLayoutManager.RegisterWindow(profileName, UI, instance)
     end
 
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
+
     return instance;
 
 end
 
-function UI:new(x, y, width, height, player, playerIndex)
+function UI:new(x, y, width, height, player, playerIndex, data)
     local o = {};
     o = ISCollapsableWindowJoypad:new(x, y, width, height, player);
     setmetatable(o, self);
@@ -159,7 +157,8 @@ function UI:new(x, y, width, height, player, playerIndex)
         b = 0.7,
         a = 1
     };
-    o.data = {}
+    o.data = data or nil
+    o.items = {}
     o.moveWithMouse = false;
     o.anchorRight = true
     o.anchorBottom = true
@@ -218,8 +217,8 @@ function UI:createChildren()
     self.controls = {}
 
     local layout = self.layouts.default.tabs
-    self.controls.items = Core.ui.client.shopItemsList:new(layout.x * FONT_SCALE, layout.y * FONT_SCALE,
-        layout.width * FONT_SCALE, layout.height * FONT_SCALE, {
+    self.controls.items = Core.ui.client.shopItemsList:new(layout.x * tools.FONT_SCALE, layout.y * tools.FONT_SCALE,
+        layout.width * tools.FONT_SCALE, layout.height * tools.FONT_SCALE, {
             viewer = self.player,
             backgroundColor = layout.backgroundColor
         })
@@ -258,28 +257,7 @@ function UI:prerender()
             end
         end
         if self.backgroundTexture then
-            -- self:drawTexture(self.backgroundTexture, 0, 0, 1, 1, 1, 1)
             self:drawTextureScaledAspect(self.backgroundTexture, 0, 0, self.width, self.height, 1);
         end
     end
-    -- local selected = self.tabPanel and self.tabPanel:getSelected() or nil
-    -- if selected then
-    --     local item = shop.items[selected.text]
-    --     if not item then
-    --         self.disabledBuyButton:setVisible(true)
-    --         return
-    --     end
-    --     self.preview:setItem(item, selected.item)
-    --     self.pricePanel:setItem(item, selected.item)
-    --     local canBuy = self.pricePanel.canBuy.passed == true
-    --     if canBuy then
-    --         -- is there inventory?
-    --         if item.inventory ~= false and item.inventory < 1 then
-    --             canBuy = false
-    --         end
-    --     end
-    --     self.disabledBuyButton:setVisible(not canBuy)
-    -- else
-    --     self.disabledBuyButton:setVisible(true)
-    -- end
 end

@@ -18,14 +18,14 @@ local fields = {
         type = "string",
         default = "default"
     },
-    items = {
-        -- array of items currently in inventory
-        type = "array",
-        default = {}
+    type = {
+        -- a unique key to identify this shop type (eg shop-good-phoods)
+        type = "string",
+        default = "default"
     },
     lockedBy = {
         -- player that has locked this shop
-        type = "bool",
+        type = "boolOrString",
         default = false
     },
     created = {
@@ -37,6 +37,21 @@ local fields = {
         -- which way the shop is facing
         type = "string",
         default = "E"
+    },
+    x = {
+        -- x position of the shop
+        type = "number",
+        default = 0
+    },
+    y = {
+        -- y position of the shop
+        type = "number",
+        default = 0
+    },
+    z = {
+        -- z position of the shop
+        type = "number",
+        default = 0
     }
 
 }
@@ -66,7 +81,9 @@ function ServerObject:stateFromIsoObject(isoObject)
     self:initNew() -- initialize with default values
     local data = isoObject:getModData()
     -- specify props derived from sprite
-    data.key = isoObject:getSprite():getProperties():Val("CustomName")
+
+    data.type = isoObject:getSprite():getProperties():Val("CustomName")
+    data.key = data.type .. "_" .. isoObject:getX() .. "_" .. isoObject:getY() .. "_" .. isoObject:getZ()
     data.facing = isoObject:getSprite():getProperties():Val("Facing")
     data.created = data.created or GameTime:getInstance():getWorldAgeHours()
     data.lockedBy = data.lockedBy or false
@@ -87,11 +104,10 @@ end
 function ServerObject:unlock()
     self.lockedBy = false
     self:saveData()
-    Core.ServerSystem.instance:removeShopIdLockData(self)
 end
 
 function ServerObject:lock(player)
-    self.lockedBy = player:getUsername()
+    self.lockedBy = (Core.isLocal and player:getPlayerNum() or player:getUsername())
     self:saveData()
 end
 
@@ -114,7 +130,7 @@ function ServerObject:updateSprite(force)
         return
     end
     local shops = Core.shops
-    local def = shops[self.key]
+    local def = shops[self.type]
     local sprite = isoObject:getSprite():getName()
 
     if def.powered == true then
@@ -143,9 +159,41 @@ function ServerObject:setType(type)
 
 end
 
+function ServerObject:saveData()
+    local isoObject = self:getIsoObject()
+    if isoObject then
+        self:toModData(isoObject:getModData())
+        isoObject:transmitModData()
+    end
+end
+
+function ServerObject:toModData(modData)
+    for k, v in pairs(fields) do
+        if self[k] ~= nil then
+            if v.type == "number" then
+                modData[k] = tonumber(self[k])
+            elseif v.type == "string" then
+                modData[k] = tostring(self[k])
+            elseif v.type == "bool" then
+                modData[k] = self[k] and true or false
+            elseif v.type == "boolOrString" then
+                if not self[k] then
+                    modData[k] = false
+                else
+                    modData[k] = self[k]
+                end
+            elseif v.type == "array" then
+                modData[k] = self[k]
+            end
+        end
+    end
+end
+
 function ServerObject:requiresRestock()
+    local shop = Core.shops[self.type]
+
     local lastRestocked = self.lastRestock or 0
-    local frequency = self.restock or 24
+    local frequency = shop.restock or 24
     local now = GameTime:getInstance():getWorldAgeHours()
     local hoursSinceLastRestock = now - lastRestocked
     local times = math.floor(hoursSinceLastRestock / frequency)
@@ -172,6 +220,16 @@ end
 -- check to ensure we are setup correctly and restock if needed
 function ServerObject:validate()
 
+end
+
+function ServerObject:requiresPower()
+    local shops = Core.shops
+    local def = shops[self.type]
+    if def.powered == true then
+        return not self:getSquare():haveElectricity() and SandboxVars.ElecShutModifier > -1 and
+                   GameTime:getInstance():getNightsSurvived() > SandboxVars.ElecShutModifier
+    end
+    return false
 end
 
 function ServerObject:purchase(playerObj, item, qty)

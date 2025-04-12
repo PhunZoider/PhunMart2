@@ -17,6 +17,17 @@ Commands[Core.commands.setBlacklist] = function(playerObj, args)
     Core.setBlacklistData(args)
 end
 
+Commands[Core.commands.openShop] = function(playerObj, args)
+    Core.ServerSystem.instance:openShop(playerObj, args)
+end
+
+Commands[Core.commands.unlockShop] = function(playerObj, args)
+    local shop = Core.ServerSystem.instance:getLuaObjectAt(args.x, args.y, args.z)
+    if shop then
+        shop:unlock()
+    end
+end
+
 Commands[Core.commands.requestShop] = function(playerObj, args)
     Core.ServerSystem.instance:requestShop(playerObj, args.location)
 end

@@ -75,13 +75,15 @@ end
 function ServerSystem.initializeShopObject(obj)
     obj:setName("PhunMartVendingMachine")
     local data = {
-        key = obj:getSprite():getProperties():Val("CustomName"),
+        type = obj:getSprite():getProperties():Val("CustomName"),
         facing = obj:getSprite():getProperties():Val("Facing"),
         lockedBy = false,
         created = GameTime:getInstance():getWorldAgeHours(),
         x = obj:getX(),
         y = obj:getY(),
-        z = obj:getZ()
+        z = obj:getZ(),
+        key = obj:getSprite():getProperties():Val("CustomName") .. "_" .. obj:getX() .. "_" .. obj:getY() .. "_" ..
+            obj:getZ()
     }
     obj:setModData(data)
     Core:addInstance(data)
@@ -95,7 +97,7 @@ function ServerSystem:initSystem()
     -- Specify GlobalObject fields that should be saved.
     -- ids = array of all shop ids that have been generated
     -- chunks = array of all chunk coordinates that have shops?
-    self.system:setObjectModDataKeys({'ids', 'chunks'})
+    self.system:setObjectModDataKeys({'ids', 'chunks', 'key', 'type', 'facing', 'lockedBy', 'created', 'x', 'y', 'z'})
 end
 
 function ServerSystem:isValidIsoObject(isoObject)
@@ -143,6 +145,9 @@ end
 
 function ServerSystem:purchase(playerObj, item, location)
     local shop = self:getLuaObjectAt(location.x, location.y, location.z)
+    local shop2 = self:getIsoObjectAt(location.x, location.y, location.z)
+
+    local fred = type(shop.setType)
     local success, reason = shop:purchase(playerObj, item)
     if success then
         Core:addToPurchaseHistory(playerObj, item)
@@ -158,19 +163,36 @@ function ServerSystem:purchase(playerObj, item, location)
     end
 end
 
-function ServerSystem:requestShop(playerObj, location, forceRestock)
-    local shop = self:getLuaObjectAt(location.x, location.y, location.z)
+function ServerSystem:openShop(player, args, forceRestock)
+    local shop = self:getLuaObjectAt(args.x, args.y, args.z)
+    local shop2 = self:getIsoObjectAt(args.x, args.y, args.z)
     if not shop then
         print("ERROR! shop not found for " .. shop.id)
+        self:sendCommand(player, Core.commands.openError, {
+            id = shop.id,
+            location = shop.location,
+            error = "shopNotFound"
+        })
         return
     end
 
-    if shop.lockedBy and shop.lockedBy ~= playerObj:getUsername() then
+    if shop.lockedBy and shop.lockedBy ~= player:getUsername() then
         print("ERROR! shop locked by " .. shop.lockedBy)
+        self:sendCommand(player, Core.commands.openError, {
+            id = shop.id,
+            location = shop.location,
+            error = "shopLocked",
+            lockedBy = shop.lockedBy
+        })
         return
     end
 
     if shop:requiresPower() then
+        self:sendCommand(player, Core.commands.openError, {
+            id = shop.id,
+            location = shop.location,
+            error = "requiresPower"
+        })
         print("ERROR! shop requires power")
         return
     end
@@ -180,13 +202,26 @@ function ServerSystem:requestShop(playerObj, location, forceRestock)
         shop:restock()
     end
 
-    shop:lock(playerObj)
+    shop:lock(player)
 
-    -- transmit data to client?
-    -- sendServerCommand(playerObj, PM.name, PM.commands.updateShop, {
-    --     id = shop.id,
-    --     location = shop.location
-    -- })
+    if Core.isLocal then
+        Core:updateInstanceInventory(shop.key, self:getInventoryForShop(shop))
+    else
+        sendServerCommand(player, Core.name, Core.commands.requestShop, {
+            key = shop.key,
+            data = self:getInventoryForShop(shop)
+        })
+    end
+
+end
+
+function ServerSystem:getInventoryForShop(shop)
+
+    local key = shop.key .. "_" .. shop.x .. "_" .. shop.y .. "_" .. shop.z
+    return {
+        key = key,
+        items = 1
+    }
 end
 
 function ServerSystem:getLoadedObjects()

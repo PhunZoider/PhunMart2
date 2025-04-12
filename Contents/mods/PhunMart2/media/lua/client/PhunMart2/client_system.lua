@@ -22,11 +22,29 @@ function ClientSystem:newLuaObject(globalObject)
     return o
 end
 
+function ClientSystem:openShop(player, obj)
+    obj:updateFromIsoObject()
+    self:sendCommand(player or getSpecificPlayer(0), Core.commands.openShop, {
+        x = obj.x,
+        y = obj.y,
+        z = obj.z
+    })
+end
+
 function ClientSystem:requestLock(obj, playerObj)
     obj:updateFromIsoObject()
     self:sendCommand(playerObj or getSpecificPlayer(0), Core.commands.requestLock, {
         id = obj.id,
         location = obj.location
+    })
+end
+
+function ClientSystem:requestUnlock(player, obj)
+    self:sendCommand(player, Core.commands.unlockShop, {
+        key = obj.key,
+        x = obj.x,
+        y = obj.y,
+        z = obj.z
     })
 end
 
@@ -120,7 +138,7 @@ end
 
 function ClientSystem:checkLocals()
     for i = 1, self:getLuaObjectCount() do
-        -- print("ClientSystem:OnTick() " .. tostring(self:getLuaObjectByIndex(i).key))
+
     end
 end
 

@@ -6,29 +6,43 @@ Core.contexts = {}
 
 Core.contexts.open = function(player, context, worldobjects, test)
     local obj
+    local playerObj = getSpecificPlayer(player)
     for _, wObj in ipairs(worldobjects) do -- find object to interact with; code support for controllers
         obj = Core.ClientSystem.instance:getLuaObjectOnSquare(wObj:getSquare())
         if obj then
-            local text = getText("IGUI_PhunMart_Open_X", getText("IGUI_PhunMart_Shop_" .. obj.key))
-            local desc = getText("IGUI_PhunMart_Shop_" .. obj.key .. "_tooltip")
+
+            local text = getText("IGUI_PhunMart_Open_X", getText("IGUI_PhunMart_Shop_" .. obj.type))
+            local desc = getText("IGUI_PhunMart_Shop_" .. obj.type .. "_tooltip")
             local disabled = false
-            if obj.lockedBy ~= false then
+            local lockedBy = obj.lockedBy
+            if lockedBy ~= false and lockedBy ~= playerObj:getUsername() then
                 desc = getText("IGUI_PhunMart_Open_X_locked_tooltip", obj.lockedBy,
-                    getText("IGUI_PhunMart_Shop_" .. obj.key))
+                    getText("IGUI_PhunMart_Shop_" .. obj.type))
                 disabled = true
             elseif obj.powered then
                 if not obj:getSquare():haveElectricity() and SandboxVars.ElecShutModifier > -1 and
                     GameTime:getInstance():getNightsSurvived() > SandboxVars.ElecShutModifier then
-                    desc = getText("IGUI_PhunMart_Open_X_nopower_tooltip", getText("IGUI_PhunMart_Shop_" .. obj.key))
+                    desc = getText("IGUI_PhunMart_Open_X_nopower_tooltip", getText("IGUI_PhunMart_Shop_" .. obj.type))
                     disabled = true
                 end
             end
             local option = context:addOptionOnTop(text, getSpecificPlayer(player), function()
-                Core.ui.client.shop.OnOpenPanel(getSpecificPlayer(player))
+
+                local o = Core.ClientSystem.instance:getLuaObjectOnSquare(wObj:getSquare())
+
+                local square = o:getFrontSquare()
+                if not square then
+                    return
+                end
+
+                ISTimedActionQueue.add(ISWalkToTimedAction:new(playerObj, square))
+                ISTimedActionQueue.add(Core.actions.openShop:new(playerObj, o))
+
             end)
+
             local toolTip = ISToolTip:new();
             toolTip:setVisible(false);
-            toolTip:setName(getText("IGUI_PhunMart_Shop_" .. obj.key));
+            toolTip:setName(getText("IGUI_PhunMart_Shop_" .. obj.type));
             toolTip.description = desc;
             option.notAvailable = disabled
             option.toolTip = toolTip;
@@ -43,7 +57,11 @@ Core.contexts.open = function(player, context, worldobjects, test)
         adminSubMenu:addOption("Shops", player, function()
             local c = Core.ui
             -- c.admin.shops.OnOpenPanel(getSpecificPlayer(player))
-            Core.ui.shop_selector.open(getSpecificPlayer(player))
+            Core.ui.shop_selector.open(obj)
+        end)
+
+        adminSubMenu:addOption("unlock", player, function()
+            Core.ClientSystem.instance:requestUnlock(playerObj, obj)
         end)
 
         adminSubMenu:addOption("Global Blacklist", player, function()

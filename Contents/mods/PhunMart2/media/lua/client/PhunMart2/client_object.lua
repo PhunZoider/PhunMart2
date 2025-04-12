@@ -32,3 +32,24 @@ function ClientObject:reroll(target)
     ClientSystem.instance:reroll(self, target)
 end
 
+function ClientObject:getFrontSquare()
+    local front = {
+        x = self.x,
+        y = self.y,
+        z = self.z
+    }
+
+    if self.facing == "N" then
+        front.y = front.y - 1
+    elseif self.facing == "W" then
+        front.x = front.x - 1
+    elseif self.facing == "S" then
+        front.y = front.y + 1
+    elseif self.facing == "E" then
+        front.x = front.x + 1
+    end
+
+    return getSquare(front.x, front.y, front.z)
+
+end
+

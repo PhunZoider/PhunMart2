@@ -30,16 +30,21 @@ PhunMart = {
         playerSetup = "PhunMartPlayerSetup",
         getShopList = "PhunMartGetShopList",
         getShopData = "PhunMartGetShopData",
-        updateShopData = "PhunMartUpdateShopData"
+        updateShopData = "PhunMartUpdateShopData",
+        openShop = "PhunMartOpenShop",
+        openError = "PhunMartOpenError",
+        unlockShop = "PhunMartUnlockShop"
 
     },
     events = {
-        OnReady = "OnPhunMartOnReady"
+        OnReady = "OnPhunMartOnReady",
+        recievedInventory = "OnPhunMartRecievedInventory"
     },
     settings = {},
     shops = allShops,
     spriteToShop = {},
     opensquares = {},
+    actions = {},
     ui = {
         client = {},
         admin = {}
@@ -129,6 +134,32 @@ function Core.hasPower(square)
                    getSandboxOptions():getOptionByName("ElecShutModifier"):getValue()
     end
     return false
+end
+
+function Core:resetInstanceInventory(key)
+    if Core.instanceInventory == nil then
+        Core.instanceInventory = {}
+    end
+    if Core.instanceInventory[key] then
+        Core.instanceInventory[key] = nil
+    end
+end
+
+function Core:updateInstanceInventory(key, data)
+    if Core.instanceInventory == nil then
+        Core.instanceInventory = {}
+    end
+    Core.instanceInventory[key] = data
+end
+
+function Core:getInstanceInventory(key)
+    if Core.instanceInventory == nil then
+        Core.instanceInventory = {}
+    end
+    if Core.instanceInventory[key] then
+        return Core.instanceInventory[key]
+    end
+    return nil
 end
 
 local tid = nil
