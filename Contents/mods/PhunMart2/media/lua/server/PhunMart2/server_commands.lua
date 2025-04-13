@@ -37,6 +37,10 @@ Commands[Core.commands.closeShop] = function(playerObj, args)
     Core.ServerSystem.instance:getLuaObjectAt(args.location.x, args.location.y, args.location.z):unlock()
 end
 
+Commands[Core.commands.upsertShopDefinition] = function(playerObj, args)
+    Core.ServerSystem.instance:upsertShopDefinition(args)
+end
+
 Commands[Core.commands.requestItemDefs] = function(playerObj, args)
     -- because this can be so massive, we will need to chunk it down
     local row = 0
@@ -124,18 +128,36 @@ Commands[Core.commands.requestLocations] = function(playerObj, args)
 end
 
 Commands[Core.commands.getShopList] = function(playerObj, args)
-    local list = SPhunMartSystem.instance:getShopList()
-    sendServerCommand(playerObj, Core.name, Core.commands.getShopList, list)
+    local list = Core.ServerSystem.instance:getShopList()
+
+    if Core.isLocal then
+        Core.ClientSystem.instance:openShopList(playerObj, list)
+    else
+        local data = {
+            username = playerObj:getUsername(),
+            data = list
+        }
+        sendServerCommand(playerObj, Core.name, Core.commands.getShopList, data)
+    end
+
 end
 
-Commands[Core.commands.getShopData] = function(playerObj, args)
-    local data = SPhunMartSystem.instance:getShopData(args.location)
-    if data then
-        sendServerCommand(playerObj, Core.name, Core.commands.getShopData, data)
+Commands[Core.commands.getShopDefinition] = function(playerObj, args)
+    local shop = Core.ServerSystem.instance:getShopDefinition(args.type)
+    if shop then
+        if Core.isLocal then
+            Core.ClientSystem.instance:openShopConfig(playerObj, shop)
+        else
+            local data = {
+                username = playerObj:getUsername(),
+                data = shop
+            }
+            sendServerCommand(playerObj, Core.name, Core.commands.getShopList, data)
+        end
     end
 end
 
-Commands[Core.commands.updateShopData] = function(playerObj, args)
+Commands[Core.commands.getShopData] = function(playerObj, args)
     local data = SPhunMartSystem.instance:getShopData(args.location)
     if data then
         sendServerCommand(playerObj, Core.name, Core.commands.getShopData, data)

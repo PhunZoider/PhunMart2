@@ -95,10 +95,26 @@ Commands[Core.commands.modifyTraits] = function(arguments)
 end
 
 Commands[Core.commands.requestShop] = function(arguments)
-    local player = getSpecificPlayer(arguments.playerIndex)
-    local shop = Core.ClientSystem.instance:getLuaObjectAt(arguments.location.x, arguments.location.y,
-        arguments.location.z)
-    shop:updateFromIsoObject()
+    Core:updateInstanceInventory(arguments.key, arguments.data)
+    -- local player = getSpecificPlayer(arguments.playerIndex)
+    -- local shop = Core.ClientSystem.instance:getLuaObjectAt(arguments.location.x, arguments.location.y,
+    --     arguments.location.z)
+    -- shop:updateFromIsoObject()
+end
+
+Commands[Core.commands.getShopList] = function(args)
+    local player = PL.getPlayerByUsername(args.username)
+    if player then
+        Core.ClientSystem.instance:openShopList(player, args.data)
+    end
+end
+
+Commands[Core.commands.getShopDefinition] = function(args)
+    local player = PL.getPlayerByUsername(args.username)
+    if player then
+        Core.ClientSystem.instance:openShopConfig(player, args.data)
+    end
+
 end
 
 Commands[Core.commands.requestShopDefs] = function(arguments)

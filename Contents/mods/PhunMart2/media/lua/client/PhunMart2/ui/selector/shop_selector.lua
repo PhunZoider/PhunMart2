@@ -21,17 +21,16 @@ local instances = {}
 
 function UI:refreshAll()
     self.controls.list:clear()
-    local shops = Core.shops
-    for k, v in pairs(shops) do
-        self.controls.list:addItem(getTextOrNull("IGUI_PhunMart_Shop_" .. k) or k, {
-            key = k,
+    for _, v in ipairs(self.data or {}) do
+        self.controls.list:addItem(getTextOrNull("IGUI_PhunMart_Shop_" .. v.type) or v.type, {
+            type = v.type,
             group = v.group or "NONE"
             -- texture = v.sprites and v.sprites[1] or nil
         })
     end
 end
 
-function UI.open(player)
+function UI.open(player, data)
     local playerIndex = player:getPlayerNum()
     local instance = instances[playerIndex]
 
@@ -49,7 +48,7 @@ function UI.open(player)
 
         ISLayoutManager.RegisterWindow(profileName, UI, instance)
     end
-
+    instance.data = data
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
@@ -246,8 +245,8 @@ end
 
 function UI:onEdit(item)
     local shop = self.controls.list.items[self.controls.list.selected].item
-    if shop and shop.key then
-        Core.ui.shop_config.open(self.player, shop.key)
+    if shop and shop.type then
+        Core.ClientSystem.instance:prepareOpenShopConfig(self.player, shop.type)
     end
 end
 

@@ -43,7 +43,7 @@ end
 
 function UI:getData()
     local pools = {}
-    for i, v in ipairs(self.tabPanel.viewList) do
+    for i, v in ipairs(self.controls.tabPanel.viewList) do
         table.insert(pools, v.view:getData())
     end
     return pools

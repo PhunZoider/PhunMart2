@@ -30,10 +30,11 @@ PhunMart = {
         playerSetup = "PhunMartPlayerSetup",
         getShopList = "PhunMartGetShopList",
         getShopData = "PhunMartGetShopData",
-        updateShopData = "PhunMartUpdateShopData",
         openShop = "PhunMartOpenShop",
         openError = "PhunMartOpenError",
-        unlockShop = "PhunMartUnlockShop"
+        unlockShop = "PhunMartUnlockShop",
+        upsertShopDefinition = "PhunMartUpsertShopDefinition",
+        getShopDefinition = "PhunMartGetShopDefinition"
 
     },
     events = {

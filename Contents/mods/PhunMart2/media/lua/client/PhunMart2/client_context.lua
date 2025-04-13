@@ -50,13 +50,7 @@ Core.contexts.open = function(player, context, worldobjects, test)
         local adminSubMenu = ISContextMenu:getNew(context)
 
         adminSubMenu:addOption("Shops", player, function()
-            local c = Core.ui
-            -- c.admin.shops.OnOpenPanel(getSpecificPlayer(player))
-            Core.ui.shop_selector.open(playerObj)
-        end)
-
-        adminSubMenu:addOption("unlock", player, function()
-            Core.ClientSystem.instance:requestUnlock(playerObj, obj)
+            Core.ClientSystem.instance:prepareShopList(playerObj)
         end)
 
         adminSubMenu:addOption("Global Blacklist", player, function()

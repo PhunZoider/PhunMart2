@@ -18,78 +18,84 @@ Core.ui.propEditor.instances = {}
 local UI = Core.ui.propEditor
 
 local shopProperties = {
-    label = {
+    enabled = {
+        type = "boolean",
+        label = "Enabled",
+        tooltip = "Untick to disable this shop from spawning. This will not remove existing shops that have already been created.",
+        default = true
+    },
+    type = {
         type = "string",
-        label = "Labelz",
-        tooltip = "The label of the property",
+        label = "Type",
+        tooltip = "A unique type that defines this shop. Cannot be edited",
+        disableOnEdit = true,
         default = ""
     },
-    key = {
+    label = {
         type = "string",
-        label = "Key",
-        tooltip = "The key of the property",
-        disableOnEdit = true,
+        label = "Label",
+        tooltip = "Name of the shop. Leave blank for default",
         default = ""
     },
     group = {
         type = "string",
         label = "Group",
-        tooltip = "The group of the property",
-        default = ""
-    },
-    price = {
-        type = "int",
-        label = "Price",
-        tooltip = "The price of the property",
-        default = ""
-    },
-    currency = {
-        type = "string",
-        label = "Currency",
-        tooltip = "The currency of the property",
-        default = ""
-    },
-    enabled = {
-        type = "boolean",
-        label = "Enabled",
-        tooltip = "Is the property enabled",
-        default = true
-    },
-    minFill = {
-        type = "int",
-        label = "Min Fill",
-        tooltip = "The minimum fill of the property",
-        default = ""
-    },
-    maxFill = {
-        type = "int",
-        label = "Max Fill",
-        tooltip = "The maximum fill of the property",
-        default = ""
-    },
-    hoursToRestock = {
-        type = "int",
-        label = "Hours To Restock",
-        tooltip = "The hours to restock of the property",
-        default = ""
-    },
-    minDistance = {
-        type = "int",
-        label = "Min Distance",
-        tooltip = "The minimum distance of the property",
+        tooltip = "A string that defines the group of this shop. eg food or boosts. Used to prevent similar stores from spawning next to each other.",
         default = ""
     },
     probability = {
         type = "int",
         label = "Probability",
-        tooltip = "The probability of the property",
+        tooltip = "The probability of this shop spawning. Leave blank for global defaults.",
+        default = ""
+    },
+    minDistance = {
+        type = "int",
+        label = "Min Distance",
+        tooltip = "The minimum distance between this shop and other shops that share the same group type. Leave blank for global defaults.",
+        default = ""
+    },
+    currency = {
+        type = "string",
+        label = "Currency",
+        tooltip = "The default currency to use in this shop. Can be overwritten at item level. Leave blank for global defaults.",
+        default = ""
+    },
+    minPrice = {
+        type = "int",
+        label = "Min Price",
+        tooltip = "The default minimum price of items in this shop. Can be overwritten at item level. Leave blank for global defaults.",
+        default = ""
+    },
+    maxPrice = {
+        type = "int",
+        label = "Max Price",
+        tooltip = "The default maximum price of items in this shop. Can be overwritten at item level. Leave blank for global defaults.",
+        default = ""
+    },
+    minInventory = {
+        type = "int",
+        label = "Min Inventory",
+        tooltip = "The minimum inventory an item will have when restocked. Leave blank for global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    maxInventory = {
+        type = "int",
+        label = "Max Inventory",
+        tooltip = "The maximum inventory an item will have when restocked. Leave blank for global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    hoursToRestock = {
+        type = "int",
+        label = "Hours To Restock",
+        tooltip = "The number of game hours before this shop will restock. Leave blank for global defaults.",
         default = ""
     },
     requiresPower = {
         type = "boolean",
         label = "Requires Power",
-        tooltip = "Does the property require power",
-        default = true
+        tooltip = "Tick to require that this shop is powered in order to function",
+        default = false
     }
 }
 

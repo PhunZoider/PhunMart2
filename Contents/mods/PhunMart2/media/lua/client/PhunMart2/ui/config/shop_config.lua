@@ -15,9 +15,18 @@ local instances = {}
 
 function UI:refreshAll()
 
+    -- copy the Core.shops properties and populate the UI
+    local data = PL.table.deepCopy(self.original_data)
+    self.data = data
+    self.controls.props:setData(data)
+    self.controls.pools:setData(data)
+    local title = getTextOrNull("IGUI_PhunMart_Shop_" .. data.type) or data.type or "Locations"
+    self:setTitle(title)
+    PL.debug("-----", self.shopType, "----", data, "-----")
+
 end
 
-function UI.open(player, shopKey)
+function UI.open(player, data)
 
     local playerIndex = player:getPlayerNum()
 
@@ -28,12 +37,10 @@ function UI.open(player, shopKey)
     local x = (core:getScreenWidth() - width) / 2
     local y = (core:getScreenHeight() - height) / 2
 
-    local instance = UI:new(x, y, width, height, player, playerIndex, shopKey);
+    local instance = UI:new(x, y, width, height, player, playerIndex, data);
+    instance.original_data = data
     instance:initialise();
-
     ISLayoutManager.RegisterWindow(profileName, UI, instance)
-
-    instance.shopKey = shopKey or nil
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
@@ -41,7 +48,7 @@ function UI.open(player, shopKey)
     return instance;
 end
 
-function UI:new(x, y, width, height, player, playerIndex, shopKey)
+function UI:new(x, y, width, height, player, playerIndex, data)
     local o = {};
     o = ISCollapsableWindowJoypad:new(x, y, width, height, player);
     setmetatable(o, self);
@@ -66,19 +73,16 @@ function UI:new(x, y, width, height, player, playerIndex, shopKey)
         a = 1
     };
     o.controls = {}
-    o.data = {}
+    o.original_data = data or {}
     o.moveWithMouse = false;
     o.anchorRight = true
     o.anchorBottom = true
     o.player = player
     o.playerIndex = playerIndex
-    o.shopKey = shopKey
     o.zOffsetLargeFont = 25;
     o.zOffsetMediumFont = 20;
     o.zOffsetSmallFont = 6;
     o:setWantKeyEvents(true)
-    local title = getTextOrNull("IGUI_PhunMart_Shop_" .. shopKey) or shopKey or "Locations"
-    o:setTitle(title)
     return o;
 end
 
@@ -186,6 +190,20 @@ function UI:createChildren()
 
     self:refreshAll()
     self:bringToTop()
+end
+
+function UI:save()
+
+    local data = self.controls.props:getData()
+    local pools = self.controls.pools:getData()
+    data.pools = pools
+
+    PL.debug("----", "Saving shop config", data, "----")
+
+    Core.ClientSystem.instance:sendCommand(self.player, Core.commands.upsertShopDefinition, data)
+
+    self:close()
+
 end
 
 function UI:isKeyConsumed(key)

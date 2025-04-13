@@ -294,32 +294,25 @@ function ServerSystem:getShopList()
     local shops = {}
     for k, v in pairs(Core.shops) do
         table.insert(shops, {
-            key = k,
+            type = k,
             label = getTextOrNull("IGUI_PhunMart_Shop_" .. k) or k,
             group = v.group or "NONE",
             enabled = v.enabled == false and "false" or "true"
         })
     end
+    return shops
 end
 
-function ServerSystem:getShopData(key)
-
-    local shop = Core.shops[key]
-    if not shop then
-        return nil
-    end
-    return PL.table.deepCopy(shop)
+function ServerSystem:getShopDefinition(shopType)
+    local data = Core.shops[shopType] or {}
+    data.type = shopType
+    return data
 end
 
-function ServerSystem:updateShopData(data)
+function ServerSystem:upsertShopDefinition(data)
 
-    local shop = Core.shops[data.key]
-    if not shop then
-        return
-    end
-    for k, v in pairs(data) do
-        shop[k] = v
-    end
+    local copy = PL.table.deepCopy(data)
+    Core.shops[data.type] = copy
 
 end
 

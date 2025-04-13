@@ -43,9 +43,12 @@ local _lastHighlighted = nil
 
 Events.OnServerCommand.Add(function(module, command, arguments)
     if module == Core.name then
-        if command == Core.commands.requestShop then
-            Core:updateInstanceInventory(arguments.key, arguments.data)
+        if Commands[command] then
+            Commands[command](arguments)
         end
+        -- if command == Core.commands.requestShop then
+        --     Core:updateInstanceInventory(arguments.key, arguments.data)
+        -- end
     end
 end)
 
