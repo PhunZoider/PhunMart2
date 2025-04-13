@@ -92,19 +92,29 @@ for _, event in pairs(PhunMart.events) do
     end
 end
 
-for k, v in pairs(Core.shops) do
-    for _, sprite in ipairs(v.sprites) do
-        Core.spriteToShop[sprite] = k
+function Core:reloadShopDefinitions()
+    local file = PL.file.loadTable(self.consts.shopsLuaFile, false)
+    if file then
+        self.shops = file
+    else
+        self.shops = allShops
     end
-    for _, sprite in ipairs(v.unpoweredSprites) do
-        Core.spriteToShop[sprite] = k
+    self.spriteToShop = {}
+    for k, v in pairs(Core.shops) do
+        for _, sprite in ipairs(v.sprites) do
+            self.spriteToShop[sprite] = k
+        end
+        for _, sprite in ipairs(v.unpoweredSprites) do
+            self.spriteToShop[sprite] = k
+        end
     end
+    return self.shops
 end
 
 function Core:ini()
     self.inied = true
-    if isServer() then
-        self.shops = self:getShops()
+    if not isClient() then
+        self:reloadShopDefinitions()
     end
     triggerEvent(self.events.OnReady, self)
 end

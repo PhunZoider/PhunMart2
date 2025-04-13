@@ -131,7 +131,12 @@ function UI:getData()
                 if v.isCsv then
                     data[k] = {}
                     for i in string.gmatch(str, "([^,]+)") do
-                        table.insert(data[k], i)
+                        local numbericTest = tonumber(i)
+                        if numbericTest then
+                            table.insert(data[k], numbericTest)
+                        else
+                            table.insert(data[k], i)
+                        end
                     end
                 else
 
@@ -150,7 +155,24 @@ function UI:getData()
         end
 
     end
-    data.filters = self.filters
+
+    local filters = {}
+    for k, v in pairs(self.filters) do
+        local toAdd = nil
+        for kk, vv in pairs(v) do
+            for kkk, vvv in pairs(vv) do
+                if toAdd == nil then
+                    toAdd = {}
+                end
+                toAdd[kk] = vv
+            end
+        end
+        if toAdd then
+            filters[k] = toAdd
+        end
+    end
+
+    data.filters = filters
 
     return data
 end
@@ -394,8 +416,9 @@ function UI:refreshItems()
     if filters.items then
         local allItems = Core.getAllItems()
         for _, v in ipairs(allItems) do
-            if not filters.items.exclude[v.type] then
-                if filters.items.include[v.type] or filters.items.categories[v.category] then
+            if not (filters.items.exclude and filters.items.exclude[v.type]) then
+                if (filters.items.include and filters.items.include[v.type]) or
+                    (filters.items.categories and filters.items.categories[v.category]) then
                     table.insert(results, {
                         type = v.type,
                         label = v.label,
@@ -411,13 +434,13 @@ function UI:refreshItems()
     if filters.vehicles then
         local allCars = Core.getAllVehicles()
         for _, v in ipairs(allCars) do
-            if not filters.vehicles.exclude[v.type] then
-                if filters.vehicles.include[v.type] or filters.vehicles.categories[v.category] then
+            if not (filters.vehicles.exclude and filters.vehicles.exclude[v.type]) then
+                if (filters.vehicles.include and filters.vehicles.include[v.type]) or
+                    (filters.vehicles.categories and filters.vehicles.categories[v.category]) then
                     table.insert(results, {
                         type = v.type,
                         label = v.label,
                         category = v.category,
-
                         source = "vehicles"
                     })
                 end
@@ -428,8 +451,9 @@ function UI:refreshItems()
     if filters.traits then
         local allTraits = Core.getAllTraits()
         for _, v in ipairs(allTraits) do
-            if not filters.traits.exclude[v.type] then
-                if filters.traits.include[v.type] or filters.traits.categories[v.category] then
+            if not (filters.traits.exclude and filters.traits.exclude[v.type]) then
+                if (filters.traits.include and filters.traits.include[v.type]) or
+                    (filters.traits.categories and filters.traits.categories[v.category]) then
                     table.insert(results, {
                         type = v.type,
                         label = v.label,
@@ -445,8 +469,9 @@ function UI:refreshItems()
     if filters.xp then
         local allXp = Core.getAllXp()
         for _, v in ipairs(allXp) do
-            if not filters.xp.exclude[v.type] then
-                if filters.xp.include[v.type] or filters.xp.categories[v.category] then
+            if not (filters.xp.exclude and filters.xp.exclude[v.type]) then
+                if (filters.xp.include and filters.xp.include[v.type]) or
+                    (filters.xp.categories and filters.xp.categories[v.category]) then
                     table.insert(results, {
                         type = v.type,
                         label = v.label,
@@ -462,8 +487,9 @@ function UI:refreshItems()
     if filters.boosts then
         local allBoosts = Core.getAllBoosts()
         for _, v in ipairs(allBoosts) do
-            if not filters.boosts.exclude[v.type] then
-                if filters.boosts.include[v.type] or filters.boosts.categories[v.category] then
+            if not (filters.boosts.exclude and filters.boosts.exclude[v.type]) then
+                if (filters.boosts.include and filters.boosts.include[v.type]) or
+                    (filters.boosts.categories and filters.boosts.categories[v.category]) then
                     table.insert(results, {
                         type = v.type,
                         label = v.label,

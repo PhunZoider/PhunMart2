@@ -313,6 +313,7 @@ function ServerSystem:upsertShopDefinition(data)
 
     local copy = PL.table.deepCopy(data)
     Core.shops[data.type] = copy
+    PL.file.saveTable(Core.consts.shopsLuaFile, Core.shops)
 
 end
 

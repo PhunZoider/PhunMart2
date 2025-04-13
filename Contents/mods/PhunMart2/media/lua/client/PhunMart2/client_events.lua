@@ -75,6 +75,7 @@ end)
 
 Events.OnPreFillWorldObjectContextMenu.Add(function(playerObj, context, worldobjects, test)
     Core.contexts.open(playerObj, context, worldobjects, test)
+    Core:reloadShopDefinitions()
 end)
 
 local function setup()
