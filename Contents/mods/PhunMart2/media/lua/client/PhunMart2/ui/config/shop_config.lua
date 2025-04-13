@@ -6,13 +6,6 @@ require "ISUI/ISCollapsableWindowJoypad"
 local tools = require "PhunMart2/ux/tools"
 local Core = PhunMart
 local PL = PhunLib
-local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
-local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
-local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
-
-local FONT_SCALE = FONT_HGT_SMALL / 14
-local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
-local BUTTON_HGT = FONT_HGT_SMALL + 6
 
 local profileName = "PhunMartUIShopConfig"
 
@@ -29,8 +22,8 @@ function UI.open(player, shopKey)
     local playerIndex = player:getPlayerNum()
 
     local core = getCore()
-    local width = 600 * FONT_SCALE
-    local height = 400 * FONT_SCALE
+    local width = 450 * tools.FONT_SCALE
+    local height = 500 * tools.FONT_SCALE
 
     local x = (core:getScreenWidth() - width) / 2
     local y = (core:getScreenHeight() - height) / 2
@@ -91,12 +84,12 @@ end
 
 function UI:RestoreLayout(name, layout)
 
-    ISLayoutManager.DefaultRestoreWindow(self, layout)
-    if name == profileName then
-        ISLayoutManager.DefaultRestoreWindow(self, layout)
-        self.userPosition = layout.userPosition == 'true'
-    end
-    self:recalcSize();
+    -- ISLayoutManager.DefaultRestoreWindow(self, layout)
+    -- if name == profileName then
+    --     ISLayoutManager.DefaultRestoreWindow(self, layout)
+    --     self.userPosition = layout.userPosition == 'true'
+    -- end
+    -- self:recalcSize();
 end
 
 function UI:SaveLayout(name, layout)
@@ -120,14 +113,23 @@ function UI:onResize()
     local padding = 10
     local th = self:titleBarHeight()
     local rh = self:resizeWidgetHeight()
+    local fs = tools.FONT_SCALE
     tabPanel:setX(padding)
     tabPanel:setY(th)
     tabPanel:setWidth(self.width - padding * 2)
-    tabPanel:setHeight(self.height - th - rh)
+
+    tabPanel:setHeight(self.height - (tabPanel.y) - rh - (tools.BUTTON_HGT + (padding * 2)))
+
     for _, view in ipairs(tabPanel.viewList) do
         view.view:setWidth(tabPanel.width)
         view.view:setHeight(tabPanel.height - tabPanel.tabHeight)
     end
+
+    self.controls.btnCancel:setX(tabPanel.x + tabPanel.width - tools.BUTTON_WID)
+    self.controls.btnCancel:setY(tabPanel.y + tabPanel.height + padding)
+
+    self.controls.btnSave:setX(self.controls.btnCancel.x - tools.BUTTON_WID - padding)
+    self.controls.btnSave:setY(self.controls.btnCancel.y)
 end
 
 function UI:createChildren()
@@ -162,6 +164,25 @@ function UI:createChildren()
     pools:initialise()
     self.controls.pools = pools
     self.controls.tabPanel:addView("Pools", self.controls.pools)
+
+    local btnCancel = ISButton:new(0, 0, tools.BUTTON_WID, tools.BUTTON_HGT, getText("UI_btn_cancel"), self, UI.close)
+    btnCancel:initialise()
+    if btnCancel.enableCancelColor then
+        btnCancel:enableCancelColor()
+    end
+    self.controls.btnCancel = btnCancel
+    self:addChild(btnCancel)
+
+    local btnSave = ISButton:new(0, 0, tools.BUTTON_WID, tools.BUTTON_HGT, getText("UI_btn_save"), self, function()
+        self:save()
+    end)
+    btnSave:initialise()
+    if btnSave.enableAcceptColor then
+        btnSave:enableAcceptColor()
+    end
+
+    self.controls.btnSave = btnSave
+    self:addChild(btnSave)
 
     self:refreshAll()
     self:bringToTop()

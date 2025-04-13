@@ -217,28 +217,27 @@ function UI:createChildren()
 
     local offset = 10
     local x = offset
-    local y = HEADER_HGT
-    local h = FONT_HGT_MEDIUM
+    local y = tools.HEADER_HGT
+    local h = tools.FONT_HGT_MEDIUM
 
     self.controls = {}
-    local panel = tools.getContainerPanel(x, y, self.width - self.scrollwidth - offset * 2,
-        self.height - y - 10 - BUTTON_HGT - offset, {
-            prerender = function(s)
-                s:setStencilRect(0, 0, s.width, s.height);
-                ISPanel.prerender(s)
-            end,
-            render = function(s)
-                ISPanel.render(s)
-                s:clearStencilRect()
-            end,
-            onMouseWheel = function(s, del)
-                if s:getScrollHeight() > 0 then
-                    s:setYScroll(s:getYScroll() - (del * 40))
-                    return true
-                end
-                return false
+    local panel = tools.getContainerPanel(0, 0, self.width - self.scrollwidth, self.height, {
+        prerender = function(s)
+            s:setStencilRect(0, 0, s.width, s.height);
+            ISPanel.prerender(s)
+        end,
+        render = function(s)
+            ISPanel.render(s)
+            s:clearStencilRect()
+        end,
+        onMouseWheel = function(s, del)
+            if s:getScrollHeight() > 0 then
+                s:setYScroll(s:getYScroll() - (del * 40))
+                return true
             end
-        })
+            return false
+        end
+    })
     self.controls._panel = panel
     self:addChild(self.controls._panel);
 

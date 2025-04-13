@@ -311,7 +311,7 @@ function UI:createChildren()
             context:addOption("Properties", self, function()
                 self:itemProperties(item)
             end, item)
-            context:addOption("Remove", self, function()
+            context:addOption("Remove " .. item.type, self, function()
                 self:promptToExcludeItem(item)
             end, item)
         end
@@ -525,6 +525,12 @@ function UI:drawDatas(y, item, alt)
     local clipX2 = self.width
     local clipY = math.max(0, y + self:getYScroll())
     local clipY2 = math.min(self.height, y + self:getYScroll() + self.itemheight)
+
+    if item.item.texture then
+        local textured = self:drawTextureScaledAspect2(item.item.texture, xoffset, y, self.itemheight - 4,
+            self.itemheight - 4, 1, 1, 1, 1)
+        xoffset = xoffset + self.itemheight + 4
+    end
 
     self:setStencilRect(clipX, clipY, clipX2 - clipX, clipY2 - clipY)
     self:drawText(item.text, xoffset, y + 4, 1, 1, 1, a, self.font);

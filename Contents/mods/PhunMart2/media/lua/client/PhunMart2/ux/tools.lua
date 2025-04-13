@@ -16,8 +16,10 @@ tools.FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 tools.FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 tools.FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
 tools.BUTTON_HGT = tools.FONT_HGT_SMALL + 6
+
 tools.FONT_SCALE = tools.FONT_HGT_SMALL / 14
 tools.HEADER_HGT = tools.FONT_HGT_MEDIUM + 2 * 2
+tools.BUTTON_WID = 100 * tools.FONT_SCALE
 
 function tools.getLabel(text, x, y)
     local label = ISLabel:new(x, y, tools.FONT_HGT_SMALL, text, 1, 1, 1, 1, UIFont.Small, true);
