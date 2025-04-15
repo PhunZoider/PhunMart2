@@ -67,9 +67,9 @@ function UI:createChildren()
 
     local padding = 10
     local x = 0
-    local y = HEADER_HGT - 1
+    local y = 0
     self.controls = {}
-    local list = tools.getListbox(x, y, self:getWidth(), self.height, {"Category"}, {
+    local list = tools.getListbox(x, y, self:getWidth(), self.height - tools.HEADER_HGT, {"Category"}, {
         draw = self.drawDatas,
         click = self.click,
         rightClick = self.rightClick

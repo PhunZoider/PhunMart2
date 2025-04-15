@@ -3,8 +3,9 @@ if isServer() then
 end
 
 require "ISUI/ISCollapsableWindowJoypad"
+local tools = require "PhunMart2/ux/tools"
 local Core = PhunMart
-
+local PL = PhunLib
 local FONT_HGT_SMALL = getTextManager():getFontHeight(UIFont.Small)
 local FONT_HGT_MEDIUM = getTextManager():getFontHeight(UIFont.Medium)
 local FONT_HGT_LARGE = getTextManager():getFontHeight(UIFont.Large)
@@ -17,11 +18,71 @@ Core.ui.shop_config_item = ISCollapsableWindowJoypad:derive(profileName);
 local UI = Core.ui.shop_config_item
 local instances = {}
 
-function UI:setData(data)
-    self.data = data
-end
+local itemProperties = {
+    probability = {
+        type = "int",
+        label = "Probability",
+        tooltip = "The probability that this item will be picked when restocking. Leave blank for defaults."
+    },
+    currency = {
+        type = "string",
+        label = "Currency",
+        tooltip = "Override pool, shop and global currency values for this item."
+    },
+    minPrice = {
+        type = "int",
+        label = "Min Price",
+        tooltip = "Overrides pool, shop and global min price for this item.",
+        default = ""
+    },
+    maxPrice = {
+        type = "int",
+        label = "Max Price",
+        tooltip = "Overrides pool, shop and global max price values for this item.",
+        default = ""
+    },
+    minInventory = {
+        type = "int",
+        label = "Min Inventory",
+        tooltip = "Overrides the pool, shop and global min inventory values for this item.",
+        default = ""
+    },
+    maxInventory = {
+        type = "int",
+        label = "Max Inventory",
+        tooltip = "Overrides the pool, shop and global max inventory values for this item.",
+        default = ""
+    }
+}
 
-function UI.open(player, item)
+local itemLimits = {
+    maxCharPurchases = {
+        type = "int",
+        label = "Max Purchases",
+        tooltip = "Maximum times this item can be purchased by a character.",
+        default = ""
+    },
+    maxActPurchases = {
+        type = "int",
+        label = "Max Act Purchases",
+        tooltip = "Maximum times this item can be purchased by an account.",
+        default = ""
+    },
+    minCharTime = {
+        type = "int",
+        label = "Min Time",
+        tooltip = "Minimum amount of time played before character can purchase item.",
+        default = ""
+    },
+    minActTime = {
+        type = "int",
+        label = "Min Act Time",
+        tooltip = "Minimum amount of time user must have played before character can purchase item.",
+        default = ""
+    }
+}
+
+function UI.open(player, data, cb)
 
     local playerIndex = player:getPlayerNum()
 
@@ -33,11 +94,17 @@ function UI.open(player, item)
     local y = (core:getScreenHeight() - height) / 2
 
     local instance = UI:new(x, y, width, height, player, playerIndex);
-    instance.item = item
+    if type(data) == "table" then
+        instance.data = PL.table.deepCopy(data)
+    else
+        instance.data = {}
+    end
+
     instance:initialise();
 
     ISLayoutManager.RegisterWindow(profileName, UI, instance)
 
+    instance.cb = cb
     instance:addToUIManager();
     instance:setVisible(true);
     instance:ensureVisible()
@@ -200,7 +267,7 @@ function UI:createChildren()
     local rh = self:resizeWidgetHeight()
     local w = self.width - 200
     local h = self.height - rh - th
-    local x = 0
+    local x = padding
     local y = th
 
     self.controls = {}
@@ -220,7 +287,7 @@ function UI:createChildren()
     self.controls.itemPropsTabs:setAnchorBottom(true);
     panel:addChild(self.controls.itemPropsTabs);
 
-    local propsPanel = ISPanel:new(x, 0, self.controls.itemPropsTabs.width, self.controls.itemPropsTabs.height);
+    local propsPanel = ISPanel:new(0, 0, self.controls.itemPropsTabs.width, self.controls.itemPropsTabs.height);
     propsPanel:initialise();
     propsPanel:instantiate();
     propsPanel:setAnchorRight(true);
@@ -228,23 +295,15 @@ function UI:createChildren()
 
     self.controls.itemPropsTabs:addView("Props", propsPanel);
 
-    local row = self:addLabeledTextbox("minPrice", "Min Price", "Min Price", propsPanel, y)
-    y = y + row.height + padding
+    local lbl, txt
 
-    row = self:addLabeledTextbox("maxPrice", "Max Price", "Max Price", propsPanel, y)
-    y = y + row.height + padding
-
-    row = self:addLabeledTextbox("currency", "Currency", "Currency", propsPanel, y)
-    y = y + row.height + padding
-
-    row = self:addLabeledTextbox("minInventory", "Min Inventory", "Min Inventory", propsPanel, y)
-    y = y + row.height + padding
-
-    row = self:addLabeledTextbox("maxInventory", "Max Inventory", "Max Inventory", propsPanel, y)
-    y = y + row.height + padding
-
-    row = self:addLabeledTextbox("probability", "Probability", "Probability", propsPanel, y)
-    y = y + row.height + padding
+    for k, v in pairs(itemProperties) do
+        lbl, txt = tools.getLabeledTextbox(v.label, v.tooltip, "", x, y, 100, 300)
+        self.controls[k] = txt
+        propsPanel:addChild(lbl)
+        propsPanel:addChild(txt)
+        y = y + txt.height + 10
+    end
 
     y = 100
 
@@ -358,23 +417,45 @@ function UI:createChildren()
     self.controls.itemPropsTabs:addView("Purchase Limits", self.controls.purchaseLimitsPanel);
 
     y = 20
+    for k, v in pairs(itemLimits) do
+        lbl, txt = tools.getLabeledTextbox(v.label, v.tooltip, "", x, y, 100, 300)
+        self.controls[k] = txt
+        self.controls.purchaseLimitsPanel:addChild(lbl)
+        self.controls.purchaseLimitsPanel:addChild(txt)
+        y = y + txt.height + 10
+    end
 
-    row = self:addLabeledTextbox("maxCharPurchases", "Max Purchases",
-        "Maximum times this item can be purchased by a character", self.controls.purchaseLimitsPanel, y)
-    y = y + row.height + padding
+    -- lbl, txt = tools.getLabeledTextbox("Max Purchases", "Maximum times this item can be purchased by a character", "",
+    --     x, y, 100, 300)
 
-    row = self:addLabeledTextbox("maxActPurchases", "Max Act Purchases",
-        "Maximum times this item can be purchased by an account", self.controls.purchaseLimitsPanel, y)
-    y = y + row.height + padding
+    -- self.controls.maxCharPurchases = txt
+    -- self.controls.purchaseLimitsPanel:addChild(lbl)
+    -- self.controls.purchaseLimitsPanel:addChild(txt)
+    -- y = y + txt.height + 10
 
-    row = self:addLabeledTextbox("minCharTime", "Min time",
-        "Minimum amount of time played before character can purchase item", self.controls.purchaseLimitsPanel, y)
-    y = y + row.height + padding
+    -- lbl, txt = tools.getLabeledTextbox("Max Act Purchases", "Maximum times this item can be purchased by an account.",
+    --     "", x, y, 100, 300)
 
-    row = self:addLabeledTextbox("minActTime", "Min Act time",
-        "Minimum amount of time user must have played before character can purchase item",
-        self.controls.purchaseLimitsPanel, y)
-    y = y + row.height + padding
+    -- self.controls.maxActPurchases = txt
+    -- self.controls.purchaseLimitsPanel:addChild(lbl)
+    -- self.controls.purchaseLimitsPanel:addChild(txt)
+    -- y = y + txt.height + 10
+
+    -- lbl, txt = tools.getLabeledTextbox("Min time", "Minimum amount of time played before character can purchase item.",
+    --     "", x, y, 100, 300)
+
+    -- self.controls.minCharTime = txt
+    -- self.controls.purchaseLimitsPanel:addChild(lbl)
+    -- self.controls.purchaseLimitsPanel:addChild(txt)
+    -- y = y + txt.height + 10
+
+    -- lbl, txt = tools.getLabeledTextbox("Min Act time",
+    --     "Minimum amount of time user must have played before character can purchase item.", "", x, y, 100, 300)
+
+    -- self.controls.minActTime = txt
+    -- self.controls.purchaseLimitsPanel:addChild(lbl)
+    -- self.controls.purchaseLimitsPanel:addChild(txt)
+    -- y = y + txt.height + 10
 
     x = self.controls._panel.width + padding
     y = th
@@ -477,6 +558,134 @@ function UI:createChildren()
     self.controls.description = description;
 
     self:refreshAll()
+end
+
+function UI:onSave()
+    print("Saving item config")
+
+    local data = {}
+    for k, v in pairs(itemProperties) do
+        local value = self.controls[k]:getText()
+        if value ~= "" then
+            if v.type == "int" then
+                value = tonumber(value)
+            elseif v.type == "string" then
+                value = value:match("^%s*(.-)%s*$")
+            end
+            data[k] = value
+        end
+    end
+
+    for k, v in pairs(itemLimits) do
+        local value = self.controls[k]:getText()
+        if value ~= "" then
+            if v.type == "int" then
+                value = tonumber(value)
+            elseif v.type == "string" then
+                value = value:match("^%s*(.-)%s*$")
+            end
+            data[k] = value
+        end
+    end
+
+    -- skills
+    if self.data.skills then
+        local d = {}
+        local add = false
+        for k, v in pairs(self.data.skills) do
+            if v.min and v.max then
+                d[k] = v
+                add = true
+            elseif v.min then
+                d[k] = {
+                    min = v.min,
+                    max = v.max
+                }
+                add = true
+            elseif v.max then
+                d[k] = {
+                    min = 0,
+                    max = v.max
+                }
+                add = true
+            end
+        end
+        if add then
+            data.skills = d
+        end
+    end
+
+    -- boosts
+    if self.data.boosts then
+        local d = {}
+        local add = false
+        for k, v in pairs(self.data.boosts) do
+            if v.min and v.max then
+                d[k] = v
+                add = true
+            elseif v.min then
+                d[k] = {
+                    min = v.min,
+                    max = v.max
+                }
+                add = true
+            elseif v.max then
+                d[k] = {
+                    min = 0,
+                    max = v.max
+                }
+                add = true
+            end
+        end
+        if add then
+            data.boosts = d
+        end
+    end
+
+    -- boosts
+    if self.data.traits then
+        local d = {}
+        local add = false
+        for k, v in pairs(self.data.traits) do
+            if v == true then
+                d[k] = true
+                add = true
+            elseif v == false then
+                d[k] = false
+                add = true
+            end
+        end
+        if add then
+            data.traits = d
+        end
+    end
+
+    -- boosts
+    if self.data.professions then
+        local d = {}
+        local add = false
+        for k, v in pairs(self.data.professions) do
+            if v == true then
+                d[k] = true
+                add = true
+            elseif v == false then
+                d[k] = false
+                add = true
+            end
+        end
+        if add then
+            data.professions = d
+        end
+    end
+
+    -- if there are no properties set, return nil
+    if next(data) == nil then
+        self.cb(nil)
+    else
+        self.cb(data)
+    end
+    self:close()
+
 end
 
 function UI:instantiate()

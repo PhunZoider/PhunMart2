@@ -17,7 +17,7 @@ function UI:setData(data)
         self.data.pools = {}
     end
 
-    local isNew = data.key == nil
+    local isNew = data.type == nil
 
     -- remove all tabviews
     if #self.controls.tabPanel.viewList > 0 then
@@ -34,7 +34,7 @@ function UI:setData(data)
         p:initialise()
         p:instantiate()
         self.controls.tabPanel:addView(tostring(i), p)
-        p:setData(v)
+        p:setData(v, isNew)
     end
 
     self.controls.tabPanel:setVisible(#self.controls.tabPanel.viewList > 0)
@@ -116,8 +116,9 @@ function UI:createChildren()
     self:addChild(self.controls.removePool);
 
     local tabPanel = tools.getTabPanel(x, tools.BUTTON_HGT + 20, self.width - offset * 2,
-        self.height - tools.BUTTON_HGT - tools.HEADER_HGT - 20 - offset, {})
+        self.height - tools.HEADER_HGT - (tools.BUTTON_HGT + offset) - offset * 2, {})
     self.controls.tabPanel = tabPanel
+
     self:addChild(tabPanel)
 
 end
@@ -183,7 +184,7 @@ function UI:onResize()
     self.controls.addPool:setX(self.controls.duplicatePool.x - self.controls.addPool.width - 10)
 
     for _, view in ipairs(self.controls.tabPanel.viewList) do
-        view.view:setWidth(self.controls.tabPanel:getWidth())
-        view.view:setHeight(self.controls.tabPanel:getHeight())
+        view.view:setWidth(self.width - 10 * 2)
+        view.view:setHeight(self.height - tools.HEADER_HGT - (tools.BUTTON_HGT + 10) - 10 * 2)
     end
 end

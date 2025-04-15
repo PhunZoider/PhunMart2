@@ -10,6 +10,7 @@ local HEADER_HGT = FONT_HGT_MEDIUM + 2 * 2
 local BUTTON_HGT = FONT_HGT_SMALL + 6
 local LABEL_HGT = FONT_HGT_MEDIUM + 6
 
+local tools = require "PhunMart2/ux/tools"
 local Core = PhunMart
 local PL = PhunLib
 local profileName = "PhunMartUIPoolsEntry"
@@ -31,34 +32,16 @@ local UI = Core.ui.pools_entry
 -- }},
 local itemGroupData = require "PhunMart2/data/groups"
 local allProps = {
-    price = {
-        type = "int",
-        label = "Base Price",
-        tooltip = "Overrides the shops base price",
-        default = ""
-    },
-    currency = {
-        type = "string",
-        label = "Currency",
-        tooltip = "Overrides the shops currency",
-        default = ""
-    },
     enabled = {
         type = "boolean",
         label = "Enabled",
         tooltip = "Untick to prevent this pool from being used",
         default = true
     },
-    minFill = {
+    probability = {
         type = "int",
-        label = "Min Stock",
-        tooltip = "Overrides the shops minimum stock level",
-        default = ""
-    },
-    maxFill = {
-        type = "int",
-        label = "Max Stock",
-        tooltip = "Overrides the shops maximum stock level",
+        label = "Probability",
+        tooltip = "The probability that this pool has of being selected when there are more than 1 pools eligible to be picked",
         default = ""
     },
     zoneDifficulty = {
@@ -75,41 +58,85 @@ local allProps = {
         isCsv = true,
         default = ""
     },
-    probability = {
+    dolist = true,
+    currency = {
+        type = "string",
+        label = "Currency",
+        tooltip = "The default currency to use in this pool. Can be overwritten at item level. Leave blank for shop or global defaults.",
+        default = ""
+    },
+    minPrice = {
         type = "int",
-        label = "Probability",
-        tooltip = "The probability that this pool has of being selected when there are more than 1 pools eligible to be picked",
+        label = "Min Price",
+        tooltip = "The default minimum price of items in this pool. Can be overwritten at item level. Leave blank for shop or global defaults.",
+        default = ""
+    },
+    maxPrice = {
+        type = "int",
+        label = "Max Price",
+        tooltip = "The default maximum price of items in this pool. Can be overwritten at item level. Leave blank for shop or global defaults.",
+        default = ""
+    },
+    minItems = {
+        type = "int",
+        label = "Min Items",
+        tooltip = "The minimum number of items this shop will have when restocked when this pool is active. Leave blank for shop or global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    maxItems = {
+        type = "int",
+        label = "Max Items",
+        tooltip = "The maximum number of items this shop will have when restocked when this pool is active. Leave blank for shop or global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    minInventory = {
+        type = "int",
+        label = "Min Inventory",
+        tooltip = "The minimum inventory an item will have when restocked. Leave blank for shop or global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    maxInventory = {
+        type = "int",
+        label = "Max Inventory",
+        tooltip = "The maximum inventory an item will have when restocked. Leave blank for global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    hoursToRestock = {
+        type = "int",
+        label = "Hours To Restock",
+        tooltip = "The number of game hours before this pool will expire. Leave blank for shop or global defaults.",
         default = ""
     }
 }
 
-function UI:setData(data)
+function UI:setData(data, isNew)
     data = data or {}
-    local isNew = data.key == nil
 
     for k, v in pairs(allProps) do
-        if v.type == "string" or v.type == "int" then
-            self.controls[k]:clear()
-            if data[k] == nil then
-                if v.default ~= nil then
-                    self.controls[k]:setText(tostring(v.default))
+        if v and type(v) == "table" then
+            if v.type == "string" or v.type == "int" then
+                self.controls[k]:clear()
+                if data[k] == nil then
+                    if v.default ~= nil then
+                        self.controls[k]:setText(tostring(v.default))
+                    end
+                elseif type(data[k]) == "table" then
+                    self.controls[k]:setText(table.concat(data[k], ","))
+                else
+                    self.controls[k]:setText(tostring(data[k]))
                 end
-            elseif type(data[k]) == "table" then
-                self.controls[k]:setText(table.concat(data[k], ","))
-            else
-                self.controls[k]:setText(tostring(data[k]))
-            end
 
-        elseif v.type == "boolean" then
-            if data[k] == nil then
-                self.controls[k]:setSelected(1, v.default == true)
-            else
-                self.controls[k]:setSelected(1, data[k] == true)
-            end
+            elseif v.type == "boolean" then
+                if data[k] == nil then
+                    self.controls[k]:setSelected(1, v.default == true)
+                else
+                    self.controls[k]:setSelected(1, data[k] == true)
+                end
 
-        end
-        if v.disableOnEdit then
-            self.controls[k]:setEditable(not isNew)
+            end
+            if v.disableOnEdit then
+                self.controls[k]:setEditable(not isNew)
+            end
         end
     end
 
@@ -122,38 +149,38 @@ end
 function UI:getData()
     local data = {}
     for k, v in pairs(allProps) do
+        if v and type(v) == "table" then
+            if v.type == "string" then
 
-        if v.type == "string" then
+                local str = self.controls[k]:getText():match("^%s*(.-)%s*$")
 
-            local str = self.controls[k]:getText():match("^%s*(.-)%s*$")
-
-            if str ~= v.default then
-                if v.isCsv then
-                    data[k] = {}
-                    for i in string.gmatch(str, "([^,]+)") do
-                        local numbericTest = tonumber(i)
-                        if numbericTest then
-                            table.insert(data[k], numbericTest)
-                        else
-                            table.insert(data[k], i)
+                if str ~= v.default then
+                    if v.isCsv then
+                        data[k] = {}
+                        for i in string.gmatch(str, "([^,]+)") do
+                            local numbericTest = tonumber(i)
+                            if numbericTest then
+                                table.insert(data[k], numbericTest)
+                            else
+                                table.insert(data[k], i)
+                            end
                         end
+                    else
+
+                        data[k] = str
+
                     end
-                else
-
-                    data[k] = str
-
                 end
-            end
 
-        elseif v.type == "int" then
-            local str = self.controls[k]:getText():gsub("%D", "")
-            if str ~= "" and str ~= v.default then
-                data[k] = tonumber(str)
+            elseif v.type == "int" then
+                local str = self.controls[k]:getText():gsub("%D", "")
+                if str ~= "" and str ~= v.default then
+                    data[k] = tonumber(str)
+                end
+            elseif v.type == "boolean" and v.default ~= self.controls[k]:isSelected(1) then
+                data[k] = self.controls[k]:isSelected(1)
             end
-        elseif v.type == "boolean" and v.default ~= self.controls[k]:isSelected(1) then
-            data[k] = self.controls[k]:isSelected(1)
         end
-
     end
 
     local filters = {}
@@ -238,150 +265,118 @@ function UI:createChildren()
 
     local offset = 10
     local x = offset
-    local y = HEADER_HGT
+    local y = offset
     local h = FONT_HGT_MEDIUM
 
     self.controls = {}
-    self.controls._panel = ISPanel:new(x, y, self.width - self.scrollwidth - offset * 2,
-        self.height - y - 10 - BUTTON_HGT - offset);
-    self.controls._panel:initialise();
-    self.controls._panel:instantiate();
-    self.controls._panel:setAnchorRight(true)
-    self.controls._panel:setAnchorLeft(true)
-    self.controls._panel:setAnchorTop(true)
-    self.controls._panel:setAnchorBottom(true)
-    self.controls._panel:addScrollBars()
-    self.controls._panel.vscroll:setVisible(true)
 
-    self.controls._panel.prerender = function(s)
-        s:setStencilRect(0, 0, s.width, s.height);
-        ISPanel.prerender(s)
-    end
-    self.controls._panel.render = function(s)
-        ISPanel.render(s)
-        s:clearStencilRect()
-    end
-    self.controls._panel.onMouseWheel = function(s, del)
-        if s:getScrollHeight() > 0 then
-            s:setYScroll(s:getYScroll() - (del * 40))
-            return true
+    local container = tools.getContainerPanel(0, 0, self.width, self.height, {
+        prerender = function(s)
+            s.width = s.parent.width
+            s.height = s.parent.height
+            s:setStencilRect(0, 0, s.width, s.height);
+            ISPanel.prerender(s)
+        end,
+        render = function(s)
+            ISPanel.render(s)
+            s:clearStencilRect()
+        end,
+        onMouseWheel = function(s, del)
+            if s:getScrollHeight() > 0 then
+                s:setYScroll(s:getYScroll() - (del * 40))
+                return true
+            end
+            return false
         end
-        return false
-    end
+    })
 
+    self.controls._panel = container
     self:addChild(self.controls._panel);
 
     for k, v in pairs(allProps) do
+        if k == "dolist" then
+            local btnEditItems = ISButton:new(110, y, 300, BUTTON_HGT, "Edit Item Query", self, function()
+                Core.ui.pools_filters_main.open(self.player, self.filters or {}, function(data)
+                    local s = self
+                    s.filters = data
+                    s:setData(s:getData())
+                end)
+            end);
+            btnEditItems:initialise();
+            btnEditItems:instantiate();
+            btnEditItems:setAnchorRight(true);
 
-        if v.type == "string" or v.type == "int" then
-            self:addTextInput(v.label, k, v.tooltip, v.disableOnEdit)
+            self.controls.pool_filter = btnEditItems
+            self.controls._panel:addChild(self.controls.pool_filter)
+
+            y = y + btnEditItems.height + 10
+
+            -- item list
+            local list = tools.getListbox(110, y, 300, 80, {"Items", "Category"}, {
+                draw = self.drawDatas
+            })
+
+            list.onRightMouseUp = function(target, x, y, a, b)
+                local row = target:rowAt(x, y)
+                if row == -1 then
+                    return
+                end
+                if target.selected ~= row then
+                    target.selected = row
+                    target:ensureVisible(target.selected)
+                end
+                local item = target.items[target.selected].item
+
+                if item then
+                    local context = ISContextMenu.get(self.playerIndex, target:getAbsoluteX() + x,
+                        target:getAbsoluteY() + y + target:getYScroll())
+                    context:removeFromUIManager()
+                    context:addToUIManager()
+
+                    context:addOption("Properties", self, function()
+                        self:itemProperties(item)
+                    end, item)
+                    context:addOption("Remove " .. item.type, self, function()
+                        self:promptToExcludeItem(item)
+                    end, item)
+                end
+            end
+
+            list:setOnMouseDoubleClick(self, self.itemProperties)
+            list.drawBorder = true;
+            list:setAnchorBottom(false)
+            self.controls.list = list
+            container:addChild(self.controls.list);
+
+            y = y + self.controls.list.height + tools.HEADER_HGT + 10
+
+            -- Find control    
+            local lblFind, txtFind = tools.getLabeledTextbox("Find", "The item list below is filtered by this text", "",
+                x, y, 100, 300)
+            lblFind.onTextChange = function()
+                self:refreshItems()
+            end
+            self.controls.label_find = lblFind
+            self.controls._panel:addChild(self.controls.label_find)
+            self.controls.filterText = txtFind
+            self.controls._panel:addChild(self.controls.filterText)
+
+        elseif v.type == "string" or v.type == "int" then
+            local lbl, input = tools.getLabeledTextbox(v.label, v.tooltip, v.default, x, y, 100, 300)
+            self.controls[k] = input
+            self.controls._panel:addChild(lbl)
+            self.controls._panel:addChild(input)
         elseif v.type == "boolean" then
-            self:addBool(v.label, k, v.tooltip)
+            local chk = tools.getBool(v.label, v.tooltip, x, y)
+            self.controls[k] = chk
+            self.controls._panel:addChild(chk)
         end
 
         y = y + h + 10
 
     end
-
-    local label = ISLabel:new(x, y, h, "Items", 1, 1, 1, 1, UIFont.Small, true);
-    label:initialise();
-    label:instantiate();
-    self.controls["label_pools"] = label
-    self.controls._panel:addChild(label);
-
-    self.controls.list = ISScrollingListBox:new(110, y + HEADER_HGT, 300, 200);
-    self.controls.list:initialise();
-    self.controls.list:instantiate();
-    self.controls.list.itemheight = FONT_HGT_SMALL + 4 * 2
-    self.controls.list.selected = 0;
-    self.controls.list.joypadParent = self;
-    self.controls.list.font = UIFont.NewSmall;
-    self.controls.list.doDrawItem = self.drawDatas;
-
-    self.controls.list:setOnMouseDownFunction(self, function(s, row)
-        -- local index = row.index
-        -- local key = row.text
-        -- local item = self.keys[key]
-        -- if item == nil then
-        --     return
-        -- end
-        -- if item == true then
-        --     self.keys[key] = false
-        -- else
-        --     self.keys[key] = true
-        -- end
-        -- self.isDirtyValue = true
-    end)
-
-    self.controls.list.onRightMouseUp = function(target, x, y, a, b)
-        local row = target:rowAt(x, y)
-        if row == -1 then
-            return
-        end
-        if target.selected ~= row then
-            target.selected = row
-            target:ensureVisible(target.selected)
-        end
-        local item = target.items[target.selected].item
-
-        if item then
-            local context = ISContextMenu.get(self.playerIndex, target:getAbsoluteX() + x,
-                target:getAbsoluteY() + y + target:getYScroll())
-            context:removeFromUIManager()
-            context:addToUIManager()
-
-            context:addOption("Properties", self, function()
-                self:itemProperties(item)
-            end, item)
-            context:addOption("Remove " .. item.type, self, function()
-                self:promptToExcludeItem(item)
-            end, item)
-        end
-    end
-
-    self.controls.list:setOnMouseDoubleClick(self, self.itemProperties)
-
-    self.controls.list.drawBorder = true;
-    self.controls.list:addColumn("Items", 0);
-    self.controls._panel:addChild(self.controls.list);
-
-    y = y + self.controls.list.height
-
-    self.controls._panel:setScrollHeight(y + h + 10);
     self.controls._panel:setScrollChildren(true)
-
-    self.controls._panel:setScrollHeight(y + h + 10);
-    self.controls._panel:setScrollChildren(true)
-
-    y = y + 10 + HEADER_HGT
-
-    local label = ISLabel:new(x, y, h, "Filter", 1, 1, 1, 1, UIFont.Small, true);
-    label:initialise();
-    label:instantiate();
-    self.controls["label_filter"] = label
-    self.controls._panel:addChild(label);
-
-    self.controls.filterText = ISTextEntryBox:new("", 110, y, 215, h);
-    self.controls.filterText:initialise();
-    self.controls.filterText.onTextChange = function()
-        self:refreshItems()
-    end
-    self.controls._panel:addChild(self.controls.filterText);
-
-    local button = ISButton:new(self.controls.filterText.x + self.controls.filterText.width + 10, y, 75, BUTTON_HGT,
-        "...", self, function()
-            Core.ui.pools_filters_main.open(self.player, self.filters or {}, function(data)
-                local s = self
-                s.filters = data
-                s:setData(s:getData())
-            end)
-        end);
-    button:initialise();
-    button:instantiate();
-
-    self.controls.pool_filter = button
-    self.controls._panel:addChild(self.controls.pool_filter)
-    self.controls._panel:setScrollHeight(y + h + 20)
+    self.controls._panel:setScrollHeight(y)
 end
 
 function UI:promptToExcludeItem(item)
@@ -526,6 +521,7 @@ function UI:refreshItems()
 end
 
 function UI:drawDatas(y, item, alt)
+
     if y + self:getYScroll() + self.itemheight < 0 or y + self:getYScroll() >= self.height then
         return y + self.itemheight
     end
@@ -547,8 +543,8 @@ function UI:drawDatas(y, item, alt)
     local iconSize = FONT_HGT_SMALL;
     local xoffset = 10;
 
-    local clipX = 0
-    local clipX2 = self.width
+    local clipX = self.columns[1].size
+    local clipX2 = self.columns[2].size
     local clipY = math.max(0, y + self:getYScroll())
     local clipY2 = math.min(self.height, y + self:getYScroll() + self.itemheight)
 
@@ -562,25 +558,28 @@ function UI:drawDatas(y, item, alt)
     self:drawText(item.text, xoffset, y + 4, 1, 1, 1, a, self.font);
     self:clearStencilRect()
 
+    local value = item.item.desc or ""
+    local cw = self.columns[2].size
+    self:drawText(value, cw + 4, y + 4, 1, 1, 1, a, self.font);
     self.itemsHeight = y + self.itemheight;
     return self.itemsHeight;
 end
 
-function UI:prerender()
-    ISPanel.prerender(self)
+-- function UI:prerender()
+--     ISPanel.prerender(self)
 
-    local offset = 0
-    local w = self.parent.width
-    local h = self.parent.height
-    local x = offset
-    local y = offset
+--     local offset = 0
+--     local w = self.parent.width
+--     local h = self.parent.height
+--     local x = offset
+--     local y = offset
 
-    local panel = self.controls._panel
+--     local panel = self.controls._panel
 
-    panel:setX(x)
-    panel:setY(y)
-    panel:setWidth(w)
-    panel:setHeight(h)
-    panel:updateScrollbars();
+--     panel:setX(x)
+--     panel:setY(y)
+--     panel:setWidth(w)
+--     panel:setHeight(h)
+--     panel:updateScrollbars();
 
-end
+-- end

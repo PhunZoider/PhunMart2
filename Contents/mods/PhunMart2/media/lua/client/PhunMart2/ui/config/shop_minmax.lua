@@ -172,8 +172,8 @@ function UI:onAccept()
     if max == 0 then
         max = nil
     end
-    if max ~= nil and max > self.acceptableRanges.max then
-        max = self.acceptableRanges.max
+    if max ~= nil and max > self.acceptableRanges.maxMax then
+        max = self.acceptableRanges.maxMax
     end
 
     self.cb({

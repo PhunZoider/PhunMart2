@@ -28,19 +28,20 @@ function tools.getLabel(text, x, y)
     return label;
 end
 
-function tools.getTextbox(value, tooltip, x, y)
-    local textbox = ISTextEntryBox:new(value and tostring(value) or "", x, y, 200, tools.FONT_HGT_SMALL + 4);
+function tools.getTextbox(value, tooltip, x, y, width)
+    local textbox = ISTextEntryBox:new(value and tostring(value) or "", x, y, width or 200, tools.FONT_HGT_SMALL + 4);
     textbox:initialise();
     -- textbox:instantiate();
     if tooltip then
         textbox:setTooltip(tooltip)
     end
+    textbox:setAnchorRight(true);
     return textbox;
 end
 
-function tools.getLabeledTextbox(label, tooltip, value, x, y)
+function tools.getLabeledTextbox(label, tooltip, value, x, y, xOffset, boxWidth)
     local lbl = tools.getLabel(label, x, y)
-    local text = tools.getTextbox(value, tooltip, x + 150, y)
+    local text = tools.getTextbox(value, tooltip, x + (xOffset or 150), y, boxWidth)
     return lbl, text
 end
 
@@ -94,10 +95,10 @@ end
 
 function tools.getListbox(x, y, w, h, columns, fns)
 
-    local y = tools.HEADER_HGT
+    local y = y + tools.HEADER_HGT
     local f = fns or {}
 
-    local box = ISScrollingListBox:new(0, y, w, h - y);
+    local box = ISScrollingListBox:new(x, y, w, h);
     box:initialise();
     box:instantiate();
     box.doDrawItem = f.draw or box.doDrawItem;

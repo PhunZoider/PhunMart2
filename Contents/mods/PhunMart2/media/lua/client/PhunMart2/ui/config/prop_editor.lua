@@ -73,6 +73,18 @@ local shopProperties = {
         tooltip = "The default maximum price of items in this shop. Can be overwritten at item level. Leave blank for global defaults.",
         default = ""
     },
+    minItems = {
+        type = "int",
+        label = "Min Items",
+        tooltip = "The minimum number of items this shop will have when restocked. Leave blank for global defaults. Can be overwritten at item level.",
+        default = ""
+    },
+    maxItems = {
+        type = "int",
+        label = "Max Items",
+        tooltip = "The maximum number of items this shop will have when restocked. Leave blank for global defaults. Can be overwritten at item level.",
+        default = ""
+    },
     minInventory = {
         type = "int",
         label = "Min Inventory",

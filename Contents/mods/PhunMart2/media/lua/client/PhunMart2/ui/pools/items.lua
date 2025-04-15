@@ -73,14 +73,13 @@ function UI:createChildren()
     ISPanelJoypad.createChildren(self)
 
     local padding = 10
-    local x = padding
-    local y = HEADER_HGT - 1
+    local x = 0
+    local y = 0
     self.controls = {}
     local filtersPanel = ISPanel:new(0, self.height - 100, self.width, 100);
     filtersPanel.drawBorder = false
     filtersPanel:initialise();
     filtersPanel:instantiate();
-
     filtersPanel.backgroundColor = {
         r = 0.1,
         g = 0.1,
@@ -91,7 +90,7 @@ function UI:createChildren()
     self.controls.filtersPanel = filtersPanel
     self:addChild(filtersPanel);
 
-    local list = tools.getListbox(x, y, self:getWidth(), filtersPanel.y + HEADER_HGT, {"Item", "Category"}, {
+    local list = tools.getListbox(x, y, self:getWidth(), filtersPanel.y, {"Item", "Category"}, {
         draw = self.drawDatas,
         click = self.click,
         rightClick = self.rightClick
@@ -103,16 +102,13 @@ function UI:createChildren()
     local lblFilter = tools.getLabel("Filter", padding, padding)
     filtersPanel:addChild(lblFilter)
 
-    local filter = ISTextEntryBox:new("", x, y, filtersPanel.width - 200, BUTTON_HGT);
+    local filter = ISTextEntryBox:new("", padding, y, filtersPanel.width - 200, BUTTON_HGT);
     filter.onTextChange = function()
         self:refreshData()
     end
+    self.controls.filter = filter
     filter:initialise();
     filter:instantiate();
-    filter:setAnchorLeft(true);
-    filter:setAnchorRight(true);
-
-    self.controls.filter = filter
     filtersPanel:addChild(filter);
 
     local left = filter.x + filter.width + padding
@@ -193,11 +189,16 @@ function UI:prerender()
     filterPanel:setWidth(filterPanel.parent.width)
     filterPanel:setY(filterPanel.parent.height - filterPanel.height)
 
+    local lblFilterCategory = self.controls.lblFilterCategory
+
     local filterCategory = self.controls.filterCategory
     filterCategory:setX(filterCategory.parent.width - filterCategory.width - padding)
-
-    local lblFilterCategory = self.controls.lblFilterCategory
+    filterCategory:setY(lblFilterCategory.y + lblFilterCategory.height + padding)
     lblFilterCategory:setX(filterCategory.x)
+
+    local filter = self.controls.filter
+    filter:setWidth(filterCategory.x - filter.x - padding)
+    filter:setY(lblFilterCategory.y + lblFilterCategory.height + padding)
 
     local list = self.controls.list
     list:setHeight(filterPanel.y - list.y)
