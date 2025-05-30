@@ -82,7 +82,7 @@ local itemLimits = {
     }
 }
 
-function UI.open(player, data, cb)
+function UI.open(player, item, cb)
 
     local playerIndex = player:getPlayerNum()
 
@@ -94,8 +94,9 @@ function UI.open(player, data, cb)
     local y = (core:getScreenHeight() - height) / 2
 
     local instance = UI:new(x, y, width, height, player, playerIndex);
-    if type(data) == "table" then
-        instance.data = PL.table.deepCopy(data)
+    self.item = item
+    if type(item) == "table" then
+        instance.data = PL.table.deepCopy(item)
     else
         instance.data = {}
     end
@@ -424,38 +425,6 @@ function UI:createChildren()
         self.controls.purchaseLimitsPanel:addChild(txt)
         y = y + txt.height + 10
     end
-
-    -- lbl, txt = tools.getLabeledTextbox("Max Purchases", "Maximum times this item can be purchased by a character", "",
-    --     x, y, 100, 300)
-
-    -- self.controls.maxCharPurchases = txt
-    -- self.controls.purchaseLimitsPanel:addChild(lbl)
-    -- self.controls.purchaseLimitsPanel:addChild(txt)
-    -- y = y + txt.height + 10
-
-    -- lbl, txt = tools.getLabeledTextbox("Max Act Purchases", "Maximum times this item can be purchased by an account.",
-    --     "", x, y, 100, 300)
-
-    -- self.controls.maxActPurchases = txt
-    -- self.controls.purchaseLimitsPanel:addChild(lbl)
-    -- self.controls.purchaseLimitsPanel:addChild(txt)
-    -- y = y + txt.height + 10
-
-    -- lbl, txt = tools.getLabeledTextbox("Min time", "Minimum amount of time played before character can purchase item.",
-    --     "", x, y, 100, 300)
-
-    -- self.controls.minCharTime = txt
-    -- self.controls.purchaseLimitsPanel:addChild(lbl)
-    -- self.controls.purchaseLimitsPanel:addChild(txt)
-    -- y = y + txt.height + 10
-
-    -- lbl, txt = tools.getLabeledTextbox("Min Act time",
-    --     "Minimum amount of time user must have played before character can purchase item.", "", x, y, 100, 300)
-
-    -- self.controls.minActTime = txt
-    -- self.controls.purchaseLimitsPanel:addChild(lbl)
-    -- self.controls.purchaseLimitsPanel:addChild(txt)
-    -- y = y + txt.height + 10
 
     x = self.controls._panel.width + padding
     y = th

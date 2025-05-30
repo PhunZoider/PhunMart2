@@ -395,6 +395,7 @@ function UI:promptToExcludeItem(item)
 end
 
 function UI:itemProperties(item)
+    
     Core.ui.shop_config_item.open(self.player, item, function(data)
         self:refreshItems()
     end)
