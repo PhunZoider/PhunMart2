@@ -45,41 +45,22 @@ Core.contexts.open = function(player, context, worldobjects, test)
         break
     end
 
-    -- if isAdmin() or isDebugEnabled() then
-    --     local adminOption = context:addOption("PhunMart", worldobjects, nil)
-    --     local adminSubMenu = ISContextMenu:getNew(context)
+    if isAdmin() or isDebugEnabled() then
+        local adminOption = context:addOption("PhunMart", worldobjects, nil)
+        local adminSubMenu = ISContextMenu:getNew(context)
 
-    --     adminSubMenu:addOption("Shops", player, function()
-    --         Core.ClientSystem.instance:prepareShopList(playerObj)
-    --     end)
+        adminSubMenu:addOption("Shops", player, function()
+            Core.ClientSystem.instance:prepareShopList(playerObj)
+        end)
 
-    --     adminSubMenu:addOption("Global Blacklist", player, function()
-    --         if Core.isLocal then
-    --             Core.ui.pools_blacklist_main.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
-    --         else
-    --             sendClientCommand(Core.name, Core.commands.getBlackList, {})
-    --         end
-    --     end)
+        adminSubMenu:addOption("Global Blacklist", player, function()
+            if Core.isLocal then
+                Core.ui.pools_blacklist_main.OnOpenPanel(getSpecificPlayer(player), Core.getBlacklist())
+            else
+                sendClientCommand(Core.name, Core.commands.getBlackList, {})
+            end
+        end)
 
-    --     context:addSubMenu(adminOption, adminSubMenu)
-    -- end
-end
-
-function Core:appendContext(context, mainMenu, playerObj, worldobjects)
-
-    local sub = context:getNew(context)
-    context:addSubMenu(mainMenu, sub)
-
-    sub:addOption("Shops", playerObj, function()
-        Core.ClientSystem.instance:prepareShopList(getSpecificPlayer(playerObj))
-    end)
-
-    sub:addOption("Global Blacklist", playerObj, function()
-        if Core.isLocal then
-            Core.ui.pools_blacklist_main.OnOpenPanel(getSpecificPlayer(playerObj), Core.getBlacklist())
-        else
-            sendClientCommand(Core.name, Core.commands.getBlackList, {})
-        end
-    end)
-
+        context:addSubMenu(adminOption, adminSubMenu)
+    end
 end

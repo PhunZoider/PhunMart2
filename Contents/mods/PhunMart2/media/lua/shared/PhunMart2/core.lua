@@ -100,11 +100,11 @@ function Core:reloadShopDefinitions()
         self.shops = allShops
     end
     self.spriteToShop = {}
-    for k, v in pairs(Core.shops) do
-        for _, sprite in ipairs(v.sprites) do
+    for k, v in pairs(Core.shops or {}) do
+        for _, sprite in ipairs(v.sprites or {}) do
             self.spriteToShop[sprite] = k
         end
-        for _, sprite in ipairs(v.unpoweredSprites) do
+        for _, sprite in ipairs(v.unpoweredSprites or {}) do
             self.spriteToShop[sprite] = k
         end
     end
