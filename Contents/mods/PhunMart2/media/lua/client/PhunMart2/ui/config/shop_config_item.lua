@@ -94,7 +94,7 @@ function UI.open(player, item, cb)
     local y = (core:getScreenHeight() - height) / 2
 
     local instance = UI:new(x, y, width, height, player, playerIndex);
-    self.item = item
+    instance.item = item
     if type(item) == "table" then
         instance.data = PL.table.deepCopy(item)
     else
